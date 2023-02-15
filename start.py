@@ -18,7 +18,9 @@ if __version_info__ < (20, 0, 0, "alpha", 5):
         f"This example is not compatible with your current PTB version {TG_VER}. To view the {TG_VER} version of this example, visit https://docs.python-telegram-bot.org/en/v{TG_VER}/examples.html"
     )
 
+
 from telegram import Update
+
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -28,6 +30,8 @@ from telegram.ext import (
 )
 import openai
 import httpx
+from allowed import user_list
+
 from allowed import user_list
 
 # Enable logging
@@ -92,7 +96,6 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except:
                 continue
         await update.message.reply_text(text=text)
-    print(f"user_conversation: {user_conversation}")
 
 
 def main() -> None:
