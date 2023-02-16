@@ -4,6 +4,7 @@
 
 
 import logging
+import os
 from typing import List
 
 from telegram import __version__ as TG_VER
@@ -28,10 +29,8 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-import openai
-import httpx
-from allowed import user_list
 
+import httpx
 from allowed import user_list
 
 # Enable logging
@@ -42,7 +41,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 bot_token = "6187271186:AAGB4Am0DBGoAvm-WIiOvxE9kHJ6Ic0dmFQ"
-openai.api_key = "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"
+openai_apikey = os.environ.get("openai_apikey")
 openai_model = "text-davinci-003"
 max_tokens = 2048
 temperature = 0.3
