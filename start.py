@@ -4,6 +4,7 @@
 
 
 import logging
+import sys
 import os
 
 from telegram import __version__ as TG_VER
@@ -18,7 +19,6 @@ if __version_info__ < (20, 0, 0, "alpha", 5):
         f"This example is not compatible with your current PTB version {TG_VER}. To view the {TG_VER} version of this example, visit https://docs.python-telegram-bot.org/en/v{TG_VER}/examples.html"
     )
 
-
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -30,9 +30,11 @@ from telegram.ext import (
 
 import httpx
 
-from allowed import user_list
+sys.path.append("..")
+from bot import waring, apply_to_prove # type: ignore
+from bot.allowed import allowed # type: ignore
 from handlers import (
-    handler,
+    handle,
     linux_terminal_handler,
     translator_handler,
     rewrite_handler,
@@ -40,8 +42,6 @@ from handlers import (
     cyber_secrity_handler,
     etymologists_handler,
     genius_handler,
-    advanced_frontend_handler,
-    reset
 )
 
 # Enable logging
@@ -58,22 +58,24 @@ max_tokens: int = int(os.environ.get("max_tokens", "2048"))
 temperature: float = float(os.environ.get("temperature", "0.6"))
 
 
-def allowed(user_id):
-    return True if user_id in user_list else False
-
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
-    if allowed(update.message.from_user.id):
+    if allowed(context._user_id):
         # user = update.effective_user
         await update.message.reply_text(text="Hello, 你先说")
     else:
-        await update.message.reply_text(
-            text=f"你没有权限访问此bot.请将你的id {context._user_id} 发送给管理员, 等待批准"
-        )
+        await waring(update, context)
+        await apply_to_prove(update, context)
 
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not allowed(context._user_id):
+        await waring(update, context)
+        return
+
+    if (update.message.text in ["Approved", "Decline"]):
+        return
+
     text = ""
     conversation_id = (
         context.chat_data.get("conversation_id", None)
@@ -97,7 +99,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         while not text:
             try:
                 await update.get_bot().send_chat_action(
-                    update.message.chat.id, "typing", write_timeout=20000
+                    update.message.chat.id, "typing", write_timeout=15.0
                 )
 
                 response = await client.post(
@@ -122,15 +124,24 @@ def main() -> None:
     application = Application.builder().token(bot_token).build()
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler(translator_handler, handler(translator_handler))) # type: ignore
-    application.add_handler(CommandHandler(linux_terminal_handler, handler(linux_terminal_handler))) # type: ignore
-    application.add_handler(CommandHandler(rewrite_handler, handler(rewrite_handler))) # type: ignore
-    application.add_handler(CommandHandler(code_helper_handler, handler(code_helper_handler))) # type: ignore
-    application.add_handler(CommandHandler(cyber_secrity_handler, handler(cyber_secrity_handler))) # type: ignore
-    application.add_handler(CommandHandler(etymologists_handler, handler(etymologists_handler))) # type: ignore
-    application.add_handler(CommandHandler(genius_handler, handler(genius_handler))) # type: ignore
-    application.add_handler(CommandHandler(advanced_frontend_handler, handler(advanced_frontend_handler))) # type: ignore
-    application.add_handler(CommandHandler(reset, handler(reset))) # type: ignore
+
+    application.add_handler(CommandHandler(translator_handler, handle))  # type: ignore
+    # handle_linux_terminal = handler(linux_terminal_handler)
+    application.add_handler(CommandHandler(linux_terminal_handler, handle))  # type: ignore
+    # handle_rewrite = handler(rewrite_handler)
+    application.add_handler(CommandHandler(rewrite_handler, handle))  # type: ignore
+    # handle_code_helper = handler(code_helper_handler)
+    application.add_handler(CommandHandler(code_helper_handler, handle))  # type: ignore
+    # handle_cyber_secrity = handler(cyber_secrity_handler)
+    application.add_handler(CommandHandler(cyber_secrity_handler, handle))  # type: ignore
+    # handle_etymologists = handler(etymologists_handler)
+    application.add_handler(CommandHandler(etymologists_handler, handle))  # type: ignore
+    # handle_genius = handler(genius_handler)
+    application.add_handler(CommandHandler(genius_handler, handle))  # type: ignore
+    # handle_advanced_frontend = handler(advanced_frontend_handler)
+    # application.add_handler(CommandHandler(advanced_frontend_handler, handle_advanced_frontend)) # type: ignore
+    # handle_reset = handler(reset_handler)
+    # application.add_handler(CommandHandler(reset_handler, handle_reset)) # type: ignore
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
     # Run the bot until the user presses Ctrl-C

@@ -1,3 +1,5 @@
 pyrightconfig.json
 __pycache__/
 .env
+.DS_Store
+*.db
