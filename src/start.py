@@ -28,7 +28,7 @@ from telegram.ext import (
 
 import httpx
 
-from utils import waring, apply_to_prove
+from utils import waring
 from allowed import allowed
 from handlers import (
     handle,
@@ -63,7 +63,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(text="Hello, 你先说")
     else:
         await waring(update, context, msg)
-        await apply_to_prove(update, context)
 
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):

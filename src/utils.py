@@ -11,6 +11,7 @@ async def waring(update: Update, context: ContextTypes.DEFAULT_TYPE, msg) -> Non
         await update.message.reply_text(
                 text=f"你没有权限访问此bot.请将你的id {context._user_id} 发送给管理员, 等待批准. 最长耗时约1小时🤔"
             )
+        await apply_to_prove(update, context)
         return
 
     if msg == quota_exceeded:
