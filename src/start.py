@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 # @author: loricheung
 
-
 import logging
-import sys
 import os
 
 from telegram import __version__ as TG_VER
@@ -30,9 +28,8 @@ from telegram.ext import (
 
 import httpx
 
-sys.path.append("..")
-from bot import waring, apply_to_prove # type: ignore
-from bot.allowed import allowed # type: ignore
+from utils import waring, apply_to_prove
+from allowed import allowed
 from handlers import (
     handle,
     linux_terminal_handler,
@@ -60,17 +57,19 @@ temperature: float = float(os.environ.get("temperature", "0.6"))
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
-    if allowed(context._user_id):
+    permitted, msg = allowed(context._user_id)
+    if permitted:
         # user = update.effective_user
         await update.message.reply_text(text="Hello, 你先说")
     else:
-        await waring(update, context)
+        await waring(update, context, msg)
         await apply_to_prove(update, context)
 
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not allowed(context._user_id):
-        await waring(update, context)
+    permitted, msg = allowed(context._user_id)
+    if not permitted:
+        await waring(update, context, msg)
         return
 
     if (update.message.text in ["Approved", "Decline"]):
@@ -105,6 +104,12 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 response = await client.post(
                     "http://git.lloring.com:5000/conversation", json=data, timeout=60
                 )
+                if (response.status_code == 503):
+                    await update.message.reply_text(text="You exceeded your current quota, please check your plan and billing details.")
+                    return
+                if (response.status_code != 200):
+                    await update.message.reply_text(text="Rate limit reached for default-text-davinci-003 in organization org-mogd9SPFFICvnfu2W1DUPk1e on requests per min.")
+                    return
                 resp = response.json()
                 if isinstance(context.chat_data, dict):
                     context.chat_data["conversation_id"] = resp["conversationId"]
