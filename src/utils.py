@@ -23,24 +23,32 @@ async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     bot = context.bot
     yes_or_no_keyboard = [["Approved", "Decline"]]
     markup = ReplyKeyboardMarkup(
-        yes_or_no_keyboard, resize_keyboard=True, one_time_keyboard=True
+        yes_or_no_keyboard, resize_keyboard=True, one_time_keyboard=False
     )
     await bot.sendMessage(
         chat_id=82315261,
         text=f"User {update.message.chat.first_name}, id: {context._user_id} want to chat with me, would you like to allow it?",
         reply_markup=markup,
-        pool_timeout=3600.0,
+        write_timeout=30.0,
     )
-    updater = await bot.get_updates(pool_timeout=3600.0)
+    updater = await bot.get_updates(read_timeout=30.0, write_timeout=30.0, timeout=30.0, pool_timeout=60)
     if not isinstance(updater, Iterable):
         await update.message.reply_text(text=f"到目前为止, 管理员尚未处理你的请求.🤯")
-    if isinstance(updater, Iterable):
+        return
+    if isinstance(updater, Iterable) and len(updater) > 0:
         reply_obj = updater[0]
         message = reply_obj.message
         if message.chat.id == 82315261 and message.text == "Approved":
-            allow_to_chat = add(context._user_id, update.message.chat.first_name)
+            _ = add(context._user_id, update.message.chat.first_name)
             await update.message.reply_text(
                 text=f"管理员已经批准了你的请求, 现在你可以和我聊天啦.🥳"
-            ) if allow_to_chat else await update.message.reply_text(
+            )
+            return
+        if message.chat.id == 82315261 and message.text == "Decline":
+            await update.message.reply_text(
                 text=f"抱歉, 管理员拒绝了你的请求. 可能他并不认识你🫢"
             )
+            return
+    else:
+        await update.message.reply_text(text=f"到目前为止, 管理员尚未处理你的请求.🤯")
+        return
