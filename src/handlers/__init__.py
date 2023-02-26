@@ -1,4 +1,5 @@
 import sys
+import os
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
@@ -73,8 +74,8 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         initial = True
 
     if update.message.text == "/reset":
-        context.chat_data["conversation_id"] = None # type: ignore
-        context.chat_data["parent_message_id"] = None # type: ignore
+        context.chat_data["conversation_id"] = None  # type: ignore
+        context.chat_data["parent_message_id"] = None  # type: ignore
         await update.message.reply_text(text="好的, 已为你开启新会话! 请继续输入你的问题.")
         return
 
@@ -98,7 +99,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     async def send_request(data):
         async with httpx.AsyncClient(timeout=None) as client:
             responses = await client.post(
-                url="http://127.0.0.1:3000/api/conversation",
+                url=os.getenv("api_endpoint") or "",
                 json=data,
                 timeout=None,
             )
@@ -111,7 +112,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.chat_data["parent_message_id"] = data["messageId"]
 
         await message.edit_text(
-            text=data['text'],
+            text=data["text"],
             parse_mode=ParseMode.MARKDOWN_V2,
             write_timeout=None,
         )

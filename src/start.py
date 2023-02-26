@@ -86,7 +86,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     async def send_request(data):
         async with httpx.AsyncClient(timeout=None) as client:
             responses = await client.post(
-                url="http://127.0.0.1:3000/api/conversation",
+                url=os.getenv("api_endpoint") or "",
                 json=data,
                 timeout=None,
             )
@@ -100,7 +100,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 context.chat_data["parent_message_id"] = data["parentMessageId"]
 
             await message.edit_text(
-                text=escape_markdown(data['text']),
+                text=escape_markdown(data["text"]),
                 parse_mode=ParseMode.MARKDOWN,
                 write_timeout=None,
             )
@@ -154,7 +154,7 @@ def main() -> None:
     # handle_advanced_frontend = handler(advanced_frontend_handler)
     # application.add_handler(CommandHandler(advanced_frontend_handler, handle_advanced_frontend)) # type: ignore
     # handle_reset = handler(reset_handler)
-    application.add_handler(CommandHandler(reset_handler, handle)) # type: ignore
+    application.add_handler(CommandHandler(reset_handler, handle))  # type: ignore
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
     # Run the bot until the user presses Ctrl-C
