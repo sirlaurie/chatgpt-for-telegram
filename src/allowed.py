@@ -1,10 +1,13 @@
 from typing import Tuple
 import sys
+
 sys.path.insert(0, "..")
-from bot import DBClient # type: ignore
+from bot import DBClient  # type: ignore
 
 not_allowd = "not_allowd"
-quota_exceeded = "You exceeded your current quota, please check your plan and billing details."
+quota_exceeded = (
+    "You exceeded your current quota, please check your plan and billing details."
+)
 
 client = DBClient()
 
@@ -18,9 +21,9 @@ def allowed(user_id) -> Tuple[bool, str]:
 
 
 def add(user_id, nickname) -> int:
-    res = client.insert('User', nickname, user_id)
+    res = client.insert("User", nickname, user_id)
     return res.rowcount
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(allowed(82315261))

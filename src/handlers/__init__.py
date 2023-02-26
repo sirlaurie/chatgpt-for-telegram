@@ -1,8 +1,12 @@
 import sys
 from telegram import Update
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 import httpx
-sys.path.insert(0, '..')
+import asyncio
+
+
+sys.path.insert(0, "..")
 from allowed import allowed
 from utils import waring, apply_to_prove
 
@@ -17,7 +21,7 @@ advanced_frontend_handler = "advanced_frontend"
 reset_handler = "reset"
 
 linux_terminal = "I want you to act as a linux terminal. I will type commands and you will reply with what the terminal should show. I want you to only reply with the terminal output inside one unique code block, and nothing else. do not write explanations. do not type commands unless I instruct you to do so. When I need to tell you something in English, I will do so by putting text inside curly brackets {like this}. My first command is pwd"
-translator = "我想让你充当私人翻译, 我会用任何语言与你交谈, 你将自动检测语言, 并始终翻译为中文. 我希望你可以使用比较高级的词汇, 使他们更文艺, 但保持相同的意思. 不要写任何解释."
+translator = "我想让你充当私人翻译, 我会用任何语言与你交谈, 你将自动检测语言, 并始终翻译为中文. 我希望你可以使用比较高级的词语, 使他们更文艺, 但保持相同的意思. 不要写任何解释."
 rewrite = "I want you to act as an English translator, spelling corrector and improver. I will speak to you in any language and you will detect the language, translate it and answer in the corrected and improved version of my text. I want you to replace my simplified A0-level words and sentences with more beautiful and elegant, upper level English words and sentences. Keep the meaning same, but make them more literary. I want you to only reply the correction, the improvements and nothing else, do not write explanations. "
 cyber_secrity = "我想让你充当网络安全专家. 这可能包括解释网络现象, 对网络优化给出具体的可实施的建议."
 etymologists = "我希望你充当词源学家. 我给你一个词, 你要研究那个词的来源, 追根溯源. 如果适用, 您还应该提供有关该词的含义如何随时间变化的信息."
@@ -41,7 +45,7 @@ def pick(act: str):
             return genius
         case "/advanced_frontend":
             return advanced_frontend
-        case _:
+        case "/reset":
             return "hello"
 
 
@@ -52,7 +56,6 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await apply_to_prove(update, context)
         return
 
-    text = ""
     initial = False
     if isinstance(context.chat_data, dict):
         initial = context.chat_data.get("initial", True)
@@ -69,6 +72,12 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]:
         initial = True
 
+    if update.message.text == "/reset":
+        context.chat_data["conversation_id"] = None # type: ignore
+        context.chat_data["parent_message_id"] = None # type: ignore
+        await update.message.reply_text(text="好的, 已为你开启新会话! 请继续输入你的问题.")
+        return
+
     conversation_id = (
         context.chat_data.get("conversation_id", None)
         if isinstance(context.chat_data, dict)
@@ -79,43 +88,76 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if isinstance(context.chat_data, dict)
         else None
     )
-    print(f"{context._user_id}: {update.message.text}")
+
+    message = message = await update.message.reply_text(text="please wait...")
+
+    await update.get_bot().send_chat_action(
+        update.message.chat.id, "typing", write_timeout=15.0
+    )
+
+    async def send_request(data):
+        async with httpx.AsyncClient(timeout=None) as client:
+            responses = await client.post(
+                url="http://127.0.0.1:3000/api/conversation",
+                json=data,
+                timeout=None,
+            )
+            asyncio.create_task(update_message(responses))
+
+    async def update_message(responses):
+        data = responses.json()
+        if isinstance(context.chat_data, dict):
+            context.chat_data["conversation_id"] = data["conversationId"]
+            context.chat_data["parent_message_id"] = data["messageId"]
+
+        await message.edit_text(
+            text=data['text'],
+            parse_mode=ParseMode.MARKDOWN_V2,
+            write_timeout=None,
+        )
+
     data = {
-        "message": update.message.text if not initial else pick(update.message.text),
+        "prompt": update.message.text if not initial else pick(update.message.text),
         "conversationId": conversation_id if not initial else None,
         "parentMessageId": parent_message_id if not initial else None,
     }
 
+    print(f"{context._user_id}:")
+    print(data)
+
+    await send_request(data)
     # 调用模型
-    async with httpx.AsyncClient() as client:
-        while not text:
-            try:
-                await update.get_bot().send_chat_action(
-                    update.message.chat.id, "typing", write_timeout=15.0
-                )
+    # async with httpx.AsyncClient() as client:
+    #     while not text:
+    #         try:
+    #             await update.get_bot().send_chat_action(
+    #                 update.message.chat.id, "typing", write_timeout=15.0
+    #             )
 
-                response = await client.post(
-                    "http://git.lloring.com:5000/conversation",
-                    json=data,
-                    timeout=60,
-                )
-                if (response.status_code == 503):
-                    await update.message.reply_text(text="You exceeded your current quota, please check your plan and billing details.")
-                    return
-                if (response.status_code != 200):
-                    await update.message.reply_text(text="Rate limit reached for default-text-davinci-003 in organization org-mogd9SPFFICvnfu2W1DUPk1e on requests per min.")
-                    return
-                resp = response.json()
-                if isinstance(context.chat_data, dict):
-                    context.chat_data["conversation_id"] = resp["conversationId"]
-                    context.chat_data["parent_message_id"] = resp["messageId"]
-                text = resp["response"]
-                if isinstance(context.chat_data, dict):
-                    context.chat_data["initial"] = False
-                if text:
-                    break
-            except:
-                continue
-        await update.message.reply_text(text=text)
-
-
+    #             response = await client.post(
+    #                 "http://git.lloring.com:5000/conversation",
+    #                 json=data,
+    #                 timeout=60,
+    #             )
+    #             if response.status_code == 503:
+    #                 await update.message.reply_text(
+    #                     text="You exceeded your current quota, please check your plan and billing details."
+    #                 )
+    #                 return
+    #             if response.status_code != 200:
+    #                 await update.message.reply_text(
+    #                     text="Rate limit reached for default-text-davinci-003 in organization org-mogd9SPFFICvnfu2W1DUPk1e on requests per min."
+    #                 )
+    #                 return
+    #             resp = response.json()
+    #             if isinstance(context.chat_data, dict):
+    #                 context.chat_data["conversation_id"] = resp["conversationId"]
+    #                 context.chat_data["parent_message_id"] = resp["messageId"]
+    #             text = resp["response"]
+    #             if isinstance(context.chat_data, dict):
+    #                 context.chat_data["initial"] = False
+    #             if text:
+    #                 break
+    #         except:
+    #             continue
+    #     await update.message.reply_text(text=text)

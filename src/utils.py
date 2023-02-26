@@ -9,8 +9,8 @@ from telegram._replykeyboardmarkup import ReplyKeyboardMarkup
 async def waring(update: Update, context: ContextTypes.DEFAULT_TYPE, msg) -> None:
     if msg == not_allowd:
         await update.message.reply_text(
-                text=f"你没有权限访问此bot.请将你的id {context._user_id} 发送给管理员, 等待批准. 最长耗时约1小时🤔"
-            )
+            text=f"你没有权限访问此bot.请将你的id {context._user_id} 发送给管理员, 等待批准. 最长耗时约1小时🤔"
+        )
         await apply_to_prove(update, context)
         return
 
@@ -31,7 +31,9 @@ async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         reply_markup=markup,
         write_timeout=30.0,
     )
-    updater = await bot.get_updates(read_timeout=30.0, write_timeout=30.0, timeout=30.0, pool_timeout=60)
+    updater = await bot.get_updates(
+        read_timeout=30.0, write_timeout=30.0, timeout=30.0, pool_timeout=60
+    )
     if not isinstance(updater, Iterable):
         await update.message.reply_text(text=f"到目前为止, 管理员尚未处理你的请求.🤯")
         return
@@ -40,14 +42,10 @@ async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         message = reply_obj.message
         if message.chat.id == 82315261 and message.text == "Approved":
             _ = add(context._user_id, update.message.chat.first_name)
-            await update.message.reply_text(
-                text=f"管理员已经批准了你的请求, 现在你可以和我聊天啦.🥳"
-            )
+            await update.message.reply_text(text=f"管理员已经批准了你的请求, 现在你可以和我聊天啦.🥳")
             return
         if message.chat.id == 82315261 and message.text == "Decline":
-            await update.message.reply_text(
-                text=f"抱歉, 管理员拒绝了你的请求. 可能他并不认识你🫢"
-            )
+            await update.message.reply_text(text=f"抱歉, 管理员拒绝了你的请求. 可能他并不认识你🫢")
             return
     else:
         await update.message.reply_text(text=f"到目前为止, 管理员尚未处理你的请求.🤯")

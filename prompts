@@ -1,8 +1,5 @@
-linux_terminal - 充当一个linux的终端模拟器
 translator - 一个翻译, 比deepl还要好
 rewrite - 把你的英语写作提高亿点点
-cyber_secrity - 你的网络太烂了, 我能帮你
 etymologists - 无所不知的词源学家
 genius - 你就当我是天才吧的天才
-advanced_frontend - 我是个合格的前端开发专家
-reset - 退出角色扮演模式
+reset - 开启新会话, 不再根据之前的上下文进行会话

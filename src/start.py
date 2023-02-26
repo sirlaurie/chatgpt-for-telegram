@@ -6,6 +6,7 @@ import logging
 import os
 
 from telegram import __version__ as TG_VER
+from telegram.constants import ParseMode
 
 try:
     from telegram import __version_info__
@@ -25,7 +26,9 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
+from telegram.helpers import escape_markdown
 
+import asyncio
 import httpx
 
 from utils import waring
@@ -39,6 +42,7 @@ from handlers import (
     cyber_secrity_handler,
     etymologists_handler,
     genius_handler,
+    reset_handler,
 )
 
 # Enable logging
@@ -49,10 +53,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 bot_token: str = os.environ.get("bot_token", "")
-openai_apikey: str = os.environ.get("openai_apikey", "")
-openai_model: str = os.environ.get("openai_model", "")
-max_tokens: int = int(os.environ.get("max_tokens", "2048"))
-temperature: float = float(os.environ.get("temperature", "0.6"))
+# openai_apikey: str = os.environ.get("openai_apikey", "")
+# openai_model: str = os.environ.get("openai_model", "")
+# max_tokens: int = int(os.environ.get("max_tokens", "2048"))
+# temperature: float = float(os.environ.get("temperature", "0.6"))
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -71,15 +75,44 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await waring(update, context, msg)
         return
 
-    if (update.message.text in ["Approved", "Decline"]):
+    if update.message.text in ["Approved", "Decline"]:
         return
 
-    text = ""
+    message = await update.message.reply_text(text="please wait...")
+    await update.get_bot().send_chat_action(
+        update.message.chat.id, "typing", write_timeout=15.0
+    )
+
+    async def send_request(data):
+        async with httpx.AsyncClient(timeout=None) as client:
+            responses = await client.post(
+                url="http://127.0.0.1:3000/api/conversation",
+                json=data,
+                timeout=None,
+            )
+            asyncio.create_task(update_message(responses))
+
+    async def update_message(responses):
+        if responses.status_code == 200:
+            data = responses.json()
+            if isinstance(context.chat_data, dict):
+                context.chat_data["conversation_id"] = data["conversationId"]
+                context.chat_data["parent_message_id"] = data["parentMessageId"]
+
+            await message.edit_text(
+                text=escape_markdown(data['text']),
+                parse_mode=ParseMode.MARKDOWN,
+                write_timeout=None,
+            )
+        else:
+            await message.edit_text(text="sorry, 服务器开小差了.", parse_mode=ParseMode.HTML)
+
     conversation_id = (
         context.chat_data.get("conversation_id", None)
         if isinstance(context.chat_data, dict)
         else None
     )
+
     parent_message_id = (
         context.chat_data.get("parent_message_id", None)
         if isinstance(context.chat_data, dict)
@@ -87,38 +120,14 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     data = {
-        "message": update.message.text,
+        "prompt": update.message.text,
         "conversationId": conversation_id,
         "parentMessageId": parent_message_id,
     }
 
-    # 调用模型
-    async with httpx.AsyncClient() as client:
-        while not text:
-            try:
-                await update.get_bot().send_chat_action(
-                    update.message.chat.id, "typing", write_timeout=15.0
-                )
+    print(data)
 
-                response = await client.post(
-                    "http://git.lloring.com:5000/conversation", json=data, timeout=60
-                )
-                if (response.status_code == 503):
-                    await update.message.reply_text(text="You exceeded your current quota, please check your plan and billing details.")
-                    return
-                if (response.status_code != 200):
-                    await update.message.reply_text(text="Rate limit reached for default-text-davinci-003 in organization org-mogd9SPFFICvnfu2W1DUPk1e on requests per min.")
-                    return
-                resp = response.json()
-                if isinstance(context.chat_data, dict):
-                    context.chat_data["conversation_id"] = resp["conversationId"]
-                    context.chat_data["parent_message_id"] = resp["messageId"]
-                text = resp["response"]
-                if text:
-                    break
-            except:
-                continue
-        await update.message.reply_text(text=text)
+    await send_request(data)
 
 
 def main() -> None:
@@ -145,7 +154,7 @@ def main() -> None:
     # handle_advanced_frontend = handler(advanced_frontend_handler)
     # application.add_handler(CommandHandler(advanced_frontend_handler, handle_advanced_frontend)) # type: ignore
     # handle_reset = handler(reset_handler)
-    # application.add_handler(CommandHandler(reset_handler, handle_reset)) # type: ignore
+    application.add_handler(CommandHandler(reset_handler, handle)) # type: ignore
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
     # Run the bot until the user presses Ctrl-C
