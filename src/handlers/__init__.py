@@ -127,38 +127,3 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(data)
 
     await send_request(data)
-    # 调用模型
-    # async with httpx.AsyncClient() as client:
-    #     while not text:
-    #         try:
-    #             await update.get_bot().send_chat_action(
-    #                 update.message.chat.id, "typing", write_timeout=15.0
-    #             )
-
-    #             response = await client.post(
-    #                 "http://git.lloring.com:5000/conversation",
-    #                 json=data,
-    #                 timeout=60,
-    #             )
-    #             if response.status_code == 503:
-    #                 await update.message.reply_text(
-    #                     text="You exceeded your current quota, please check your plan and billing details."
-    #                 )
-    #                 return
-    #             if response.status_code != 200:
-    #                 await update.message.reply_text(
-    #                     text="Rate limit reached for default-text-davinci-003 in organization org-mogd9SPFFICvnfu2W1DUPk1e on requests per min."
-    #                 )
-    #                 return
-    #             resp = response.json()
-    #             if isinstance(context.chat_data, dict):
-    #                 context.chat_data["conversation_id"] = resp["conversationId"]
-    #                 context.chat_data["parent_message_id"] = resp["messageId"]
-    #             text = resp["response"]
-    #             if isinstance(context.chat_data, dict):
-    #                 context.chat_data["initial"] = False
-    #             if text:
-    #                 break
-    #         except:
-    #             continue
-    #     await update.message.reply_text(text=text)

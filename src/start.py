@@ -4,7 +4,8 @@
 
 import logging
 import os
-
+import html
+import json
 from telegram import __version__ as TG_VER
 from telegram.constants import ParseMode
 
@@ -47,16 +48,14 @@ from handlers import (
 
 # Enable logging
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+    filename="../error.log",
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
 )
 
 logger = logging.getLogger(__name__)
 
 bot_token: str = os.environ.get("bot_token", "")
-# openai_apikey: str = os.environ.get("openai_apikey", "")
-# openai_model: str = os.environ.get("openai_model", "")
-# max_tokens: int = int(os.environ.get("max_tokens", "2048"))
-# temperature: float = float(os.environ.get("temperature", "0.6"))
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -69,7 +68,26 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await waring(update, context, msg)
 
 
-async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.warning(f"Update {update} caused error {context.error}")
+    update_str = update.to_dict() if isinstance(update, Update) else str(update)
+
+    message = (
+        f"An exception was raised while handling an update\n"
+        f"<pre>update = {html.escape(json.dumps(update_str, indent=2, ensure_ascii=False))}"
+        "</pre>\n\n"
+        f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
+        f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
+    )
+
+    await context.bot.send_message(
+        chat_id=os.getenv("DEVELOPER_CHAT_ID", 82315261),
+        text=message,
+        parse_mode=ParseMode.HTML,
+    )
+
+
+async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     permitted, msg = allowed(context._user_id)
     if not permitted:
         await waring(update, context, msg)
@@ -156,7 +174,8 @@ def main() -> None:
     # handle_reset = handler(reset_handler)
     application.add_handler(CommandHandler(reset_handler, handle))  # type: ignore
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
-
+    # error handler
+    # application.add_error_handler(error_handler)  # type: ignore
     # Run the bot until the user presses Ctrl-C
     application.run_polling()
 
