@@ -50,7 +50,7 @@ from handlers import (
 logging.basicConfig(
     filename="../error.log",
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
+    level=logging.WARNING,
 )
 
 logger = logging.getLogger(__name__)

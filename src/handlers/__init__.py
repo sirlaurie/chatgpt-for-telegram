@@ -90,7 +90,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else None
     )
 
-    message = message = await update.message.reply_text(text="please wait...")
+    message = await update.message.reply_text(text="please wait...")
 
     await update.get_bot().send_chat_action(
         update.message.chat.id, "typing", write_timeout=15.0
@@ -109,7 +109,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         data = responses.json()
         if isinstance(context.chat_data, dict):
             context.chat_data["conversation_id"] = data["conversationId"]
-            context.chat_data["parent_message_id"] = data["messageId"]
+            context.chat_data["parent_message_id"] = data["parentMessageId"]
 
         await message.edit_text(
             text=data["text"],
