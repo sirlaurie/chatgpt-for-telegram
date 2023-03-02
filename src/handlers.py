@@ -86,10 +86,10 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text in ["Approved", "Decline"]:
         return
 
-    message = await update.message.reply_text(text="please wait ...")
+    message = await update.message.reply_text(text="please wait ...", pool_timeout=10.0)
 
     await update.get_bot().send_chat_action(
-        update.message.chat.id, "typing", write_timeout=15.0
+        update.message.chat.id, "typing", write_timeout=15.0, pool_timeout=10.0
     )
 
     async def send_request(data):

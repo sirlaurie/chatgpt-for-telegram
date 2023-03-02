@@ -34,7 +34,7 @@ async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     )
 
     updater = await bot.get_updates(
-        timeout=3600.0
+        timeout=3600.0, pool_timeout=3600.0
     )
 
     if not isinstance(updater, Iterable):
