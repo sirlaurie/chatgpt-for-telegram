@@ -1,5 +1,5 @@
-from typing import Tuple
 import sys
+from typing import Tuple
 
 sys.path.insert(0, "..")
 from bot import DBClient  # type: ignore
@@ -26,4 +26,4 @@ def add(user_id, nickname) -> int:
 
 
 if __name__ == "__main__":
-    print(allowed(82315261))
+    print(allowed(0))
