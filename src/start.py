@@ -4,7 +4,7 @@
 
 import logging
 import os
-import html
+import re
 import json
 from telegram import __version__ as TG_VER
 from telegram.constants import ParseMode
@@ -47,11 +47,11 @@ from handlers import (
 )
 
 # Enable logging
-logging.basicConfig(
-    filename="../error.log",
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.WARNING,
-)
+# logging.basicConfig(
+#     # filename="error.log",
+#     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+#     level=logging.WARNING,
+# )
 
 logger = logging.getLogger(__name__)
 
@@ -68,23 +68,44 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await waring(update, context, msg)
 
 
-async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    logger.warning(f"Update {update} caused error {context.error}")
-    update_str = update.to_dict() if isinstance(update, Update) else str(update)
+# async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+#     logger.warning(f"Update {update} caused error {context.error}")
+#     update_str = update.to_dict() if isinstance(update, Update) else str(update)
 
-    message = (
-        f"An exception was raised while handling an update\n"
-        f"<pre>update = {html.escape(json.dumps(update_str, indent=2, ensure_ascii=False))}"
-        "</pre>\n\n"
-        f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
-        f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
-    )
+#     message = (
+#         f"An exception was raised while handling an update\n"
+#         f"<pre>update = {html.escape(json.dumps(update_str, indent=2, ensure_ascii=False))}"
+#         "</pre>\n\n"
+#         f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
+#         f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
+#     )
 
-    await context.bot.send_message(
-        chat_id=os.getenv("DEVELOPER_CHAT_ID", 82315261),
-        text=message,
-        parse_mode=ParseMode.HTML,
-    )
+#     await context.bot.send_message(
+#         chat_id=os.getenv("DEVELOPER_CHAT_ID", 82315261),
+#         text=message,
+#         parse_mode=ParseMode.HTML,
+#     )
+
+header = {
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {os.getenv("openai_apikey") or ""}'
+}
+
+pattern = re.compile(r'^data:\s*(?P<json>{.+})\s*$', re.MULTILINE)
+content_pattern = re.compile(r'"content":\s*"(.*)"')
+
+
+def clear(response):
+    match = pattern.match(response)
+    if match:
+        json_str = match.group('json')
+        data = json.loads(json_str)
+        choices = data.get('choices', [])
+        if choices:
+            delta = choices[0].get('delta', {})
+            content = delta.get('content', '')
+            clear_content = re.sub(r'\\n', '', content)
+            return clear_content
 
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -97,50 +118,38 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     message = await update.message.reply_text(text="please wait...")
+    full_message = ""
+
     await update.get_bot().send_chat_action(
         update.message.chat.id, "typing", write_timeout=15.0
     )
 
     async def send_request(data):
         async with httpx.AsyncClient(timeout=None) as client:
-            responses = await client.post(
-                url=os.getenv("api_endpoint") or "",
-                json=data,
-                timeout=None,
-            )
-            asyncio.create_task(update_message(responses))
+            async with client.stream(method="POST", url=os.getenv('api_endpoint') or "", headers=header, json=data) as response:
+                async for chunk in response.aiter_text():
+                    # print(f'decoding...{chunk.decode()}')
+                    if chunk != 'data: [DONE]':
+                        asyncio.create_task(update_message(chunk))
 
-    async def update_message(responses):
-        if responses.status_code == 200:
-            data = responses.json()
-            if isinstance(context.chat_data, dict):
-                context.chat_data["conversation_id"] = data["conversationId"]
-                context.chat_data["parent_message_id"] = data["parentMessageId"]
+    async def update_message(response):
+        nonlocal full_message
+        fragment = clear(response) or ""
+        full_message += fragment
+        print(full_message)
+        await message.edit_text(
+            text=escape_markdown(full_message),
+            parse_mode=ParseMode.MARKDOWN,
+            write_timeout=2.0,
+        )
 
-            await message.edit_text(
-                text=escape_markdown(data["text"]),
-                parse_mode=ParseMode.MARKDOWN,
-                write_timeout=None,
-            )
-        else:
-            await message.edit_text(text="sorry, 服务器开小差了.", parse_mode=ParseMode.HTML)
-
-    conversation_id = (
-        context.chat_data.get("conversation_id", None)
-        if isinstance(context.chat_data, dict)
-        else None
-    )
-
-    parent_message_id = (
-        context.chat_data.get("parent_message_id", None)
-        if isinstance(context.chat_data, dict)
-        else None
-    )
-
+    messages = context.chat_data.get('messages', []) if isinstance(context.chat_data, dict) else []
+    request = {'role': 'user', 'content': update.message.text}
+    messages.append(request)
     data = {
-        "prompt": update.message.text,
-        "conversationId": conversation_id,
-        "parentMessageId": parent_message_id,
+        "model": "gpt-3.5-turbo-0301",
+        "messages": messages,
+        "stream": True
     }
 
     print(data)
