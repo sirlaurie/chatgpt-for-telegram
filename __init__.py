@@ -27,29 +27,40 @@ class DBClient:
         self.connection.commit()
         self.connection.close()
 
-    def readall(self, table) -> List:
+    def check_table(self, table: str) -> Union[int, None]:
+        result = self.cursor.execute(
+            f"SELECT name FROM sqlite_master WHERE type='table' AND name={table}"
+            )
+        return result.fetchone()
+
+    def create_table(self, table: str, fields: dict) -> None:
+        fields_sql = ', '.join([f'{field_name} {field_type}' for field_name, field_type in fields.items()])
+        self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {table} ({fields_sql})")
+        self.connection.commit()
+
+    def readall(self, table: str) -> List:
         sql = f"SELECT * FROM {table}"
         res = self.cursor.execute(sql)
         return res.fetchall()
 
-    def read_one(self, table, telegram_id) -> Union[Tuple, None]:
+    def read_one(self, table: str, telegram_id) -> Union[Tuple, None]:
         sql = f"SELECT * FROM {table} WHERE telegramId = {telegram_id}"
         res = self.cursor.execute(sql)
         return res.fetchone()
 
-    def insert(self, table, nickname, telegram_id) -> sqlite3.Cursor:
+    def insert(self, table: str, nickname: str, telegram_id) -> sqlite3.Cursor:
         sql = f"INSERT INTO {table} (role, nickname, telegramId, allow) VALUES (?, ?, ?, ?)"
         res = self.cursor.execute(sql, ("User", nickname, telegram_id, 1))
         self.connection.commit()
         return res
 
-    def update(self, table, telegram_id, allow) -> sqlite3.Cursor:
+    def update(self, table: str, telegram_id: str, allow) -> sqlite3.Cursor:
         sql = f"UPDATE {table} SET allow = {allow} WHERE telegramId = {telegram_id}"
         res = self.cursor.execute(sql)
         self.connection.commit()
         return res
 
-    def delete(self, table, telegram_id) -> sqlite3.Cursor:
+    def delete(self, table: str, telegram_id) -> sqlite3.Cursor:
         sql = f"DELETE FROM {table} WHERE telegramId = {telegram_id}"
         res = self.cursor.execute(sql)
         self.connection.commit()
