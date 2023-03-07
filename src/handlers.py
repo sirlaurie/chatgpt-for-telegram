@@ -1,15 +1,16 @@
 import os
-from re import escape
 import sys
 import httpx
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
-# from telegram.helpers import escape_markdown
+from telegram.helpers import escape_markdown
+from telegram import MessageEntity
 
 sys.path.insert(0, "..")
 from allowed import allowed
 from utils import waring, apply_to_prove
+from helpers import escape
 
 reset_handler = "reset"
 genius_handler = "genius"
@@ -106,9 +107,10 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             resp = response.json()
             message_from_gpt = resp.get("choices", [{}])[0].get("message", {})
             content = message_from_gpt.get("content", "")
-            print(content)
+            import pdb
+            pdb.set_trace()
             await message.edit_text(
-                text=escape(content),
+                text=escape_markdown(text=escape(content), version=2, entity_type=MessageEntity.PRE),
                 parse_mode=ParseMode.MARKDOWN_V2,
                 disable_web_page_preview=True
             )
