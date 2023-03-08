@@ -2,15 +2,15 @@ import os
 import sys
 import httpx
 from telegram import Update
-from telegram.constants import ParseMode
+# from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
-from telegram.helpers import escape_markdown
-from telegram import MessageEntity
+# from telegram.helpers import escape_markdown
+# from telegram import MessageEntity
 
 sys.path.insert(0, "..")
 from allowed import allowed
 from utils import waring, apply_to_prove
-from helpers import escape
+# from helpers import escape_extend
 
 reset_handler = "reset"
 genius_handler = "genius"
@@ -107,11 +107,9 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             resp = response.json()
             message_from_gpt = resp.get("choices", [{}])[0].get("message", {})
             content = message_from_gpt.get("content", "")
-            import pdb
-            pdb.set_trace()
             await message.edit_text(
-                text=escape_markdown(text=escape(content), version=2, entity_type=MessageEntity.PRE),
-                parse_mode=ParseMode.MARKDOWN_V2,
+                text=content,
+                # parse_mode=ParseMode.MARKDOWN_V2,
                 disable_web_page_preview=True
             )
             await update_message(message_from_gpt)
@@ -142,10 +140,8 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     messages.append(request)
+    data = {"model": "gpt-3.5-turbo-0301", "messages": messages[:5], "stream": False}
+    await send_request(data)
 
     if isinstance(context.chat_data, dict):
         context.chat_data["messages"] = messages
-
-    print(messages)
-    data = {"model": "gpt-3.5-turbo-0301", "messages": messages[:5], "stream": False}
-    await send_request(data)
