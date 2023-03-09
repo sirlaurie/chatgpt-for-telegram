@@ -2,12 +2,12 @@
 name = "telegram bot for chatgpt"
 version = "0.1.0"
 description = "telegram bot for using chatgpt"
-authors = ["sirlaurie <liusuzhang@gmail.com>"]
+authors = ["sirlaurie"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 python-telegram-bot = "^20.0"
 httpx = "^0.23.3"
 

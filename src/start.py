@@ -29,19 +29,19 @@ from telegram.ext import (
     filters,
 )
 
-from utils import waring
-from allowed import allowed
-from handlers import (
-    handle,
+from constants.messages import WELCOME_MESSAGE
+from constants.handlers import (
     linux_terminal_handler,
     translator_handler,
     rewrite_handler,
-    code_helper_handler,
     cyber_secrity_handler,
     etymologists_handler,
     genius_handler,
     reset_handler,
-)
+    )
+from utils import waring
+from allowed import allowed
+from handlers import handle
 
 # Enable logging
 logging.basicConfig(
@@ -52,7 +52,6 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-bot_token: str = os.environ.get("bot_token", "")
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -60,7 +59,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     permitted, msg = allowed(context._user_id)
     if permitted:
         # user = update.effective_user
-        await update.message.reply_text(text="Hello, 你先说")
+        await update.message.reply_text(text=WELCOME_MESSAGE)
     else:
         await waring(update, context, msg)
 
@@ -103,6 +102,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 
 def main() -> None:
+    bot_token: str = os.environ.get("bot_token", "")
     """Start the bot."""
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(bot_token).build()
@@ -112,7 +112,6 @@ def main() -> None:
     application.add_handler(CommandHandler(translator_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(linux_terminal_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(rewrite_handler, handle))  # type: ignore
-    application.add_handler(CommandHandler(code_helper_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(cyber_secrity_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(etymologists_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(genius_handler, handle))  # type: ignore
