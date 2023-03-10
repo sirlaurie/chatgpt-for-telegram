@@ -1,10 +1,9 @@
-import sys
 from typing import Tuple
 
-sys.path.insert(0, "..")
-from bot import DBClient  # type: ignore
+from db import DBClient
+from constants.messages import NOT_ALLOWD, NOT_PERMITED
 
-not_allowd = "not_allowd"
+
 quota_exceeded = (
     "You exceeded your current quota, please check your plan and billing details."
 )
@@ -15,13 +14,13 @@ client = DBClient()
 def allowed(user_id) -> Tuple[bool, str]:
     user = client.read_one(table="User", telegram_id=user_id)
     if not isinstance(user, Tuple):
-        return (False, not_allowd)
+        return (False, NOT_PERMITED)
     *_, allow = user
-    return (bool(allow), quota_exceeded)
+    return (bool(allow), NOT_ALLOWD)
 
 
-def add(user_id, nickname) -> int:
-    res = client.insert("User", nickname, user_id)
+def add(user_id, nickname, allow) -> int:
+    res = client.insert("User", nickname, user_id, allow)
     return res.rowcount
 
 

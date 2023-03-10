@@ -10,6 +10,9 @@ from telegram._replykeyboardmarkup import ReplyKeyboardMarkup
 # from telegram import MessageEntity
 
 from constants.messages import (
+    NOT_ALLOWD,
+    NOT_PERMITED,
+    YES_OR_NO_KEYBOARD,
     INIT_REPLY_MESSAGE,
     NEW_CONVERSATION_MESSAGE,
     TARGET_LANGUAGE_KEYBOARD,
@@ -24,7 +27,7 @@ from constants.prompts import (
     linux_terminal,
 )
 from allowed import allowed
-from utils import waring, apply_to_prove
+from utils import waring
 
 
 header = {
@@ -53,14 +56,18 @@ def pick(act: str):
 
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     permitted, msg = allowed(context._user_id)
-    if not permitted:
+    if not permitted and msg == NOT_PERMITED:
         await waring(update, context, msg)
-        await apply_to_prove(update, context)
+        return
+    if not permitted and msg == NOT_ALLOWD:
+        await update.message.reply_text(text=NOT_ALLOWD)
         return
 
     initial = False
 
-    if update.message.text in [
+    message_text = update.message.text
+
+    if message_text in [
         "/linux_terminal",
         "/translator",
         "/rewrite",
@@ -73,21 +80,19 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]:
         initial = True
 
-    # import pdb
-
-    # pdb.set_trace()
-    print(context.chat_data.get("initial", False))
+    if message_text in YES_OR_NO_KEYBOARD:
+        return
 
     # if isinstance(context.chat_data, dict):
     #     initial = context.chat_data.get("initial", False)
 
-    if update.message.text == "/reset":
+    if message_text == "/reset":
         if isinstance(context.chat_data, dict):
             context.chat_data["messages"] = []
         await update.message.reply_text(text=NEW_CONVERSATION_MESSAGE)
         return
 
-    if update.message.text == "/translator":
+    if message_text == "/translator":
         target_language_keyboard = [TARGET_LANGUAGE_KEYBOARD]
         markup = ReplyKeyboardMarkup(
             target_language_keyboard, resize_keyboard=True, one_time_keyboard=True
@@ -148,17 +153,17 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else []
     )
 
-    if update.message.text in TARGET_LANGUAGE_KEYBOARD:
+    if message_text in TARGET_LANGUAGE_KEYBOARD:
         request = {
             "role": "user",
-            "content": translator.format(target_lang=update.message.text),
+            "content": translator.format(target_lang=message_text),
         }
     else:
         request = {
             "role": "user",
-            "content": update.message.text
+            "content": message_text
             if not initial
-            else pick(update.message.text),
+            else pick(message_text),
         }
 
     messages.append(request)

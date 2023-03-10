@@ -1,6 +1,8 @@
 # messages
 NOT_PERMITED = "你没有权限访问此bot.请将你的id {user_id} 发送给管理员, 等待批准. 最长耗时约1小时🤔\n PS: 如果你不知道管理员是谁, 说明这个bot并非一个公开的bot. \n\nYou do not have permission to access this bot. Please send your ID {user_id} to the my boss and wait for approval, which may take up to 1 hour.\n PS: If you do not know who the boss is, it means that this bot is not a public bot."
 
+NOT_ALLOWD = "You are not on permit list."
+
 YES_OR_NO_KEYBOARD = ["Approved", "Decline"]
 
 TARGET_LANGUAGE_KEYBOARD = ["English", '中文', "日本語"]
