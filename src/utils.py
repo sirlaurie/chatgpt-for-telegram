@@ -12,14 +12,13 @@ from constants.messages import (
     PROCESS_TIMEOUT,
     APPROVED_MESSAGE,
     DECLINE_MESSAGE,
-    )
+)
 from allowed import add
 
 
 async def waring(update: Update, context: ContextTypes.DEFAULT_TYPE, msg) -> None:
     await update.message.reply_text(
-        text=NOT_PERMITED.format(user_id=context._user_id),
-        pool_timeout=3600.0
+        text=NOT_PERMITED.format(user_id=context._user_id), pool_timeout=3600.0
     )
     await apply_to_prove(update, context)
     return
@@ -33,34 +32,41 @@ async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     )
     message = await bot.sendMessage(
         chat_id=os.getenv("DEVELOPER_CHAT_ID", 0),
-        text=ASK_FOR_PERMITED.format(name=update.message.chat.first_name, user_id=context._user_id) ,
+        text=ASK_FOR_PERMITED.format(
+            name=update.message.chat.first_name, user_id=context._user_id
+        ),
         reply_markup=markup,
         write_timeout=3600.0,
-        pool_timeout=3600.0
+        pool_timeout=3600.0,
     )
 
-    updater = await bot.get_updates(
-        timeout=3600.0,
-        read_timeout=3600.0,
-        pool_timeout=3600.0
+    update_from_admin = await bot.get_updates(
+        timeout=3600.0, read_timeout=3600.0, pool_timeout=3600.0
     )
 
-    if not isinstance(updater, Iterable):
+    if isinstance(update_from_admin, Iterable) and len(update_from_admin) == 0:
         await update.message.reply_text(text=PROCESS_TIMEOUT)
         return
 
-    if isinstance(updater, Iterable) and len(updater) > 0:
-        # import pdb
-        # pdb.set_trace()
-        reply_obj = updater[0]
+    if isinstance(update_from_admin, Iterable) and len(update_from_admin) > 0:
+        reply_obj = update_from_admin[0]
         permit_message = reply_obj.message
-        if permit_message.chat.id == int(os.getenv("DEVELOPER_CHAT_ID", 0)) and permit_message.text == "Approved":
+
+        if (
+            hasattr(permit_message, "chat")
+            and permit_message.chat.id == int(os.getenv("DEVELOPER_CHAT_ID", 0))
+            and permit_message.text == "Approved"
+        ):
             _ = add(context._user_id, update.message.chat.first_name, 1)
             await update.message.reply_text(text=APPROVED_MESSAGE)
-            await message.edit_reply_markup(reply_markup=None)
+            # await message.edit_reply_markup(reply_markup=None)
             return
-        if permit_message.chat.id == int(os.getenv("DEVELOPER_CHAT_ID", 0)) and permit_message.text == "Decline":
+        if (
+            hasattr(permit_message, "chat")
+            and permit_message.chat.id == int(os.getenv("DEVELOPER_CHAT_ID", 0))
+            and permit_message.text == "Decline"
+        ):
             _ = add(context._user_id, update.message.chat.first_name, 0)
             await update.message.reply_text(text=DECLINE_MESSAGE)
-            await message.edit_reply_markup(reply_markup=None)
+            # await message.edit_reply_markup(reply_markup=None)
             return

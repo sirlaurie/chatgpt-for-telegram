@@ -28,11 +28,13 @@ class DBClient:
     def check_table(self, table: str) -> Union[int, None]:
         result = self.cursor.execute(
             f"SELECT name FROM sqlite_master WHERE type='table' AND name={table}"
-            )
+        )
         return result.fetchone()
 
     def create_table(self, table: str, fields: dict) -> None:
-        fields_sql = ', '.join([f'{field_name} {field_type}' for field_name, field_type in fields.items()])
+        fields_sql = ", ".join(
+            [f"{field_name} {field_type}" for field_name, field_type in fields.items()]
+        )
         self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {table} ({fields_sql})")
         self.connection.commit()
 
@@ -46,7 +48,9 @@ class DBClient:
         res = self.cursor.execute(sql)
         return res.fetchone()
 
-    def insert(self, table: str, nickname: str, telegram_id: int, allow: int) -> sqlite3.Cursor:
+    def insert(
+        self, table: str, nickname: str, telegram_id: int, allow: int
+    ) -> sqlite3.Cursor:
         sql = f"INSERT INTO {table} (role, nickname, telegramId, allow) VALUES (?, ?, ?, ?)"
         res = self.cursor.execute(sql, ("User", nickname, telegram_id, allow))
         self.connection.commit()

@@ -1,12 +1,13 @@
 import os
 import httpx
 
-# from telegram.constants import ParseMode
+from telegram.constants import ParseMode
 from telegram import Update
 from telegram.ext import ContextTypes
 from telegram._replykeyboardmarkup import ReplyKeyboardMarkup
 
-# from telegram.helpers import escape_markdown
+from telegram.helpers import escape_markdown
+
 # from telegram import MessageEntity
 
 from constants.messages import (
@@ -104,7 +105,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pool_timeout=3600.0,
         )
         # if isinstance(context.chat_data, dict):
-            # context.chat_data["initial"] = True
+        # context.chat_data["initial"] = True
         return
 
     await update.get_bot().send_chat_action(
@@ -123,12 +124,12 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             resp = response.json()
             message_from_gpt = resp.get("choices", [{}])[0].get("message", {})
-            content = message_from_gpt.get("content", "")
+            content = message_from_gpt.get("content", None) or "openai开小差了, 请继续提问"
 
             await message.edit_text(
-                text=content,
-                # parse_mode=ParseMode.MARKDOWN_V2,
-                disable_web_page_preview=True,
+                text=escape_markdown(text=content, version=2),
+                parse_mode=ParseMode.MARKDOWN_V2,
+                # disable_web_page_preview=True,
             )
 
             await update_message(message_from_gpt)
@@ -161,9 +162,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         request = {
             "role": "user",
-            "content": message_text
-            if not initial
-            else pick(message_text),
+            "content": message_text if not initial else pick(message_text),
         }
 
     messages.append(request)
@@ -176,6 +175,6 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if isinstance(context.chat_data, dict):
         context.chat_data["messages"] = messages
-        print('****************************************************************')
+        print("****************************************************************")
         print(context.chat_data["messages"])
-        print('----------------------------------------------------------------')
+        print("----------------------------------------------------------------")

@@ -38,7 +38,7 @@ from constants.handlers import (
     etymologists_handler,
     genius_handler,
     reset_handler,
-    )
+)
 from utils import waring
 from allowed import allowed
 from handlers import handle
@@ -51,7 +51,6 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

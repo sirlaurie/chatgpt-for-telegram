@@ -1,4 +1,3 @@
-
 # handler
 linux_terminal_handler = "linux_terminal"
 translator_handler = "translator"

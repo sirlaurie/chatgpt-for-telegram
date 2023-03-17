@@ -1,22 +1,21 @@
-
 import unicodedata
 
 escape_char = [
-    '!',
-    '<',
-    '>',
-    '_',
-    '~',
-    '`',
-    '#',
-    '-',
-    '=',
-    ]
+    "!",
+    "<",
+    ">",
+    "_",
+    "~",
+    "`",
+    "#",
+    "-",
+    "=",
+]
 
 
 def to_half_width(text: str) -> str:
-    text = text.replace('\u3000', ' ').replace('，', ', ').replace('。', '. ')
-    return unicodedata.normalize('NFKC', text)
+    text = text.replace("\u3000", " ").replace("，", ", ").replace("。", ". ")
+    return unicodedata.normalize("NFKC", text)
 
 
 def escape_extend(string: str) -> str:
@@ -29,4 +28,3 @@ def escape_extend(string: str) -> str:
     #   else:
     #     string = string
     return f"```\n{string}\n```"
-
