@@ -105,7 +105,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pool_timeout=3600.0,
         )
         # if isinstance(context.chat_data, dict):
-        # context.chat_data["initial"] = True
+        #     context.chat_data["initial"] = True
         return
 
     await update.get_bot().send_chat_action(
@@ -124,15 +124,19 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             resp = response.json()
             message_from_gpt = resp.get("choices", [{}])[0].get("message", {})
-            content = message_from_gpt.get("content", None) or "openai开小差了, 请继续提问"
+            content = message_from_gpt.get("content", "")
+            if content:
+                await message.edit_text(
+                    text=escape_markdown(text=content, version=2),
+                    parse_mode=ParseMode.MARKDOWN_V2,
+                )
 
-            await message.edit_text(
-                text=escape_markdown(text=content, version=2),
-                parse_mode=ParseMode.MARKDOWN_V2,
-                # disable_web_page_preview=True,
-            )
-
-            await update_message(message_from_gpt)
+                await update_message(message_from_gpt)
+            else:
+                await message.edit_text(
+                    text=escape_markdown(text="openai开小差了, 请继续提问", version=2),
+                    parse_mode=ParseMode.MARKDOWN_V2,
+                )
 
     async def update_message(message):
         old_messages = (
@@ -144,26 +148,27 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if isinstance(context.chat_data, dict):
             context.chat_data["messages"] = old_messages
 
-    messages = (
-        (
-            context.chat_data.get("messages", [])
-            if isinstance(context.chat_data, dict)
-            else []
-        )
-        if not initial
-        else []
-    )
-
     if message_text in TARGET_LANGUAGE_KEYBOARD:
         request = {
             "role": "user",
             "content": translator.format(target_lang=message_text),
         }
+        initial = True
     else:
         request = {
             "role": "user",
             "content": message_text if not initial else pick(message_text),
         }
+
+    messages = (
+        []
+        if initial
+        else (
+            context.chat_data.get("messages", [])
+            if isinstance(context.chat_data, dict)
+            else []
+        )
+    )
 
     messages.append(request)
     data = {
