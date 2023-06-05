@@ -46,6 +46,7 @@ async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     if isinstance(update_from_admin, Iterable) and len(update_from_admin) == 0:
         await update.message.reply_text(text=PROCESS_TIMEOUT)
+        await message.delete(read_timeout=60.0)
         return
 
     if isinstance(update_from_admin, Iterable) and len(update_from_admin) > 0:
