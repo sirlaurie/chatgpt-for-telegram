@@ -173,7 +173,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     messages.append(request)
     data = {
         "model": os.getenv("model", "gpt-3.5-turbo"),
-        "messages": messages[-7:],
+        "messages": messages,
         "stream": False,
     }
     await send_request(data)
