@@ -43,7 +43,10 @@ from constants.handlers import (
 )
 from utils import waring, model
 from allowed import allowed
-from handlers import handle
+from handler import handle
+from handlers.reset_handler import reset_handle
+from handlers.switch_model_handler import switch_model_handle
+from handlers.translator_handler import translator_handle
 
 # Enable logging
 logging.basicConfig(
@@ -109,14 +112,14 @@ def main() -> None:
     application = Application.builder().token(bot_token).build()
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler(model_switch_handler, handle))  # type: ignore
-    application.add_handler(CommandHandler(translator_handler, handle))  # type: ignore
+    application.add_handler(CommandHandler(model_switch_handler, switch_model_handle))  # type: ignore
+    application.add_handler(CommandHandler(translator_handler, translator_handle))  # type: ignore
     application.add_handler(CommandHandler(linux_terminal_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(rewrite_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(cyber_secrity_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(etymologists_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(genius_handler, handle))  # type: ignore
-    application.add_handler(CommandHandler(reset_handler, handle))  # type: ignore
+    application.add_handler(CommandHandler(reset_handler, reset_handle))  # type: ignore
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
     application.add_handler(CallbackQueryHandler(model))
     # error handler

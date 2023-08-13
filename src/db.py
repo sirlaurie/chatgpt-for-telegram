@@ -57,8 +57,8 @@ class DBClient:
         self.connection.commit()
         return res
 
-    def update(self, table: str, telegram_id: str, allow, premium) -> sqlite3.Cursor:
-        sql = f"UPDATE {table} SET allow = {allow} premium = {premium} WHERE telegramId = {telegram_id}"
+    def update(self, table: str, telegram_id: str, allow: int, premium: int) -> sqlite3.Cursor:
+        sql = f"UPDATE {table} SET allow = {allow}, premium = {premium} WHERE telegramId = {telegram_id}"
         res = self.cursor.execute(sql)
         self.connection.commit()
         return res
