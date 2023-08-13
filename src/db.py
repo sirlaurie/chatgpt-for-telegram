@@ -17,7 +17,8 @@ class DBClient:
                          (role TEXT NOT NULL,
                           nickname TEXT NOT NULL,
                           telegramId INTEGER PRIMARY KEY,
-                          allow INT NOT NULL)"""
+                          allow INT NOT NULL,
+                          premium INTEGER NOT NULL)"""
             )
             self.connection.commit()
 
@@ -49,15 +50,15 @@ class DBClient:
         return res.fetchone()
 
     def insert(
-        self, table: str, nickname: str, telegram_id: int, allow: int
+        self, table: str, nickname: str, telegram_id: int, allow: int, premium: int
     ) -> sqlite3.Cursor:
-        sql = f"INSERT INTO {table} (role, nickname, telegramId, allow) VALUES (?, ?, ?, ?)"
-        res = self.cursor.execute(sql, ("User", nickname, telegram_id, allow))
+        sql = f"INSERT INTO {table} (role, nickname, telegramId, allow, premium) VALUES (?, ?, ?, ?, ?)"
+        res = self.cursor.execute(sql, ("User", nickname, telegram_id, allow, premium))
         self.connection.commit()
         return res
 
-    def update(self, table: str, telegram_id: str, allow) -> sqlite3.Cursor:
-        sql = f"UPDATE {table} SET allow = {allow} WHERE telegramId = {telegram_id}"
+    def update(self, table: str, telegram_id: str, allow, premium) -> sqlite3.Cursor:
+        sql = f"UPDATE {table} SET allow = {allow} premium = {premium} WHERE telegramId = {telegram_id}"
         res = self.cursor.execute(sql)
         self.connection.commit()
         return res

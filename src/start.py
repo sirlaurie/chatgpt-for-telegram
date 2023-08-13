@@ -32,7 +32,7 @@ from telegram.ext import (
 
 from constants.messages import WELCOME_MESSAGE
 from constants.handlers import (
-    model_select_handler,
+    model_switch_handler,
     linux_terminal_handler,
     translator_handler,
     rewrite_handler,
@@ -109,7 +109,7 @@ def main() -> None:
     application = Application.builder().token(bot_token).build()
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler(model_select_handler, handle))  # type: ignore
+    application.add_handler(CommandHandler(model_switch_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(translator_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(linux_terminal_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(rewrite_handler, handle))  # type: ignore

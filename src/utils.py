@@ -59,7 +59,7 @@ async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             and permit_message.chat.id == int(os.getenv("DEVELOPER_CHAT_ID", 0))
             and permit_message.text == "Approved"
         ):
-            _ = add(context._user_id, update.message.chat.first_name, 1)
+            _ = add(context._user_id, update.message.chat.first_name, 1, 0)
             await update.message.reply_text(text=APPROVED_MESSAGE)
             await message.edit_reply_markup(reply_markup=None)
             return
@@ -68,7 +68,7 @@ async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             and permit_message.chat.id == int(os.getenv("DEVELOPER_CHAT_ID", 0))
             and permit_message.text == "Decline"
         ):
-            _ = add(context._user_id, update.message.chat.first_name, 0)
+            _ = add(context._user_id, update.message.chat.first_name, 0, 0)
             await update.message.reply_text(text=DECLINE_MESSAGE)
             await message.edit_reply_markup(reply_markup=None)
             return
@@ -83,4 +83,4 @@ async def model(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await query.answer()
     context.bot_data.update({"model": query.data})
 
-    await query.edit_message_text(text=f"OK! 你选择的模型是: {query.data}")
+    await query.edit_message_text(text=f"OK! 已为您切换到 {query.data} 模型")

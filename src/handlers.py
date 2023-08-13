@@ -88,7 +88,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/genius",
         "/expand",
         "/advanced_frontend",
-        "/model_select",
+        "/switch_model",
         "/reset",
     ]:
         initial = True
@@ -98,7 +98,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # if isinstance(context.chat_data, dict):
     #     initial = context.chat_data.get("initial", False)
-    if message_text == "/model_select":
+    if message_text == "/switch_model":
         if premium:
             inline_keybord = [
                 [

@@ -19,8 +19,8 @@ def allowed(user_id) -> Tuple[bool, bool, str]:
     return (bool(allow), bool(premium), NOT_ALLOWD)
 
 
-def add(user_id, nickname, allow) -> int:
-    res = client.insert("User", nickname, user_id, allow)
+def add(user_id, nickname, allow, premium) -> int:
+    res = client.insert("User", nickname, user_id, allow, premium)
     return res.rowcount
 
 
