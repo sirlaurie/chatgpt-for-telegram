@@ -2,7 +2,7 @@ import os
 import httpx
 
 from telegram.constants import ParseMode
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from telegram._replykeyboardmarkup import ReplyKeyboardMarkup
 
@@ -26,6 +26,15 @@ from constants.prompts import (
     etymologists,
     cyber_secrity,
     linux_terminal,
+)
+from constants.models import (
+    gpt_3p5_turbo,
+    gpt_3p5_turbo_16k,
+    gpt_3p5_turbo_0613,
+    gpt_3p5_turbo_16k_0613,
+    gpt_4,
+    gpt_4_0314,
+    gpt_4_0613,
 )
 from allowed import allowed
 from utils import waring
@@ -56,7 +65,7 @@ def pick(act: str):
 
 
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    permitted, msg = allowed(context._user_id)
+    permitted, premium, msg = allowed(context._user_id)
     if not permitted and msg == NOT_PERMITED:
         await waring(update, context, msg)
         return
@@ -68,6 +77,8 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message_text = update.message.text
 
+    # import pdb
+    # pdb.set_trace()
     if message_text in [
         "/linux_terminal",
         "/translator",
@@ -77,6 +88,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/genius",
         "/expand",
         "/advanced_frontend",
+        "/model_select",
         "/reset",
     ]:
         initial = True
@@ -86,6 +98,44 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # if isinstance(context.chat_data, dict):
     #     initial = context.chat_data.get("initial", False)
+    if message_text == "/model_select":
+        if premium:
+            inline_keybord = [
+                [
+                    InlineKeyboardButton(
+                        "gpt-3.5-turbo", callback_data=str(gpt_3p5_turbo)
+                    ),
+                    InlineKeyboardButton(
+                        "gpt-3.5-turbo-16k", callback_data=str(gpt_3p5_turbo_16k)
+                    ),
+                ],
+                [
+                    InlineKeyboardButton(
+                        "gpt-3.5-turbo-0613", callback_data=str(gpt_3p5_turbo_0613)
+                    ),
+                    InlineKeyboardButton(
+                        "gpt-3.5-turbo-16k-0613",
+                        callback_data=str(gpt_3p5_turbo_16k_0613),
+                    ),
+                ],
+                [
+                    InlineKeyboardButton("gpt-4", callback_data=str(gpt_4)),
+                    InlineKeyboardButton("gpt-4-0314", callback_data=str(gpt_4_0314)),
+                    InlineKeyboardButton("gpt-4-0613", callback_data=str(gpt_4_0613)),
+                ],
+            ]
+            reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)
+
+            await update.message.reply_text(
+                f"当前使用的模型是: {context.bot_data.get('model', None) or os.getenv('model')}. 切换你要使用的模型:",
+                reply_markup=reply_markup,
+            )
+            return
+
+        await update.message.reply_text(
+            "Sorry, 由于GPT-4等高级模型的费用较高, 默认用户当前只能使用GPT-3.5-turbo模型"
+        )
+        return
 
     if message_text == "/reset":
         if isinstance(context.chat_data, dict):
@@ -134,7 +184,10 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update_message(message_from_gpt)
             else:
                 await message.edit_text(
-                    text=escape_markdown(text="openai开小差了, 请继续提问", version=2),
+                    text=escape_markdown(
+                        text="ERROR: " + resp.get("error", {}).get("message", {}),
+                        version=2,
+                    ),
                     parse_mode=ParseMode.MARKDOWN_V2,
                 )
 
@@ -171,15 +224,11 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     messages.append(request)
+
     data = {
-        "model": os.getenv("model", "gpt-3.5-turbo"),
+        "model": context.bot_data.get("model", None)
+        or os.getenv("model", "gpt-3.5-turbo-16k"),
         "messages": messages,
         "stream": False,
     }
     await send_request(data)
-
-    if isinstance(context.chat_data, dict):
-        context.chat_data["messages"] = messages
-        print("****************************************************************")
-        print(context.chat_data["messages"])
-        print("----------------------------------------------------------------")

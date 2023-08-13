@@ -17,11 +17,12 @@ from allowed import add
 
 
 async def waring(update: Update, context: ContextTypes.DEFAULT_TYPE, msg) -> None:
-    await update.message.reply_text(
-        text=NOT_PERMITED.format(user_id=context._user_id), pool_timeout=3600.0
-    )
-    await apply_to_prove(update, context)
-    return
+    if update.message is not None:
+        await update.message.reply_text(
+            text=NOT_PERMITED.format(user_id=context._user_id), pool_timeout=3600.0
+        )
+        await apply_to_prove(update, context)
+        return
 
 
 async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -41,7 +42,7 @@ async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     )
 
     update_from_admin = await bot.get_updates(
-        timeout=3600.0, read_timeout=3600.0, pool_timeout=3600.0
+        timeout=3600, read_timeout=3600.0, pool_timeout=3600.0
     )
 
     if isinstance(update_from_admin, Iterable) and len(update_from_admin) == 0:
@@ -60,7 +61,7 @@ async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         ):
             _ = add(context._user_id, update.message.chat.first_name, 1)
             await update.message.reply_text(text=APPROVED_MESSAGE)
-            # await message.edit_reply_markup(reply_markup=None)
+            await message.edit_reply_markup(reply_markup=None)
             return
         if (
             hasattr(permit_message, "chat")
@@ -69,5 +70,17 @@ async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         ):
             _ = add(context._user_id, update.message.chat.first_name, 0)
             await update.message.reply_text(text=DECLINE_MESSAGE)
-            # await message.edit_reply_markup(reply_markup=None)
+            await message.edit_reply_markup(reply_markup=None)
             return
+
+
+async def model(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Parses the CallbackQuery and updates the message text."""
+    query = update.callback_query
+
+    # CallbackQueries need to be answered, even if no notification to the user is needed
+    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
+    await query.answer()
+    context.bot_data.update({"model": query.data})
+
+    await query.edit_message_text(text=f"OK! 你选择的模型是: {query.data}")

@@ -27,10 +27,12 @@ from telegram.ext import (
     ContextTypes,
     MessageHandler,
     filters,
+    CallbackQueryHandler,
 )
 
 from constants.messages import WELCOME_MESSAGE
 from constants.handlers import (
+    model_select_handler,
     linux_terminal_handler,
     translator_handler,
     rewrite_handler,
@@ -39,7 +41,7 @@ from constants.handlers import (
     genius_handler,
     reset_handler,
 )
-from utils import waring
+from utils import waring, model
 from allowed import allowed
 from handlers import handle
 
@@ -107,7 +109,7 @@ def main() -> None:
     application = Application.builder().token(bot_token).build()
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
-
+    application.add_handler(CommandHandler(model_select_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(translator_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(linux_terminal_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(rewrite_handler, handle))  # type: ignore
@@ -116,6 +118,7 @@ def main() -> None:
     application.add_handler(CommandHandler(genius_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(reset_handler, handle))  # type: ignore
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
+    application.add_handler(CallbackQueryHandler(model))
     # error handler
     application.add_error_handler(error_handler)  # type: ignore
     # Run the bot until the user presses Ctrl-C
