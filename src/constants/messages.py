@@ -5,7 +5,7 @@ NOT_ALLOWD = "你暂时不在允许聊天的列表中.\n\nYou are not on permit 
 
 YES_OR_NO_KEYBOARD = ["Approved", "Decline"]
 
-TARGET_LANGUAGE_KEYBOARD = ["English", "中文", "日本語"]
+TARGET_LANGUAGE_KEYBOARD = ["English", "Deutsch", "Française", "中文", "日本語"]
 
 ASK_FOR_PERMITED = (
     "User {name}, id: {user_id} want to chat with me, would you like to allow it?"
