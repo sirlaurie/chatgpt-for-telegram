@@ -72,13 +72,3 @@ async def apply_to_prove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await update.message.reply_text(text=DECLINE_MESSAGE)
             await message.edit_reply_markup(reply_markup=None)
             return
-
-
-async def model(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Parses the CallbackQuery and updates the message text."""
-    query = update.callback_query
-
-    await query.answer()
-    context.bot_data.update({"model": query.data})
-
-    await query.edit_message_text(text=f"OK! 已为您切换到 {query.data} 模型")

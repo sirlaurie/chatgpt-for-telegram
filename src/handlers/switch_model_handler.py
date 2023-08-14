@@ -24,6 +24,16 @@ from allowed import allowed
 from utils import waring
 
 
+async def switch_model_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Parses the CallbackQuery and updates the message text."""
+    query = update.callback_query
+    
+    await query.answer()
+    context.bot_data.update({"model": query.data})
+
+    await query.edit_message_text(text=f"OK! 已为您切换到 {query.data} 模型")
+
+
 async def switch_model_handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     permitted, premium, msg = allowed(context._user_id)
     if not permitted and msg == NOT_PERMITED:
