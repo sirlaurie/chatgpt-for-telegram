@@ -41,11 +41,11 @@ from constants.handlers import (
     genius_handler,
     reset_handler,
 )
-from utils import waring, model
+from utils import waring
 from allowed import allowed
 from handler import handle
 from handlers.reset_handler import reset_handle
-from handlers.switch_model_handler import switch_model_handle
+from handlers.switch_model_handler import switch_model_handle, switch_model_callback
 from handlers.translator_handler import translator_handle
 
 # Enable logging
@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
-    permitted, msg = allowed(context._user_id)
+    permitted, _, msg = allowed(context._user_id)
     if permitted:
         # user = update.effective_user
         await update.message.reply_text(text=WELCOME_MESSAGE)
@@ -121,9 +121,9 @@ def main() -> None:
     application.add_handler(CommandHandler(genius_handler, handle))  # type: ignore
     application.add_handler(CommandHandler(reset_handler, reset_handle))  # type: ignore
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
-    application.add_handler(CallbackQueryHandler(model))
+    application.add_handler(CallbackQueryHandler(switch_model_callback))
     # error handler
-    application.add_error_handler(error_handler)  # type: ignore
+    # application.add_error_handler(error_handler)  # type: ignore
     # Run the bot until the user presses Ctrl-C
     application.run_polling()
 

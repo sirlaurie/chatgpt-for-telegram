@@ -1,4 +1,6 @@
+import json
 import os
+from typing import cast
 import httpx
 
 from telegram.constants import ParseMode
@@ -49,6 +51,8 @@ def pick(act: str):
 
 
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message:
+        return
     permitted, _, msg = allowed(context._user_id)
     if not permitted and msg == NOT_PERMITED:
         await waring(update, context, msg)
@@ -59,7 +63,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.bot_data.update({"initial": False})
 
-    message_text = update.message.text
+    message_text = cast(str, update.message.text)
 
     if message_text in [
         "/linux_terminal",
@@ -76,37 +80,62 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     await update.get_bot().send_chat_action(
-        update.message.chat.id, "typing", write_timeout=15.0, pool_timeout=10.0
+        update.message.chat.id, "typing", write_timeout=15.0, pool_timeout=10.0 # type: ignore
     )
 
     async def send_request(data: dict):
-        async with httpx.AsyncClient(timeout=None) as client:
-            message = await update.message.reply_text(
-                text=INIT_REPLY_MESSAGE, pool_timeout=15.0
-            )
-            response = await client.post(
-                url=os.getenv("api_endpoint") or os.getenv("default_api_endpoint", ""),
-                headers=header,
-                json=data,
-            )
-            resp = response.json()
-            message_from_gpt = resp.get("choices", [{}])[0].get("message", {})
-            content = message_from_gpt.get("content", "")
-            if content:
-                await message.edit_text(
-                    text=escape_markdown(text=content, version=2),
-                    parse_mode=ParseMode.MARKDOWN_V2,
-                )
+        client = httpx.AsyncClient(timeout=None)
+        assert update.message is not None
+        message = await update.message.reply_text(
+            text=INIT_REPLY_MESSAGE, pool_timeout=15.0
+        )
+        full_content = ""
+        index = 0
+        async with client.stream(
+            method="POST",
+            url=os.getenv("api_endpoint") or os.getenv("default_api_endpoint", ""),
+            headers=header,
+            json=data,
+        ) as response:
+            async for chunk in response.aiter_lines():
+                index += 1
+                string = chunk.strip("data: ")
+                if not string:
+                    continue
+                if "[DONE]" in chunk:
+                    await response.aclose()
+                    continue
+                chunk = json.loads(string)
 
-                await update_message(message_from_gpt)
-            else:
-                await message.edit_text(
-                    text=escape_markdown(
-                        text="ERROR: " + resp.get("error", {}).get("message", {}),
-                        version=2,
-                    ),
-                    parse_mode=ParseMode.MARKDOWN_V2,
+                is_stop = chunk.get("choices", [{}])[0].get("finish_reason")
+                if is_stop:
+                    continue
+
+                chunk_message = (
+                    chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
                 )
+                full_content += chunk_message
+
+                if index and index % 7 == 0:
+                    await message.edit_text(
+                        text=escape_markdown(text=full_content, version=2),
+                        parse_mode=ParseMode.MARKDOWN_V2,
+                    )
+
+            await message.edit_text(
+                text=escape_markdown(text=full_content, version=2),
+                parse_mode=ParseMode.MARKDOWN_V2,
+            )
+        await update_message({"role": "assistant", "content": full_content})
+
+        # else:
+        #     await message.edit_text(
+        #         text=escape_markdown(
+        #             text="ERROR: " + resp.get("error", {}).get("message", {}),
+        #             version=2,
+        #         ),
+        #         parse_mode=ParseMode.MARKDOWN_V2,
+        #     )
 
     async def update_message(message):
         old_messages = (
@@ -115,6 +144,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else []
         )
         old_messages.append(message)
+
         if isinstance(context.chat_data, dict):
             context.chat_data["messages"] = old_messages
 
@@ -123,11 +153,13 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "role": "user",
             "content": translator.format(target_lang=message_text),
         }
-        context.bot_data.update({"initial": True})
+        # context.bot_data.update({"initial": True})
     else:
         request = {
             "role": "user",
-            "content": message_text if not context.bot_data.get("initial") else pick(message_text),
+            "content": message_text
+            if not context.bot_data.get("initial")
+            else pick(message_text),
         }
 
     messages = (
@@ -141,11 +173,16 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     messages.append(request)
+    if isinstance(context.chat_data, dict):
+        context.chat_data["messages"] = messages
 
     data = {
         "model": context.bot_data.get("model", None)
         or os.getenv("model", "gpt-3.5-turbo-16k"),
         "messages": messages,
-        "stream": False,
+        "stream": True,
     }
+    print(data)
+
     await send_request(data)
+
