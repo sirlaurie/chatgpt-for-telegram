@@ -91,6 +91,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         full_content = ""
         index = 0
+        model = context.bot_data.get("model", "")
         async with client.stream(
             method="POST",
             url=os.getenv("api_endpoint") or os.getenv("default_api_endpoint", ""),
@@ -106,10 +107,10 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     await response.aclose()
                     continue
                 chunk = json.loads(string)
-
+                model = chunk.get("model")
                 is_stop = chunk.get("choices", [{}])[0].get("finish_reason")
                 if is_stop:
-                    continue
+                    break
 
                 chunk_message = (
                     chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
@@ -123,7 +124,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     )
 
             await message.edit_text(
-                text=escape_markdown(text=full_content, version=2),
+                text=escape_markdown(text= f'🎨 Generate by {model} model: \n\n {full_content}', version=2),
                 parse_mode=ParseMode.MARKDOWN_V2,
             )
         await update_message({"role": "assistant", "content": full_content})

@@ -123,7 +123,7 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
     application.add_handler(CallbackQueryHandler(switch_model_callback))
     # error handler
-    # application.add_error_handler(error_handler)  # type: ignore
+    application.add_error_handler(error_handler)  # type: ignore
     # Run the bot until the user presses Ctrl-C
     application.run_polling()
 
