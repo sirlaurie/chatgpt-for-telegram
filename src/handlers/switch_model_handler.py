@@ -16,9 +16,10 @@ from constants.models import (
     gpt_3p5_turbo_16k,
     gpt_3p5_turbo_0613,
     gpt_3p5_turbo_16k_0613,
-    gpt_4,
     gpt_4_0314,
     gpt_4_0613,
+    gpt_4_32k_0314,
+    gpt_4_32k_0613
 )
 from allowed import allowed
 from utils import waring
@@ -67,9 +68,12 @@ async def switch_model_handle(update: Update, context: ContextTypes.DEFAULT_TYPE
                 ),
             ],
             [
-                InlineKeyboardButton("gpt-4", callback_data=str(gpt_4)),
                 InlineKeyboardButton("gpt-4-0314", callback_data=str(gpt_4_0314)),
+                InlineKeyboardButton("gpt-4-32k-0314", callback_data=str(gpt_4_32k_0314)),
+            ],
+            [
                 InlineKeyboardButton("gpt-4-0613", callback_data=str(gpt_4_0613)),
+                InlineKeyboardButton("gpt-4-32k-0613", callback_data=str(gpt_4_32k_0613)),
             ],
         ]
         reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)
