@@ -1,4 +1,15 @@
+from typing import Tuple
 import unicodedata
+import tiktoken
+from constants.models import (
+    gpt_4,
+    gpt_4_0314,
+    gpt_4_0613,
+    gpt_3p5_turbo,
+    gpt_3p5_turbo_0613,
+    gpt_3p5_turbo_16k,
+    gpt_3p5_turbo_16k_0613
+    )
 
 escape_char = [
     "!",
@@ -11,6 +22,16 @@ escape_char = [
     "-",
     "=",
 ]
+
+token_price = {
+    gpt_4: 0.03,
+    gpt_4_0314: 0.03,
+    gpt_4_0613: 0.03,
+    gpt_3p5_turbo: 0.0015,
+    gpt_3p5_turbo_0613: 0.0015,
+    gpt_3p5_turbo_16k: 0.003,
+    gpt_3p5_turbo_16k_0613: 0.003,
+}
 
 
 def to_half_width(text: str) -> str:
@@ -28,3 +49,14 @@ def escape_extend(string: str) -> str:
     #   else:
     #     string = string
     return f"```\n{string}\n```"
+
+
+def usage_from_messages(message: str, model="gpt-3.5-turbo-0613") -> Tuple[int, str]:
+    """Return the number of tokens used by a list of messages."""
+    encoding = tiktoken.encoding_for_model(model)
+    num_tokens = 0
+    num_tokens += len(encoding.encode(message))
+    num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
+    # price = num_tokens / 1000 * token_price.get(model, 0.003)
+    price = "{:9f}".format(num_tokens / 1000 * token_price.get(model, 0.003))
+    return num_tokens, price

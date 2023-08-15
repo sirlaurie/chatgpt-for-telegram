@@ -26,6 +26,7 @@ from constants.prompts import (
 )
 from allowed import allowed
 from utils import waring
+from helpers import usage_from_messages
 
 
 header = {
@@ -80,7 +81,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     await update.get_bot().send_chat_action(
-        update.message.chat.id, "typing", write_timeout=15.0, pool_timeout=10.0 # type: ignore
+        update.message.chat.id, "typing", write_timeout=15.0, pool_timeout=10.0  # type: ignore
     )
 
     async def send_request(data: dict):
@@ -122,9 +123,12 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         text=escape_markdown(text=full_content, version=2),
                         parse_mode=ParseMode.MARKDOWN_V2,
                     )
-
+            num_token, price = usage_from_messages(full_content, model=model)
             await message.edit_text(
-                text=escape_markdown(text= f'🎨 Generate by {model} model: \n\n {full_content}', version=2),
+                text=escape_markdown(
+                    text=f"🎨 Generate by model: {model}.\n💸 Usage: {num_token} tokens, about ${price} \n----------------------------------------------------\n\n{full_content}",
+                    version=2,
+                ),
                 parse_mode=ParseMode.MARKDOWN_V2,
             )
         await update_message({"role": "assistant", "content": full_content})
@@ -186,4 +190,3 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(data)
 
     await send_request(data)
-
