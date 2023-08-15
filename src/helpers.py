@@ -2,9 +2,10 @@ from typing import Tuple
 import unicodedata
 import tiktoken
 from constants.models import (
-    gpt_4,
     gpt_4_0314,
+    gpt_4_32k_0314,
     gpt_4_0613,
+    gpt_4_32k_0613,
     gpt_3p5_turbo,
     gpt_3p5_turbo_0613,
     gpt_3p5_turbo_16k,
@@ -24,13 +25,14 @@ escape_char = [
 ]
 
 token_price = {
-    gpt_4: 0.03,
-    gpt_4_0314: 0.03,
-    gpt_4_0613: 0.03,
-    gpt_3p5_turbo: 0.0015,
-    gpt_3p5_turbo_0613: 0.0015,
-    gpt_3p5_turbo_16k: 0.003,
-    gpt_3p5_turbo_16k_0613: 0.003,
+    gpt_4_0314: 0.06,
+    gpt_4_32k_0314: 0.12,
+    gpt_4_0613: 0.06,
+    gpt_4_32k_0613: 0.12,
+    gpt_3p5_turbo: 0.002,
+    gpt_3p5_turbo_0613: 0.002,
+    gpt_3p5_turbo_16k: 0.004,
+    gpt_3p5_turbo_16k_0613: 0.004,
 }
 
 
@@ -58,5 +60,5 @@ def usage_from_messages(message: str, model="gpt-3.5-turbo-0613") -> Tuple[int, 
     num_tokens += len(encoding.encode(message))
     num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
     # price = num_tokens / 1000 * token_price.get(model, 0.003)
-    price = "{:9f}".format(num_tokens / 1000 * token_price.get(model, 0.003))
+    price = "{:9f}".format(num_tokens / 1000 * token_price.get(model, 0.004))
     return num_tokens, price
