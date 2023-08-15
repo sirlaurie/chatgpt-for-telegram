@@ -1,6 +1,6 @@
 import json
 import os
-from typing import cast
+from typing import Dict, List, Union, cast
 import httpx
 
 from telegram.constants import ParseMode
@@ -35,7 +35,16 @@ header = {
 }
 
 
-def pick(act: str):
+def pick(act: str) -> str:
+    """
+    Function that matches the passed-in string to a known set of strings and returns the associated function.
+
+    Args:
+        act (str): The action string to match.
+
+    Returns:
+        str: default string.
+    """
     match act:
         case "/linux_terminal":
             return linux_terminal
@@ -49,9 +58,11 @@ def pick(act: str):
             return genius
         case "/expand":
             return expand
+        case _:
+            return "who are you?"
 
 
-async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
         return
     permitted, _, msg = allowed(context._user_id)
@@ -84,7 +95,16 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         update.message.chat.id, "typing", write_timeout=15.0, pool_timeout=10.0  # type: ignore
     )
 
-    async def send_request(data: dict):
+    async def send_request(data: Dict[str, Union[str, List[Dict[str, str]]]]) -> None:
+        """
+        Sends the request to the server and processes the response.
+
+        Args:
+            data (Dict[str, Union[str, List[Dict[str, str]]]]): Data to be sent with the request.
+
+        Returns:
+            None
+        """
         client = httpx.AsyncClient(timeout=None)
         assert update.message is not None
         message = await update.message.reply_text(
@@ -99,6 +119,19 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             headers=header,
             json=data,
         ) as response:
+            if not response.is_success:
+                resp = await response.aread()
+                content = resp.decode()
+                content = json.loads(content)
+                await message.edit_text(
+                    text=escape_markdown(
+                        text="ERROR: " + content.get("error", {}).get("message", {}),
+                        version=2,
+                    ),
+                    parse_mode=ParseMode.MARKDOWN_V2,
+                )
+                await response.aclose()
+                return
             async for chunk in response.aiter_lines():
                 index += 1
                 string = chunk.strip("data: ")
@@ -108,8 +141,8 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     await response.aclose()
                     continue
                 chunk = json.loads(string)
-                model = chunk.get("model")
-                is_stop = chunk.get("choices", [{}])[0].get("finish_reason")
+                model = chunk.get("model", os.getenv("model"))
+                is_stop = chunk.get("choices", [{}])[0].get("finish_reason", None)
                 if is_stop:
                     break
 
@@ -131,18 +164,18 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 ),
                 parse_mode=ParseMode.MARKDOWN_V2,
             )
-        await update_message({"role": "assistant", "content": full_content})
+            await update_message({"role": "assistant", "content": full_content})
 
-        # else:
-        #     await message.edit_text(
-        #         text=escape_markdown(
-        #             text="ERROR: " + resp.get("error", {}).get("message", {}),
-        #             version=2,
-        #         ),
-        #         parse_mode=ParseMode.MARKDOWN_V2,
-        #     )
+    async def update_message(message: Dict[str, str]) -> None:
+        """
+        Updates the conversation context with the new message.
 
-    async def update_message(message):
+        Args:
+            message (Dict[str, str]): The message to be appended.
+
+        Returns:
+            None
+        """
         old_messages = (
             context.chat_data.get("messages", [])
             if isinstance(context.chat_data, dict)
@@ -163,13 +196,13 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         request = {
             "role": "user",
             "content": message_text
-            if not context.bot_data.get("initial")
+            if not context.bot_data.get("initial", True)
             else pick(message_text),
         }
 
     messages = (
         []
-        if context.bot_data.get("initial")
+        if context.bot_data.get("initial", True)
         else (
             context.chat_data.get("messages", [])
             if isinstance(context.chat_data, dict)
