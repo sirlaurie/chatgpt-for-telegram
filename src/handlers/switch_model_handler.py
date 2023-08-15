@@ -27,6 +27,8 @@ from utils import waring
 async def switch_model_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Parses the CallbackQuery and updates the message text."""
     query = update.callback_query
+    if not query:
+        return
     
     await query.answer()
     context.bot_data.update({"model": query.data})
@@ -39,10 +41,12 @@ async def switch_model_handle(update: Update, context: ContextTypes.DEFAULT_TYPE
     if not permitted and msg == NOT_PERMITED:
         await waring(update, context, msg)
         return
-    if not permitted and msg == NOT_ALLOWD:
+    if not permitted and msg == NOT_ALLOWD and update.message:
         await update.message.reply_text(text=NOT_ALLOWD)
         return
 
+    if not update.message:
+        return
     if premium:
         inline_keybord = [
             [
@@ -77,6 +81,6 @@ async def switch_model_handle(update: Update, context: ContextTypes.DEFAULT_TYPE
         return
 
     await update.message.reply_text(
-        "Sorry, 由于GPT-4等高级模型的费用较高, 默认用户当前只能使用GPT-3.5-turbo-16k模型"
+        "Sorry, 由于GPT-4等高级模型的费用较高(GPT-3.5的20倍), 默认用户当前只能使用GPT-3.5-turbo-16k模型"
     )
     return

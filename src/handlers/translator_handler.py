@@ -19,6 +19,8 @@ from utils import waring
 
 
 async def translator_handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message:
+        return
     permitted, _, msg = allowed(context._user_id)
     if not permitted and msg == NOT_PERMITED:
         await waring(update, context, msg)
