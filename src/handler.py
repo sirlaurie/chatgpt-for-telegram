@@ -1,3 +1,4 @@
+import html
 import json
 import os
 from typing import Dict, List, Union, cast
@@ -157,12 +158,15 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                         parse_mode=ParseMode.MARKDOWN_V2,
                     )
             num_token, price = usage_from_messages(full_content, model=model)
+            to_sent_message = (
+                f"{html.escape(full_content)}\n\n"
+                f"----------------------------------------\n"
+                f'<i>🎨 Generate by model: {model}.</i>\n'
+                f'<i>💸 Usage: {num_token} tokens, cost: ${price}</i>'
+                )
             await message.edit_text(
-                text=escape_markdown(
-                    text=f"🎨 Generate by model: {model}.\n💸 Usage: {num_token} tokens, about ${price} \n----------------------------------------------------\n\n{full_content}",
-                    version=2,
-                ),
-                parse_mode=ParseMode.MARKDOWN_V2,
+                text=to_sent_message,
+                parse_mode=ParseMode.HTML,
             )
             await update_message({"role": "assistant", "content": full_content})
 
@@ -220,6 +224,8 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "messages": messages,
         "stream": True,
     }
-    print(data)
+
+    first_name = getattr(update.message.from_user, 'first_name', None)
+    print(f"************ from {first_name}: ************\n{data}")
 
     await send_request(data)

@@ -59,6 +59,5 @@ def usage_from_messages(message: str, model="gpt-3.5-turbo-0613") -> Tuple[int, 
     num_tokens = 0
     num_tokens += len(encoding.encode(message))
     num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
-    # price = num_tokens / 1000 * token_price.get(model, 0.003)
-    price = "{:9f}".format(num_tokens / 1000 * token_price.get(model, 0.004))
+    price = f"{num_tokens / 1000 * token_price.get(model, 0.004):.5f}"
     return num_tokens, price
