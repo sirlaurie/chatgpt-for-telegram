@@ -29,8 +29,6 @@ async def translator_handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(text=NOT_ALLOWD)
         return
 
-    context.bot_data.update({"initial": True})
-
     target_language_keyboard = [TARGET_LANGUAGE_KEYBOARD]
     markup = ReplyKeyboardMarkup(
         target_language_keyboard, resize_keyboard=True, one_time_keyboard=True

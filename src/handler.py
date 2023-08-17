@@ -195,7 +195,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             "role": "user",
             "content": translator.format(target_lang=message_text),
         }
-        # context.bot_data.update({"initial": True})
+        context.bot_data.update({"initial": True})
     else:
         request = {
             "role": "user",
