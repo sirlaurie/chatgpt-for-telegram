@@ -11,7 +11,7 @@ quota_exceeded = (
 client = DBClient()
 
 
-def allowed(user_id) -> Tuple[bool, bool, str]:
+def allowed(user_id: int) -> Tuple[bool, bool, str]:
     user = client.read_one(table="User", telegram_id=user_id)
     if not isinstance(user, Tuple):
         return (False, False, NOT_PERMITED)
@@ -19,7 +19,7 @@ def allowed(user_id) -> Tuple[bool, bool, str]:
     return (bool(allow), bool(premium), NOT_ALLOWD)
 
 
-def add(user_id, nickname, allow, premium) -> int:
+def add(user_id: int, nickname: str, allow: int, premium: int) -> int:
     res = client.insert("User", nickname, user_id, allow, premium)
     return res.rowcount
 
