@@ -113,7 +113,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
         full_content = ""
         index = 0
-        model = context.bot_data.get("model", "")
+        model = context.chat_data.get("model", "")
         async with client.stream(
             method="POST",
             url=os.getenv("api_endpoint") or os.getenv("default_api_endpoint", ""),
@@ -219,7 +219,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         context.chat_data["messages"] = messages
 
     data = {
-        "model": context.bot_data.get("model", None)
+        "model": context.chat_data.get("model", None)
         or os.getenv("model", "gpt-3.5-turbo-16k"),
         "messages": messages,
         "stream": True,

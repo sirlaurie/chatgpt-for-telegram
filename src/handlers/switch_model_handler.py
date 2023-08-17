@@ -32,7 +32,9 @@ async def switch_model_callback(update: Update, context: ContextTypes.DEFAULT_TY
         return
     
     await query.answer()
-    context.bot_data.update({"model": query.data})
+    if not context.chat_data:
+        return
+    context.chat_data.update({"model": query.data})
 
     await query.edit_message_text(text=f"OK! 已为您切换到 {query.data} 模型")
 
@@ -46,7 +48,7 @@ async def switch_model_handle(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.message.reply_text(text=NOT_ALLOWD)
         return
 
-    if not update.message:
+    if not update.message or not isinstance(context.chat_data, dict):
         return
     if premium:
         inline_keybord = [
@@ -79,7 +81,7 @@ async def switch_model_handle(update: Update, context: ContextTypes.DEFAULT_TYPE
         reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)
 
         await update.message.reply_text(
-            f"当前使用的模型是: {context.bot_data.get('model', None) or os.getenv('model')}. 切换你要使用的模型:",
+            f"当前使用的模型是: {context.chat_data.get('model', None) or os.getenv('model')}. 切换你要使用的模型:",
             reply_markup=reply_markup,
         )
         return
