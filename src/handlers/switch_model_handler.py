@@ -7,11 +7,7 @@ import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
-from constants.messages import (
-    NOT_ALLOWD,
-    NOT_PERMITED,
-)
-from constants.models import (
+from src.constants import (
     gpt_3p5_turbo,
     gpt_3p5_turbo_16k,
     gpt_3p5_turbo_0613,
@@ -21,8 +17,8 @@ from constants.models import (
     gpt_4_32k_0314,
     gpt_4_32k_0613
 )
-from allowed import allowed
-from utils import waring
+from src.utils import is_allowed
+from src.helpers import check_permission
 
 
 async def switch_model_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -39,17 +35,16 @@ async def switch_model_callback(update: Update, context: ContextTypes.DEFAULT_TY
     await query.edit_message_text(text=f"OK! 已为您切换到 {query.data} 模型")
 
 
-async def switch_model_handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    permitted, premium, msg = allowed(context._user_id)
-    if not permitted and msg == NOT_PERMITED:
-        await waring(update, context, msg)
+@check_permission
+async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.effective_user:
         return
-    if not permitted and msg == NOT_ALLOWD and update.message:
-        await update.message.reply_text(text=NOT_ALLOWD)
-        return
+
+    _, premium, _ = is_allowed(update.effective_user.id)
 
     if not update.message or not isinstance(context.chat_data, dict):
         return
+
     if premium:
         inline_keybord = [
             [

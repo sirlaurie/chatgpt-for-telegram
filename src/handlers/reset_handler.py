@@ -5,25 +5,17 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from constants.messages import (
-    NOT_ALLOWD,
-    NOT_PERMITED,
-    NEW_CONVERSATION_MESSAGE,
-)
+from src.constants import NEW_CONVERSATION_MESSAGE
 
-from allowed import allowed
-from utils import waring
+from src.helpers import check_permission
 
 
-async def reset_handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@check_permission
+async def reset_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
         return
-    permitted, _, msg = allowed(context._user_id)
-    if not permitted and msg == NOT_PERMITED:
-        await waring(update, context, msg)
-        return
-    if not permitted and msg == NOT_ALLOWD:
-        await update.message.reply_text(text=NOT_ALLOWD)
+
+    if not update.effective_user:
         return
 
     context.bot_data.update({"initial": True})

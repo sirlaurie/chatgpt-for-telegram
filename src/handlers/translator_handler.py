@@ -8,25 +8,14 @@ from telegram._replykeyboardmarkup import ReplyKeyboardMarkup
 
 # from telegram import MessageEntity
 
-from constants.messages import (
-    NOT_ALLOWD,
-    NOT_PERMITED,
-    TARGET_LANGUAGE_KEYBOARD,
-)
+from src.constants import TARGET_LANGUAGE_KEYBOARD
 
-from allowed import allowed
-from utils import waring
+from src.helpers import check_permission
 
 
-async def translator_handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@check_permission
+async def translator_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
-        return
-    permitted, _, msg = allowed(context._user_id)
-    if not permitted and msg == NOT_PERMITED:
-        await waring(update, context, msg)
-        return
-    if not permitted and msg == NOT_ALLOWD:
-        await update.message.reply_text(text=NOT_ALLOWD)
         return
 
     target_language_keyboard = [TARGET_LANGUAGE_KEYBOARD]

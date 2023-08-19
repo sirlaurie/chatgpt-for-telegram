@@ -1,33 +1,33 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# @author: loricheung
+
+
+__all__ = (
+  "handler",
+  "reset_handler",
+  "switch_model_handler",
+  "switch_model_callback",
+  "translator_handler"
+  )
+
 import html
 import json
 import os
 from typing import Dict, List, Union, cast
 import httpx
-
-from telegram.constants import ParseMode
 from telegram import Update
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 from telegram.helpers import escape_markdown
 
-from constants.messages import (
-    NOT_ALLOWD,
-    NOT_PERMITED,
-    YES_OR_NO_KEYBOARD,
-    INIT_REPLY_MESSAGE,
-    TARGET_LANGUAGE_KEYBOARD,
-)
-from constants.prompts import (
-    expand,
-    genius,
-    rewrite,
-    translator,
-    etymologists,
-    cyber_secrity,
-    linux_terminal,
-)
-from allowed import allowed
-from utils import waring
-from helpers import usage_from_messages
+from src.constants import YES_OR_NO_KEYBOARD, INIT_REPLY_MESSAGE, TARGET_LANGUAGE_KEYBOARD, translator_prompt
+from src.helpers import check_permission
+from src.utils import pick, usage_from_messages
+
+from .reset_handler import reset_handler
+from .switch_model_handler import switch_model_handler, switch_model_callback
+from .translator_handler import translator_handler
 
 
 header = {
@@ -35,48 +35,15 @@ header = {
     "Authorization": f'Bearer {os.getenv("openai_apikey") or ""}',
 }
 
-
-def pick(act: str) -> str:
-    """
-    Function that matches the passed-in string to a known set of strings and returns the associated function.
-
-    Args:
-        act (str): The action string to match.
-
-    Returns:
-        str: default string.
-    """
-    match act:
-        case "/linux_terminal":
-            return linux_terminal
-        case "/rewrite":
-            return rewrite
-        case "/cyber_secrity":
-            return cyber_secrity
-        case "/etymologists":
-            return etymologists
-        case "/genius":
-            return genius
-        case "/expand":
-            return expand
-        case _:
-            return "who are you?"
-
-
-async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+@check_permission
+async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
-        return
-    permitted, _, msg = allowed(context._user_id)
-    if not permitted and msg == NOT_PERMITED:
-        await waring(update, context, msg)
-        return
-    if not permitted and msg == NOT_ALLOWD:
-        await update.message.reply_text(text=NOT_ALLOWD)
         return
 
     context.bot_data.update({"initial": False})
 
     message_text = cast(str, update.message.text)
+    print(f"got a message: {message_text}")
 
     if message_text in [
         "/linux_terminal",
@@ -90,6 +57,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         context.bot_data.update({"initial": True})
 
     if message_text in YES_OR_NO_KEYBOARD:
+        print(message_text)
         return
 
     await update.get_bot().send_chat_action(
@@ -193,7 +161,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if message_text in TARGET_LANGUAGE_KEYBOARD:
         request = {
             "role": "user",
-            "content": translator.format(target_lang=message_text),
+            "content": translator_prompt.format(target_lang=message_text),
         }
         context.bot_data.update({"initial": True})
     else:
