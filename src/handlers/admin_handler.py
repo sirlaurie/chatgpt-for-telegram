@@ -56,8 +56,8 @@ async def admin_handler(
 
     if not update.effective_user:
         return
-        
-    admin_id = os.getenv("DEVELOPER_CHAT_ID", 0)
+
+    admin_id = int(os.getenv("DEVELOPER_CHAT_ID", 0))
     if update.effective_user.id != admin_id:
         await update.message.reply_text(
             text="Opops! you are not my master!"
