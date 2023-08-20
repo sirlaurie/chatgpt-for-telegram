@@ -20,21 +20,17 @@ def check_permission(func: Callable) -> Callable:
         update: Update, context: CallbackContext, *args, **kwargs
     ) -> None:
         if not update.message:
-            print("no message")
             return
 
         if not update.effective_user:
-            print("no effective user")
             return
 
-        permitted, _, msg = is_allowed(update.effective_user.id)
+        permitted, *_, msg = is_allowed(update.effective_user.id)
         if not permitted and msg == NOT_PERMITED:
-            reply_from_admin = await warning(update, context)
-            print(f"return {reply_from_admin}")
+            await warning(update, context)
             return
         if not permitted and msg == NOT_ALLOWD:
             await update.message.reply_text(text=NOT_ALLOWD)
-            print("not allowed")
             return
 
         return await func(update, context, *args, **kwargs)

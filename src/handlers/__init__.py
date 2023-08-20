@@ -4,12 +4,18 @@
 
 
 __all__ = (
-  "handler",
-  "reset_handler",
-  "switch_model_handler",
-  "switch_model_callback",
-  "translator_handler"
-  )
+    "handler",
+    "reset_handler",
+    "admin_handler",
+    "query_list",
+    "manage_user",
+    "action",
+    "back",
+    "finish",
+    "switch_model_handler",
+    "switch_model_callback",
+    "translator_handler",
+)
 
 import html
 import json
@@ -21,13 +27,19 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 from telegram.helpers import escape_markdown
 
-from src.constants import YES_OR_NO_KEYBOARD, INIT_REPLY_MESSAGE, TARGET_LANGUAGE_KEYBOARD, translator_prompt
+from src.constants import (
+    YES_OR_NO_KEYBOARD,
+    INIT_REPLY_MESSAGE,
+    TARGET_LANGUAGE_KEYBOARD,
+    translator_prompt,
+)
 from src.helpers import check_permission
 from src.utils import pick, usage_from_messages
 
 from .reset_handler import reset_handler
 from .switch_model_handler import switch_model_handler, switch_model_callback
 from .translator_handler import translator_handler
+from .admin_handler import admin_handler, query_list, manage_user, action, back, finish
 
 
 header = {
@@ -35,10 +47,14 @@ header = {
     "Authorization": f'Bearer {os.getenv("openai_apikey") or ""}',
 }
 
+
 @check_permission
 async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
         return
+
+    if not context.chat_data:
+        context.chat_data = {}
 
     context.bot_data.update({"initial": False})
 
@@ -74,8 +90,10 @@ async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         Returns:
             None
         """
-        client = httpx.AsyncClient(timeout=None)
         assert update.message is not None
+        assert context.chat_data is not None
+        
+        client = httpx.AsyncClient(timeout=None)
         message = await update.message.reply_text(
             text=INIT_REPLY_MESSAGE, pool_timeout=15.0
         )
@@ -129,9 +147,9 @@ async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             to_sent_message = (
                 f"{html.escape(full_content)}\n\n"
                 f"----------------------------------------\n"
-                f'<i>🎨 Generate by model: {model}.</i>\n'
-                f'<i>💸 Usage: {num_token} tokens, cost: ${price}</i>'
-                )
+                f"<i>🎨 Generate by model: {model}.</i>\n"
+                f"<i>💸 Usage: {num_token} tokens, cost: ${price}</i>"
+            )
             await message.edit_text(
                 text=to_sent_message,
                 parse_mode=ParseMode.HTML,
@@ -193,7 +211,7 @@ async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "stream": True,
     }
 
-    first_name = getattr(update.message.from_user, 'first_name', None)
+    first_name = getattr(update.message.from_user, "first_name", None)
     print(f"************ from {first_name}: ************\n{data}")
 
     await send_request(data)

@@ -15,24 +15,38 @@ from src.constants import (
     gpt_4_0314,
     gpt_4_0613,
     gpt_4_32k_0314,
-    gpt_4_32k_0613
+    gpt_4_32k_0613,
 )
 from src.utils import is_allowed
 from src.helpers import check_permission
 
 
-async def switch_model_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def switch_model_callback(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Parses the CallbackQuery and updates the message text."""
     query = update.callback_query
     if not query:
         return
-    
-    await query.answer()
-    if not context.chat_data:
-        return
-    context.chat_data.update({"model": query.data})
 
-    await query.edit_message_text(text=f"OK! 已为您切换到 {query.data} 模型")
+    await query.answer()
+    if not isinstance(context.chat_data, dict):
+        return
+    model = query.data
+    if model not in [
+        gpt_3p5_turbo,
+        gpt_3p5_turbo_0613,
+        gpt_3p5_turbo_16k,
+        gpt_3p5_turbo_16k_0613,
+        gpt_4_0314,
+        gpt_4_0613,
+        gpt_4_32k_0314,
+        gpt_4_32k_0613,
+    ]:
+        return
+    context.chat_data.update({"model": model})
+
+    await query.edit_message_text(text=f"OK! 已为您切换到 {model} 模型")
 
 
 @check_permission
@@ -40,7 +54,7 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     if not update.effective_user:
         return
 
-    _, premium, _ = is_allowed(update.effective_user.id)
+    _, premium, *_ = is_allowed(update.effective_user.id)
 
     if not update.message or not isinstance(context.chat_data, dict):
         return
@@ -48,9 +62,7 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     if premium:
         inline_keybord = [
             [
-                InlineKeyboardButton(
-                    "gpt-3.5-turbo", callback_data=str(gpt_3p5_turbo)
-                ),
+                InlineKeyboardButton("gpt-3.5-turbo", callback_data=str(gpt_3p5_turbo)),
                 InlineKeyboardButton(
                     "gpt-3.5-turbo-0613", callback_data=str(gpt_3p5_turbo_0613)
                 ),
@@ -66,11 +78,15 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             ],
             [
                 InlineKeyboardButton("gpt-4-0314", callback_data=str(gpt_4_0314)),
-                InlineKeyboardButton("gpt-4-32k-0314", callback_data=str(gpt_4_32k_0314)),
+                InlineKeyboardButton(
+                    "gpt-4-32k-0314", callback_data=str(gpt_4_32k_0314)
+                ),
             ],
             [
                 InlineKeyboardButton("gpt-4-0613", callback_data=str(gpt_4_0613)),
-                InlineKeyboardButton("gpt-4-32k-0613", callback_data=str(gpt_4_32k_0613)),
+                InlineKeyboardButton(
+                    "gpt-4-32k-0613", callback_data=str(gpt_4_32k_0613)
+                ),
             ],
         ]
         reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)

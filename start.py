@@ -31,9 +31,26 @@ from src.constants import (
     etymologists_command,
     genius_command,
     reset_command,
+    APPROVE,
+    DECLINE,
+    UPGRADE,
+    DOWNGRADE,
 )
 from src.helpers import check_permission
-from src.handlers import handler, reset_handler, switch_model_handler, switch_model_callback, translator_handler
+from src.handlers import (
+    handler,
+    reset_handler,
+    admin_handler,
+    query_list,
+    manage_user,
+    action,
+    back,
+    finish,
+    switch_model_handler,
+    switch_model_callback,
+    translator_handler,
+)
+from src.helpers import approval_callback
 
 
 # Enable logging
@@ -74,38 +91,34 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 def main() -> None:
     bot_token: str = os.environ.get("bot_token", "")
-    """Start the bot."""
-    # Create the Application and pass it your bot's token.
+    CHOOSING, MANAGER_USER = range(2)
+    # """Start the bot."""
+    # # Create the Application and pass it your bot's token.
     application = Application.builder().token(bot_token).build()
-
-    # conv_handler = ConversationHandler(
-    #     entry_points=[
-    #         CommandHandler("start", start),
-    #         CommandHandler(reset_command, reset_handler),
-    #         CommandHandler(model_switch_command, switch_model_handler),
-    #         CallbackQueryHandler(switch_model_callback),
-    #         CommandHandler(translator_command, translator_handler),
-    #         CommandHandler(linux_terminal_command, handler),
-    #         CommandHandler(rewrite_command, handler),
-    #         CommandHandler(cyber_secrity_command, handler),
-    #         CommandHandler(etymologists_command, handler),
-    #         CommandHandler(genius_command, handler),
-    #         MessageHandler(filters.TEXT & ~filters.COMMAND, handler),
-    #     ],
-    #     states={
-    #         0: [
-    #             MessageHandler(filters.Regex("^Approved$"), admin_approved),
-    #             MessageHandler(filters.Regex("^Decline$"), admin_declined),
-    #         ],
-    #     },
-    #     fallbacks=[CommandHandler('cancel', cancel)],
-    # )
-    # application.add_handler(conv_handler)
-    # error handler
     application.add_handler(CommandHandler("start", start))
+
+    conv_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler("admin", admin_handler),
+        ],
+        states={
+            CHOOSING: [
+                CallbackQueryHandler(query_list, pattern="^允许|等待|高级名单$"),
+            ],
+            MANAGER_USER: [
+                CallbackQueryHandler(manage_user, pattern=r"\d+"),
+                CallbackQueryHandler(action, pattern=f"{APPROVE}|{DECLINE}|{UPGRADE}|{DOWNGRADE}"),
+                CallbackQueryHandler(back, pattern="^back$"),
+                CallbackQueryHandler(finish, pattern="^finish$"),
+            ]
+        },
+        fallbacks=[CallbackQueryHandler(finish, pattern="^finish$"),],
+    )
+    application.add_handler(conv_handler)
     application.add_handler(CommandHandler(reset_command, reset_handler))
     application.add_handler(CommandHandler(model_switch_command, switch_model_handler))
-    application.add_handler(CallbackQueryHandler(switch_model_callback))
+    application.add_handler(CallbackQueryHandler(switch_model_callback, pattern="^gpt"))
+    application.add_handler(CallbackQueryHandler(approval_callback, pattern="^允许|拒绝"))
     application.add_handler(CommandHandler(translator_command, translator_handler))
     application.add_handler(CommandHandler(linux_terminal_command, handler))
     application.add_handler(CommandHandler(rewrite_command, handler))
@@ -113,6 +126,7 @@ def main() -> None:
     application.add_handler(CommandHandler(etymologists_command, handler))
     application.add_handler(CommandHandler(genius_command, handler))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handler))
+    # error handler
     application.add_error_handler(error_handler)  # type: ignore
     # Run the bot until the user presses Ctrl-C
     application.run_polling()

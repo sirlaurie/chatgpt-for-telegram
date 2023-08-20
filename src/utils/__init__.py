@@ -5,14 +5,18 @@
 
 __all__ = (
     "add",
+    "update",
+    "query",
+    "query_one",
     "is_allowed",
-    )
+)
 
 from typing import Tuple
 
 import tiktoken
+
 # from .db import DBClient
-from .checks import is_allowed, add
+from .checks import is_allowed, add, update, query, query_one
 from src.constants import (
     linux_terminal_prompt,
     rewrite_prompt,

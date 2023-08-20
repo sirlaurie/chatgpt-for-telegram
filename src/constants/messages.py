@@ -17,8 +17,26 @@ APPROVED_MESSAGE = "管理员已经批准了你的请求, 现在你可以和我�
 
 DECLINE_MESSAGE = "抱歉, 管理员拒绝了你的请求. 可能他并不认识你.🫢\n\nSorry, the administrator has denied your request. Perhaps they do not know you.🫢"
 
+UPGRADE_MESSAGE = "管理员已经将你设为高级用户, 现在你可以使用切换模型功能了.😘\n\nAdmin has upgraded your permission, now you can switch model.😘"
+
+DOWNGRANDE_MESSAGE = "管理员已经将你降级为普通用户, 你无法继续使用切换模型功能了.😔\\Admin has downgraded your permission, you are no longer to switch model.😔"
+
 WELCOME_MESSAGE = "Hi, 你想和我说点什么吗"
 
 NEW_CONVERSATION_MESSAGE = "好的, 已为你开启新会话! 请继续输入你的问题."
 
 INIT_REPLY_MESSAGE = "hold my beer ... "
+
+WAITING = '等待名单'
+PERMITTED = '允许名单'
+PREMIUM = '高级名单'
+
+APPROVE = '允许'
+DECLINE = '拒绝'
+
+UPGRADE = '升级'
+DOWNGRADE = '降级'
+
+WAITING_COLUMN = 'waiting'
+ALLOW_COLUMN = 'allow'
+PREMIUM_COLUMN = 'premium'

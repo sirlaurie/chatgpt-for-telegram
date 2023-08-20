@@ -5,8 +5,9 @@
 __all__ = (
   "check_permission",
   "warning",
-  "apply_to_approve"
+  "apply_to_approve",
+  "approval_callback"
   )
 
 from .permission import check_permission
-from .unauthorize import warning, apply_to_approve
+from .unauthorize import warning, apply_to_approve, approval_callback
