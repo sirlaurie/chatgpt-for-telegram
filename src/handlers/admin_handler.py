@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 # @author: loricheung
 
-
+import os
 from functools import wraps
 from typing import Callable, cast
+
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
 from src.constants import (
@@ -31,7 +32,9 @@ CHOOSING, MANAGER = range(2)
 
 def check_callback(func: Callable) -> Callable:
     @wraps(func)
-    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs) -> int:
+    async def wrapper(
+        update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs
+    ) -> int:
         callback_query = update.callback_query
         if not callback_query:
             return -1
@@ -41,6 +44,7 @@ def check_callback(func: Callable) -> Callable:
             return -1
         bot = context.bot
         return await func(bot, callback_query, query_data, *args, **kwargs)
+
     return wrapper
 
 
@@ -48,6 +52,16 @@ async def admin_handler(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None | int:
     if not update.message:
+        return
+
+    if not update.effective_user:
+        return
+        
+    admin_id = os.getenv("DEVELOPER_CHAT_ID", 0)
+    if update.effective_user.id != admin_id:
+        await update.message.reply_text(
+            text="Opops! you are not my master!"
+        )
         return
 
     inline_keyboard = [
@@ -81,24 +95,58 @@ async def query_list(bot, callback_query, query_data) -> int:
 
     users = query(maps)
 
-    inline_keyboard = [
-        [
-            InlineKeyboardButton(f"👤 {user[1]} - {user[2]}", callback_data=str(user[2]))
-            for user in users
-        ],
+    inline_keyboard = []
+
+    if not users:
+        await callback_query.edit_message_text(
+            text=f"目前{query_data}没有用户",
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton("Back", callback_data="back"),
+                        InlineKeyboardButton("Finish", callback_data="finish"),
+                    ]
+                ]
+            ),
+            write_timeout=3600.0,
+            pool_timeout=3600.0,
+        )
+        return MANAGER
+
+    for user_index in range(len(users)):
+        if user_index % 2 == 0:
+            user_1 = users[user_index]
+            if user_index < len(users) - 1:
+                user_2 = users[user_index + 1]
+                user_row = [
+                    InlineKeyboardButton(
+                        f"👤 {user_1[1]} - {user_1[2]}", callback_data=str(user_1[2])
+                    ),
+                    InlineKeyboardButton(
+                        f"👤 {user_2[1]} - {user_2[2]}", callback_data=str(user_2[2])
+                    ),
+                ]
+            else:
+                user_row = [
+                    InlineKeyboardButton(
+                        f"👤 {user_1[1]} - {user_1[2]}", callback_data=str(user_1[2])
+                    ),
+                ]
+
+            inline_keyboard.append(user_row)
+
+    inline_keyboard.append(
         [
             InlineKeyboardButton("Back", callback_data="back"),
             InlineKeyboardButton("Finish", callback_data="finish"),
-        ],
-    ]
-    if not users:
-        await callback_query.edit_message_text(
-        f"目前{query_data}没有用户", reply_markup=InlineKeyboardMarkup(inline_keyboard)
+        ]
     )
-        return MANAGER
 
     await callback_query.edit_message_text(
-        f"这是{query_data}: ", reply_markup=InlineKeyboardMarkup(inline_keyboard)
+        text=f"这是{query_data}: ",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard),
+        write_timeout=3600.0,
+        pool_timeout=3600.0,
     )
     return MANAGER
 
@@ -111,7 +159,9 @@ async def manage_user(bot, callback_query, query_data) -> int:
             InlineKeyboardButton(f"{APPROVE}", callback_data=f"{APPROVE} {user[2]}"),
             InlineKeyboardButton(f"{DECLINE}", callback_data=f"{DECLINE} {user[2]}"),
             InlineKeyboardButton(f"{UPGRADE}", callback_data=f"{UPGRADE} {user[2]}"),
-            InlineKeyboardButton(f"{DOWNGRADE}", callback_data=f"{DOWNGRADE} {user[2]}"),
+            InlineKeyboardButton(
+                f"{DOWNGRADE}", callback_data=f"{DOWNGRADE} {user[2]}"
+            ),
         ],
         [
             InlineKeyboardButton("Back", callback_data="back"),
@@ -119,7 +169,10 @@ async def manage_user(bot, callback_query, query_data) -> int:
         ],
     ]
     await callback_query.edit_message_text(
-        text=f"选择对用户 {user[1]} 的操作: ", reply_markup=InlineKeyboardMarkup(inline_keyboard)
+        text=f"选择对用户 {user[1]} 的操作: ",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard),
+        write_timeout=3600.0,
+        pool_timeout=3600.0,
     )
     return MANAGER
 
@@ -146,12 +199,16 @@ async def action(bot, callback_query, query_data) -> int:
         ],
     ]
     await callback_query.edit_message_text(
-        text="As you wish, Sir", reply_markup=InlineKeyboardMarkup(inline_keyboard)
-        )
+        text="As you wish, Sir",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard),
+        write_timeout=3600.0,
+        pool_timeout=3600.0,
+    )
     return MANAGER
 
+
 @check_callback
-async def back(callback_query, query_data) -> int:
+async def back(bot, callback_query, query_data) -> int:
     inline_keyboard = [
         [
             InlineKeyboardButton(WAITING, callback_data=WAITING),
@@ -166,16 +223,17 @@ async def back(callback_query, query_data) -> int:
     await callback_query.edit_message_text(
         text="选择需要管理的名单: ",
         reply_markup=InlineKeyboardMarkup(inline_keyboard),
+        write_timeout=3600.0,
+        pool_timeout=3600.0,
     )
     return CHOOSING
 
 
 @check_callback
-async def finish(callback_query, query_data) -> int:
+async def finish(bot, callback_query, query_data) -> int:
     """Returns `ConversationHandler.END`, which tells the
     ConversationHandler that the conversation is over.
     """
     await callback_query.answer()
     await callback_query.edit_message_text(text="Good bye, Sir!")
     return ConversationHandler.END
-
