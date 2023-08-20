@@ -53,13 +53,11 @@ async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
         return
 
-    if not context.chat_data:
-        context.chat_data = {}
+    assert context.chat_data is not None
 
     context.bot_data.update({"initial": False})
 
     message_text = cast(str, update.message.text)
-    print(f"got a message: {message_text}")
 
     if message_text in [
         "/linux_terminal",
