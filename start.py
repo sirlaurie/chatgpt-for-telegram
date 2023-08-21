@@ -103,7 +103,7 @@ def main() -> None:
         ],
         states={
             CHOOSING: [
-                CallbackQueryHandler(query_list, pattern="^允许|等待|高级名单$"),
+                CallbackQueryHandler(query_list, pattern="^(允许|等待|高级)名单$"),
             ],
             MANAGER_USER: [
                 CallbackQueryHandler(manage_user, pattern=r"\d+"),
