@@ -1,5 +1,5 @@
 # messages
-NOT_PERMITED = "你没有权限访问此bot.请将你的id {user_id} 发送给管理员, 等待批准. 大约耗时一分钟.🤔\n PS: 如果你不知道管理员是谁, 说明这个bot并非一个公开的bot. \n\nYou do not have permission to access this bot. Please send your ID {user_id} to the my boss and wait for approval, which may take up to 1 min.\n PS: If you do not know who the boss is, it means that this bot is not a public bot."
+NOT_PERMITED = "你没有权限访问此bot.请将你的id {user_id} 发送给管理员, 等待批准. 最长耗时1小时.🤔\n PS: 如果你不知道管理员是谁, 说明这个bot并非一个公开的bot. \n\nYou do not have permission to access this bot. Please send your ID {user_id} to the my boss and wait for approval, which may take up to 1 hour.\n PS: If you do not know who the boss is, it means that this bot is not a public bot."
 
 NOT_ALLOWD = "你暂时不在允许聊天的列表中.\n\nYou are not on permit list."
 
@@ -11,7 +11,7 @@ ASK_FOR_PERMITED = (
     "User {name}, id: {user_id} want to chat with me, would you like to allow it?"
 )
 
-PROCESS_TIMEOUT = "到目前为止, 管理员尚未处理你的请求.🤯\n\nthe administrator has not yet handled your request so far.🤯"
+PROCESS_TIMEOUT = "到目前为止, 管理员尚未处理你的请求.🤯\n但你已经在等待名单中了.\n\nthe administrator has not yet handled your request so far.🤯\nBut you are already on waitlist."
 
 APPROVED_MESSAGE = "管理员已经批准了你的请求, 现在你可以和我聊天啦.🥳\n\nAdministrator has approved your request, now you can chat with me.🥳"
 

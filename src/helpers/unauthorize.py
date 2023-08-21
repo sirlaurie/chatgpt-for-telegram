@@ -3,6 +3,7 @@
 # @author: loricheung
 
 import os
+import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
@@ -13,20 +14,26 @@ from src.constants import (
     ASK_FOR_PERMITED,
     APPROVED_MESSAGE,
     DECLINE_MESSAGE,
+    PROCESS_TIMEOUT,
 )
-from src.utils import add, update as update_user
+from src.utils import is_allowed, add, update as update_user
 
+apply_timeout = 3600
 
-async def warning(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def warning(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message or not update.effective_user:
         return
-
-    await update.message.reply_text(
-        text=NOT_PERMITED.format(user_id=context._user_id), pool_timeout=3600.0
+    user_id = update.effective_user.id
+    msg = await update.message.reply_text(
+        text=NOT_PERMITED.format(user_id=user_id), pool_timeout=3600.0
     )
     add(int(update.effective_user.id), str(update.effective_user.first_name), 0, 0, 1)
-    return await apply_to_approve(update, context)
-
+    await apply_to_approve(update, context)
+    await asyncio.sleep(apply_timeout)
+    allow, *_ = is_allowed(user_id=user_id)
+    if not allow:
+        await msg.edit_text(text=PROCESS_TIMEOUT, pool_timeout=3600.0)
+    return
 
 async def apply_to_approve(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.effective_user:
@@ -34,6 +41,7 @@ async def apply_to_approve(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     if not update.message:
         return
+
     bot = context.bot
     admin_id = int(os.getenv("DEVELOPER_CHAT_ID", 0))
     telegram_id = update.effective_user.id
@@ -47,7 +55,7 @@ async def apply_to_approve(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             ),
         ]
     ]
-    await bot.send_message(
+    msg = await bot.send_message(
         chat_id=admin_id,
         text=ASK_FOR_PERMITED.format(
             name=update.message.chat.first_name, user_id=context._user_id
@@ -56,6 +64,8 @@ async def apply_to_approve(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         write_timeout=3600.0,
         pool_timeout=3600.0,
     )
+    await asyncio.sleep(apply_timeout)
+    await msg.delete(write_timeout=60.0, pool_timeout=60.0)
     return
 
 
@@ -87,9 +97,9 @@ async def approval_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             pool_timeout=3600.0,
         )
     await bot.send_message(
-            chat_id=int(admin_id),
-            text="As your wish, Sir",
-            write_timeout=3600.0,
-            pool_timeout=3600.0,
-        )
+        chat_id=int(admin_id),
+        text="As your wish, Sir",
+        write_timeout=3600.0,
+        pool_timeout=3600.0,
+    )
     return

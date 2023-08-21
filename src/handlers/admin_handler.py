@@ -6,8 +6,8 @@ import os
 from functools import wraps
 from typing import Callable, cast
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, ConversationHandler
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
+from telegram.ext import ContextTypes, ConversationHandler, ExtBot
 from src.constants import (
     WAITING,
     PERMITTED,
@@ -50,19 +50,18 @@ def check_callback(func: Callable) -> Callable:
 
 async def admin_handler(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None | int:
+) -> int:
     if not update.message:
-        return
+        return -1
 
     if not update.effective_user:
-        return
+        return -1
 
     admin_id = int(os.getenv("DEVELOPER_CHAT_ID", 0))
-    if update.effective_user.id != admin_id:
-        await update.message.reply_text(
-            text="Opops! you are not my master!"
-        )
-        return
+    admins = [admin_id, 67466212]
+    if update.effective_user.id not in admins:
+        await update.message.reply_text(text="Opops! you are not my master!")
+        return -1
 
     inline_keyboard = [
         [
@@ -84,7 +83,7 @@ async def admin_handler(
 
 
 @check_callback
-async def query_list(bot, callback_query, query_data) -> int:
+async def query_list(bot: ExtBot, callback_query: CallbackQuery, query_data: str) -> int:
     maps = {}
     if query_data == WAITING:
         maps.update({WAITING_COLUMN: 1})
@@ -95,52 +94,45 @@ async def query_list(bot, callback_query, query_data) -> int:
 
     users = query(maps)
 
-    inline_keyboard = []
+    extra_row = [
+        InlineKeyboardButton("Back", callback_data="back"),
+        InlineKeyboardButton("Finish", callback_data="finish"),
+    ]
 
     if not users:
         await callback_query.edit_message_text(
             text=f"目前{query_data}没有用户",
-            reply_markup=InlineKeyboardMarkup(
-                [
-                    [
-                        InlineKeyboardButton("Back", callback_data="back"),
-                        InlineKeyboardButton("Finish", callback_data="finish"),
-                    ]
-                ]
-            ),
+            reply_markup=InlineKeyboardMarkup([extra_row]),
             write_timeout=3600.0,
             pool_timeout=3600.0,
         )
         return MANAGER
 
-    for user_index in range(len(users)):
-        if user_index % 2 == 0:
-            user_1 = users[user_index]
-            if user_index < len(users) - 1:
-                user_2 = users[user_index + 1]
-                user_row = [
-                    InlineKeyboardButton(
-                        f"👤 {user_1[1]} - {user_1[2]}", callback_data=str(user_1[2])
-                    ),
-                    InlineKeyboardButton(
-                        f"👤 {user_2[1]} - {user_2[2]}", callback_data=str(user_2[2])
-                    ),
-                ]
-            else:
-                user_row = [
-                    InlineKeyboardButton(
-                        f"👤 {user_1[1]} - {user_1[2]}", callback_data=str(user_1[2])
-                    ),
-                ]
-
-            inline_keyboard.append(user_row)
-
-    inline_keyboard.append(
+    inline_keyboard = [
         [
-            InlineKeyboardButton("Back", callback_data="back"),
-            InlineKeyboardButton("Finish", callback_data="finish"),
+            InlineKeyboardButton(
+                f"👤 {users[i][1]} - {users[i][2]}", callback_data=str(users[i][2])
+            ),
+            InlineKeyboardButton(
+                f"👤 {users[i+1][1]} - {users[i+1][2]}",
+                callback_data=str(users[i + 1][2]),
+            ),
         ]
-    )
+        for i in range(0, len(users) - 1, 2)
+    ]
+
+    if len(users) % 2 == 1:
+        user_index = len(users) - 1
+        inline_keyboard.append(
+            [
+                InlineKeyboardButton(
+                    f"👤 {users[user_index][1]} - {users[user_index][2]}",
+                    callback_data=str(users[user_index][2])
+                )
+            ]
+        )
+
+    inline_keyboard.append(extra_row)
 
     await callback_query.edit_message_text(
         text=f"这是{query_data}: ",
@@ -152,7 +144,7 @@ async def query_list(bot, callback_query, query_data) -> int:
 
 
 @check_callback
-async def manage_user(bot, callback_query, query_data) -> int:
+async def manage_user(bot: ExtBot, callback_query: CallbackQuery, query_data: str) -> int:
     user = cast(tuple, query_one(int(query_data)))
     inline_keyboard = [
         [
@@ -178,37 +170,45 @@ async def manage_user(bot, callback_query, query_data) -> int:
 
 
 @check_callback
-async def action(bot, callback_query, query_data) -> int:
+async def action(bot: ExtBot, callback_query: CallbackQuery, query_data: str) -> int:
     act, telegram_id = query_data.split()
-    if act == APPROVE:
-        update(int(telegram_id), 1, 0, 0)
-        await bot.send_message(chat_id=int(telegram_id), text=APPROVED_MESSAGE)
-    if act == DECLINE:
-        update(int(telegram_id), 0, 0, 1)
-        await bot.send_message(chat_id=int(telegram_id), text=DECLINE_MESSAGE)
-    if act == UPGRADE:
-        update(int(telegram_id), 1, 1, 0)
-        await bot.send_message(chat_id=int(telegram_id), text=UPGRADE_MESSAGE)
-    if act == DOWNGRADE:
-        update(int(telegram_id), 1, 0, 0)
-        await bot.send_message(chat_id=int(telegram_id), text=DOWNGRANDE_MESSAGE)
     inline_keyboard = [
         [
             InlineKeyboardButton("Back", callback_data="back"),
             InlineKeyboardButton("Finish", callback_data="finish"),
         ],
     ]
-    await callback_query.edit_message_text(
-        text="As you wish, Sir",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard),
-        write_timeout=3600.0,
-        pool_timeout=3600.0,
-    )
+    try:
+        if act == APPROVE:
+            update(int(telegram_id), 1, 0, 0)
+            await bot.send_message(chat_id=int(telegram_id), text=APPROVED_MESSAGE)
+        if act == DECLINE:
+            update(int(telegram_id), 0, 0, 1)
+            await bot.send_message(chat_id=int(telegram_id), text=DECLINE_MESSAGE)
+        if act == UPGRADE:
+            update(int(telegram_id), 1, 1, 0)
+            await bot.send_message(chat_id=int(telegram_id), text=UPGRADE_MESSAGE)
+        if act == DOWNGRADE:
+            update(int(telegram_id), 1, 0, 0)
+            await bot.send_message(chat_id=int(telegram_id), text=DOWNGRANDE_MESSAGE)
+        await callback_query.edit_message_text(
+            text="As you wish, Sir",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard),
+            write_timeout=3600.0,
+            pool_timeout=3600.0,
+        )
+    except Exception as e:
+        await callback_query.edit_message_text(
+            text=f"the action was successfully done, but a error was happen, here is the reson\n{e}",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard),
+            write_timeout=3600.0,
+            pool_timeout=3600.0,
+            )
     return MANAGER
 
 
 @check_callback
-async def back(bot, callback_query, query_data) -> int:
+async def back(bot: ExtBot, callback_query: CallbackQuery, query_data: str) -> int:
     inline_keyboard = [
         [
             InlineKeyboardButton(WAITING, callback_data=WAITING),
@@ -230,10 +230,10 @@ async def back(bot, callback_query, query_data) -> int:
 
 
 @check_callback
-async def finish(bot, callback_query, query_data) -> int:
+async def finish(bot: ExtBot, callback_query: CallbackQuery, query_data: str) -> int:
     """Returns `ConversationHandler.END`, which tells the
     ConversationHandler that the conversation is over.
     """
-    await callback_query.answer()
+    # await callback_query.answer()
     await callback_query.edit_message_text(text="Good bye, Sir!")
     return ConversationHandler.END
