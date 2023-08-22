@@ -12,20 +12,10 @@ __all__ = (
     "reset_command",
     "rewrite_command",
     "translator_command",
-    # messages
-    "NOT_PERMITED",
-    "NOT_ALLOWD",
+    # constant
+    "SUPPPORTED_FILE",
     "YES_OR_NO_KEYBOARD",
     "TARGET_LANGUAGE_KEYBOARD",
-    "ASK_FOR_PERMITED",
-    "PROCESS_TIMEOUT",
-    "APPROVED_MESSAGE",
-    "DECLINE_MESSAGE",
-    "UPGRADE_MESSAGE",
-    "DOWNGRANDE_MESSAGE",
-    "WELCOME_MESSAGE",
-    "NEW_CONVERSATION_MESSAGE",
-    "INIT_REPLY_MESSAGE",
     "WAITING",
     "PERMITTED",
     "PREMIUM",
@@ -36,6 +26,18 @@ __all__ = (
     "WAITING_COLUMN",
     "ALLOW_COLUMN",
     "PREMIUM_COLUMN",
+    # messages
+    "NOT_PERMITED",
+    "NOT_ALLOWD",
+    "ASK_FOR_PERMITED",
+    "PROCESS_TIMEOUT",
+    "APPROVED_MESSAGE",
+    "DECLINE_MESSAGE",
+    "UPGRADE_MESSAGE",
+    "DOWNGRANDE_MESSAGE",
+    "WELCOME_MESSAGE",
+    "NEW_CONVERSATION_MESSAGE",
+    "INIT_REPLY_MESSAGE",
     # models
     "gpt_3p5_turbo",
     "gpt_3p5_turbo_16k",
@@ -66,20 +68,10 @@ from .commands import (
     translator_command,
 )
 
-from .messages import (
-    NOT_PERMITED,
-    NOT_ALLOWD,
+from .constant import (
+    SUPPPORTED_FILE,
     YES_OR_NO_KEYBOARD,
     TARGET_LANGUAGE_KEYBOARD,
-    ASK_FOR_PERMITED,
-    PROCESS_TIMEOUT,
-    APPROVED_MESSAGE,
-    DECLINE_MESSAGE,
-    UPGRADE_MESSAGE,
-    DOWNGRANDE_MESSAGE,
-    WELCOME_MESSAGE,
-    NEW_CONVERSATION_MESSAGE,
-    INIT_REPLY_MESSAGE,
     WAITING,
     PERMITTED,
     PREMIUM,
@@ -90,6 +82,20 @@ from .messages import (
     WAITING_COLUMN,
     ALLOW_COLUMN,
     PREMIUM_COLUMN,
+)
+
+from .messages import (
+    NOT_PERMITED,
+    NOT_ALLOWD,
+    ASK_FOR_PERMITED,
+    PROCESS_TIMEOUT,
+    APPROVED_MESSAGE,
+    DECLINE_MESSAGE,
+    UPGRADE_MESSAGE,
+    DOWNGRANDE_MESSAGE,
+    WELCOME_MESSAGE,
+    NEW_CONVERSATION_MESSAGE,
+    INIT_REPLY_MESSAGE,
   )
 
 from .models import (

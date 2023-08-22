@@ -3,10 +3,6 @@ NOT_PERMITED = "你没有权限访问此bot.请将你的id {user_id} 发送给�
 
 NOT_ALLOWD = "你暂时不在允许聊天的列表中.\n\nYou are not on permit list."
 
-YES_OR_NO_KEYBOARD = ["Approved", "Decline"]
-
-TARGET_LANGUAGE_KEYBOARD = ["English", "Deutsch", "Française", "中文", "日本語"]
-
 ASK_FOR_PERMITED = (
     "User {name}, id: {user_id} want to chat with me, would you like to allow it?"
 )
@@ -26,17 +22,3 @@ WELCOME_MESSAGE = "Hi, 你想和我说点什么吗"
 NEW_CONVERSATION_MESSAGE = "好的, 已为你开启新会话! 请继续输入你的问题."
 
 INIT_REPLY_MESSAGE = "hold my beer ... "
-
-WAITING = '等待名单'
-PERMITTED = '允许名单'
-PREMIUM = '高级名单'
-
-APPROVE = '允许'
-DECLINE = '拒绝'
-
-UPGRADE = '升级'
-DOWNGRADE = '降级'
-
-WAITING_COLUMN = 'waiting'
-ALLOW_COLUMN = 'allow'
-PREMIUM_COLUMN = 'premium'

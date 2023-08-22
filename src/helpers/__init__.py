@@ -7,9 +7,10 @@ __all__ = (
   "warning",
   "apply_to_approve",
   "approval_callback",
-  "send_request"
+  "send_request",
+  "read_document",
   )
 
 from .permission import check_permission
 from .unauthorize import warning, apply_to_approve, approval_callback
-from .request import send_request
+from .request import send_request, read_document
