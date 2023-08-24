@@ -82,6 +82,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "</pre>\n\n"
         f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
         f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
+        f"<pre>ERROR: {context.error}</pre>\n\n"
     )
 
     await context.bot.send_message(
