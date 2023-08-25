@@ -43,15 +43,14 @@ def check_callback(func: Callable) -> Callable:
         if not query_data:
             return -1
         bot = context.bot
-        return await func(bot, callback_query, query_data, *args, **kwargs)
+        return await func(bot=bot, callback_query=callback_query, query_data=query_data, *args, **kwargs)
 
     return wrapper
 
 
-async def admin_handler(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
+async def admin_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if not update.message:
+        _ = context # no meaning. just for LSP to ignore unaccessed params
         return -1
 
     if not update.effective_user:
@@ -84,6 +83,7 @@ async def admin_handler(
 
 @check_callback
 async def query_list(bot: ExtBot, callback_query: CallbackQuery, query_data: str) -> int:
+    _ = bot # no meaning. just for LSP
     maps = {}
     if query_data == WAITING:
         maps.update({WAITING_COLUMN: 1})
@@ -145,6 +145,7 @@ async def query_list(bot: ExtBot, callback_query: CallbackQuery, query_data: str
 
 @check_callback
 async def manage_user(bot: ExtBot, callback_query: CallbackQuery, query_data: str) -> int:
+    _ = bot # no meaning. just for LSP
     user = cast(tuple, query_one(int(query_data)))
     inline_keyboard = [
         [
@@ -209,6 +210,7 @@ async def action(bot: ExtBot, callback_query: CallbackQuery, query_data: str) ->
 
 @check_callback
 async def back(bot: ExtBot, callback_query: CallbackQuery, query_data: str) -> int:
+    _ = bot, query_data # no meaning. just for LSP
     inline_keyboard = [
         [
             InlineKeyboardButton(WAITING, callback_data=WAITING),
@@ -234,6 +236,7 @@ async def finish(bot: ExtBot, callback_query: CallbackQuery, query_data: str) ->
     """Returns `ConversationHandler.END`, which tells the
     ConversationHandler that the conversation is over.
     """
+    _ = bot, query_data # no meaning. just for LSP
     # await callback_query.answer()
     await callback_query.edit_message_text(text="Good bye, Sir!")
     return ConversationHandler.END

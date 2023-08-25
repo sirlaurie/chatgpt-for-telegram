@@ -15,6 +15,7 @@ from src.helpers import send_request, read_document
 
 async def document_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
+        _ = context # no meaning. just for LSP
         return
 
     await update.message.reply_text(

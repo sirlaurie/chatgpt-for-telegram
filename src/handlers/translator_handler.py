@@ -16,6 +16,7 @@ from src.helpers import check_permission
 @check_permission
 async def translator_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
+        _ = context # no meaning. just for LSP
         return
 
     target_language_keyboard = [TARGET_LANGUAGE_KEYBOARD]
