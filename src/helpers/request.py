@@ -106,6 +106,7 @@ async def send_request(
         await update_message(
             context, message={"role": "assistant", "content": full_content}
         )
+    await client.aclose()
 
 
 async def update_message(
