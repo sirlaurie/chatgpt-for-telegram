@@ -68,6 +68,7 @@ logger = logging.getLogger(__name__)
 @check_permission
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
+        _ = context
         return
     await update.message.reply_text(text=WELCOME_MESSAGE)
 
@@ -97,7 +98,7 @@ def main() -> None:
     CHOOSING, MANAGER_USER = range(2)
     # """Start the bot."""
     # # Create the Application and pass it your bot's token.
-    application = Application.builder().token(bot_token).build()
+    application = Application.builder().connect_timeout(connect_timeout=5 * 60.0).token(bot_token).build()
     application.add_handler(CommandHandler("start", start))
 
     conv_handler = ConversationHandler(
