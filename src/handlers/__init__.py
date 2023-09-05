@@ -12,6 +12,12 @@ __all__ = (
     "action",
     "back",
     "finish",
+    "CHOOSING",
+    "MANAGER",
+    "image_start",
+    "generate",
+    "cancel_gen_image",
+    "GENERATE",
     "switch_model_handler",
     "switch_model_callback",
     "translator_handler",
@@ -35,8 +41,9 @@ from src.utils import pick
 from .reset_handler import reset_handler
 from .switch_model_handler import switch_model_handler, switch_model_callback
 from .translator_handler import translator_handler
-from .admin_handler import admin_handler, query_list, manage_user, action, back, finish
+from .admin_handler import admin_handler, query_list, manage_user, action, back, finish, CHOOSING, MANAGER
 from .document_handler import document_start, document_handler
+from .image_gen_handler import image_start, generate, cancel_gen_image, GENERATE
 
 
 @check_permission

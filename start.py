@@ -31,6 +31,9 @@ from src.constants import (
     etymologists_command,
     genius_command,
     reset_command,
+    admin_command,
+    document_command,
+    gen_image_command,
     APPROVE,
     DECLINE,
     UPGRADE,
@@ -46,6 +49,12 @@ from src.handlers import (
     action,
     back,
     finish,
+    CHOOSING,
+    MANAGER,
+    image_start,
+    generate,
+    cancel_gen_image,
+    GENERATE,
     switch_model_handler,
     switch_model_callback,
     translator_handler,
@@ -95,33 +104,57 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 def main() -> None:
     bot_token: str = os.environ.get("bot_token", "")
-    CHOOSING, MANAGER_USER = range(2)
     # """Start the bot."""
     # # Create the Application and pass it your bot's token.
-    application = Application.builder().connect_timeout(connect_timeout=5 * 60.0).token(bot_token).build()
+    application = (
+        Application.builder()
+        .connect_timeout(connect_timeout=5 * 60.0)
+        .token(bot_token)
+        .build()
+    )
     application.add_handler(CommandHandler("start", start))
 
-    conv_handler = ConversationHandler(
+    admin_conv_handler = ConversationHandler(
         entry_points=[
-            CommandHandler("admin", admin_handler),
+            CommandHandler(admin_command, admin_handler),
         ],
         states={
             CHOOSING: [
                 CallbackQueryHandler(query_list, pattern="^(允许|等待|高级)名单$"),
             ],
-            MANAGER_USER: [
+            MANAGER: [
                 CallbackQueryHandler(manage_user, pattern=r"\d+"),
-                CallbackQueryHandler(action, pattern=f"{APPROVE}|{DECLINE}|{UPGRADE}|{DOWNGRADE}"),
+                CallbackQueryHandler(
+                    action, pattern=f"{APPROVE}|{DECLINE}|{UPGRADE}|{DOWNGRADE}"
+                ),
                 CallbackQueryHandler(back, pattern="^back$"),
                 CallbackQueryHandler(finish, pattern="^finish$"),
-            ]
+            ],
         },
-        fallbacks=[CallbackQueryHandler(finish, pattern="^finish$"),],
+        fallbacks=[
+            CallbackQueryHandler(finish, pattern="^finish$"),
+        ],
     )
-    application.add_handler(conv_handler)
+
+    image_gen_conv_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler(gen_image_command, image_start),
+        ],
+        states={
+            GENERATE: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, generate),
+                CallbackQueryHandler(cancel_gen_image, pattern="^cancel_gen_image$"),
+            ],
+        },
+        fallbacks=[
+            CallbackQueryHandler(cancel_gen_image, pattern="^cancel_gen_image$"),
+        ],
+    )
+    application.add_handler(admin_conv_handler)
+    application.add_handler(image_gen_conv_handler)
     application.add_handler(CommandHandler(reset_command, reset_handler))
     application.add_handler(CommandHandler(model_switch_command, switch_model_handler))
-    application.add_handler(CommandHandler("document", document_start))
+    application.add_handler(CommandHandler(document_command, document_start))
     application.add_handler(MessageHandler(filters.Document.ALL, document_handler))
     application.add_handler(CallbackQueryHandler(switch_model_callback, pattern="^gpt"))
     application.add_handler(CallbackQueryHandler(approval_callback, pattern="^允许|拒绝$"))

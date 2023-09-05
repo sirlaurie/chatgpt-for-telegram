@@ -12,6 +12,9 @@ __all__ = (
     "reset_command",
     "rewrite_command",
     "translator_command",
+    "document_command",
+    "gen_image_command",
+    "admin_command",
     # constant
     "SUPPPORTED_FILE",
     "YES_OR_NO_KEYBOARD",
@@ -66,6 +69,9 @@ from .commands import (
     reset_command,
     rewrite_command,
     translator_command,
+    document_command,
+    gen_image_command,
+    admin_command,
 )
 
 from .constant import (
@@ -96,7 +102,7 @@ from .messages import (
     WELCOME_MESSAGE,
     NEW_CONVERSATION_MESSAGE,
     INIT_REPLY_MESSAGE,
-  )
+)
 
 from .models import (
     gpt_3p5_turbo,
@@ -107,7 +113,7 @@ from .models import (
     gpt_4_0613,
     gpt_4_32k_0314,
     gpt_4_32k_0613,
-  )
+)
 
 from .prompts import (
     expand_prompt,
@@ -117,4 +123,4 @@ from .prompts import (
     etymologists_prompt,
     cyber_secrity_prompt,
     linux_terminal_prompt,
-  )
+)

@@ -1,6 +1,7 @@
 reset - 开启新会话, 不再根据之前的上下文进行会话
 switch_model - 切换OpenAI模型, 仅限高级用户
 document - 读取文件, 理解文档. 因Token限制,暂无法处理大文档
+gen_image - 根据提示词生成图像
 translator - 一个翻译, 比deepl不知道好到哪里去了
 rewrite - 把你的英语写作提高亿点点
 linux_terminal - 扮演一个linux终端
