@@ -68,7 +68,7 @@ from src.helpers import approval_callback
 logging.basicConfig(
     filename="error.log",
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.DEBUG,
+    level=logging.WARNING,
 )
 
 logger = logging.getLogger(__name__)
@@ -91,7 +91,6 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         f"<pre>update = {html.escape(json.dumps(update_str, indent=2, ensure_ascii=False))}"
         "</pre>\n\n"
         f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
-        f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
         f"<pre>ERROR: {context.error}</pre>\n\n"
     )
 
@@ -101,7 +100,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         parse_mode=ParseMode.HTML,
     )
 
-    if update.effective_user is not None and "Flood control exceeded" in str(context.error):
+    if update.effective_user is not None:
         user_id = update.effective_user.id
         await context.bot.send_message(
             chat_id=user_id,
