@@ -26,6 +26,8 @@ __all__ = (
 )
 
 import os
+import time
+import datetime
 from typing import cast
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -41,7 +43,16 @@ from src.utils import pick
 from .reset_handler import reset_handler
 from .switch_model_handler import switch_model_handler, switch_model_callback
 from .translator_handler import translator_handler
-from .admin_handler import admin_handler, query_list, manage_user, action, back, finish, CHOOSING, MANAGER
+from .admin_handler import (
+    admin_handler,
+    query_list,
+    manage_user,
+    action,
+    back,
+    finish,
+    CHOOSING,
+    MANAGER,
+)
 from .document_handler import document_start, document_handler
 from .image_gen_handler import image_start, generate, cancel_gen_image, GENERATE
 
@@ -89,20 +100,23 @@ async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             else pick(message_text),
         }
 
-    messages = (
-        []
-        if context.bot_data.get("initial", True)
-        else (
-            context.chat_data.get("messages", [])
-            if isinstance(context.chat_data, dict)
-            else []
-        )
-    )
+    if context.bot_data.get("initial", True):
+        messages = []
+    else:
+        last_message_date = context.chat_data.get("last_message_date", 0)
+        last_message_datetime = datetime.datetime.fromtimestamp(last_message_date, tz=datetime.timezone.utc)
+        time_difference = datetime.datetime.now(tz=datetime.timezone.utc)- last_message_datetime
+
+        if time_difference > datetime.timedelta(seconds=60.0):
+            messages = []
+        elif isinstance(context.chat_data, dict):
+            messages = context.chat_data.get("messages", [])
+        else:
+            messages = []
 
     messages.append(request)
-
-    if isinstance(context.chat_data, dict):
-        context.chat_data["messages"] = messages
+    context.chat_data.update({"last_message_date": update.message.date.timestamp()})
+    context.chat_data["messages"] = messages
 
     data = {
         "model": context.chat_data.get("model", None)
