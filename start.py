@@ -101,6 +101,14 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         parse_mode=ParseMode.HTML,
     )
 
+    if update.effective_user is not None and "Flood control exceeded" in str(context.error):
+        user_id = update.effective_user.id
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=f"<pre>ERROR: {context.error}</pre>\n\n",
+            parse_mode=ParseMode.HTML
+        )
+
 
 def main() -> None:
     bot_token: str = os.environ.get("bot_token", "")
