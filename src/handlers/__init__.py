@@ -26,7 +26,6 @@ __all__ = (
 )
 
 import os
-import time
 import datetime
 from typing import cast
 from telegram import Update
@@ -107,7 +106,7 @@ async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         last_message_datetime = datetime.datetime.fromtimestamp(last_message_date, tz=datetime.timezone.utc)
         time_difference = datetime.datetime.now(tz=datetime.timezone.utc)- last_message_datetime
 
-        if time_difference > datetime.timedelta(days=1.0):
+        if time_difference > datetime.timedelta(hours=1.0):
             messages = []
         elif isinstance(context.chat_data, dict):
             messages = context.chat_data.get("messages", [])
