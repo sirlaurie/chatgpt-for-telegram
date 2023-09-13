@@ -9,7 +9,7 @@ ASK_FOR_PERMITED = (
 
 PROCESS_TIMEOUT = "到目前为止, 管理员尚未处理你的请求.🤯\n但你已经在等待名单中了.\n\nthe administrator has not yet handled your request so far.🤯\nBut you are already on waitlist."
 
-APPROVED_MESSAGE = "管理员已经批准了你的请求, 现在你可以和我聊天啦.🥳\n\nAdministrator has approved your request, now you can chat with me.🥳"
+APPROVED_MESSAGE = "管理员已经批准了你的请求, 现在你可以和我聊天啦.🥳 \n\n建议follow下面的频道, 管理员会在那里更新新的功能和常见问题.\n\nAdministrator has approved your request, now you can chat with me.🥳 \n\n Please follow the channel below, the administrator update new funtion and FAQ there. \n\nhttps://t.me/+_jE24p8dJL84ODY1"
 
 DECLINE_MESSAGE = "抱歉, 管理员拒绝了你的请求. 可能他并不认识你.🫢\n\nSorry, the administrator has denied your request. Perhaps they do not know you.🫢"
 
