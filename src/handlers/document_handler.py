@@ -86,6 +86,8 @@ async def document_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     if isinstance(context.chat_data, dict):
         context.chat_data["messages"] = [req]
 
+    context.chat_data.update({"last_message_date": update.message.date.timestamp()})
+
     data = {
         "model": context.chat_data.get("model", None)
         or os.getenv("model", "gpt-3.5-turbo-16k"),
