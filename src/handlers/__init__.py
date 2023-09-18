@@ -21,6 +21,13 @@ __all__ = (
     "switch_model_handler",
     "switch_model_callback",
     "translator_handler",
+    "typing_src_lang",
+    "typing_tgt_lang",
+    "translate",
+    "stop",
+    "TYPING_SRC_LANG",
+    "TYPING_TGT_LANG",
+    "TRANSLATE",
     "document_start",
     "document_handler",
 )
@@ -41,7 +48,7 @@ from src.utils import pick
 
 from .reset_handler import reset_handler
 from .switch_model_handler import switch_model_handler, switch_model_callback
-from .translator_handler import translator_handler
+from .translator_handler import translator_handler, typing_src_lang, typing_tgt_lang, translate, stop, TYPING_SRC_LANG, TYPING_TGT_LANG, TRANSLATE
 from .admin_handler import (
     admin_handler,
     query_list,

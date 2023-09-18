@@ -58,6 +58,13 @@ from src.handlers import (
     switch_model_handler,
     switch_model_callback,
     translator_handler,
+    typing_src_lang,
+    typing_tgt_lang,
+    translate,
+    stop,
+    TYPING_SRC_LANG,
+    TYPING_TGT_LANG,
+    TRANSLATE,
     document_start,
     document_handler,
 )
@@ -105,7 +112,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         await context.bot.send_message(
             chat_id=user_id,
             text=f"<pre>ERROR: {context.error}</pre>\n\n",
-            parse_mode=ParseMode.HTML
+            parse_mode=ParseMode.HTML,
         )
 
 
@@ -157,15 +164,38 @@ def main() -> None:
             CallbackQueryHandler(cancel_gen_image, pattern="^cancel_gen_image$"),
         ],
     )
+
+    translator_conv_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler(translator_command, translator_handler),
+        ],
+        states={
+            TYPING_SRC_LANG: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, typing_src_lang),
+                MessageHandler(filters.Regex("^Done$"), stop),
+            ],
+            TYPING_TGT_LANG: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, typing_tgt_lang),
+                MessageHandler(filters.Regex("^Done$"), stop),
+            ],
+            TRANSLATE: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, translate),
+                MessageHandler(filters.Regex("^Done$"), stop),
+            ],
+        },
+        fallbacks=[
+            MessageHandler(filters.Regex("^Done$"), stop),
+        ],
+    )
     application.add_handler(admin_conv_handler)
     application.add_handler(image_gen_conv_handler)
+    application.add_handler(translator_conv_handler)
     application.add_handler(CommandHandler(reset_command, reset_handler))
     application.add_handler(CommandHandler(model_switch_command, switch_model_handler))
     application.add_handler(CommandHandler(document_command, document_start))
     application.add_handler(MessageHandler(filters.Document.ALL, document_handler))
     application.add_handler(CallbackQueryHandler(switch_model_callback, pattern="^gpt"))
     application.add_handler(CallbackQueryHandler(approval_callback, pattern="^允许|拒绝$"))
-    application.add_handler(CommandHandler(translator_command, translator_handler))
     application.add_handler(CommandHandler(linux_terminal_command, handler))
     application.add_handler(CommandHandler(rewrite_command, handler))
     application.add_handler(CommandHandler(cyber_secrity_command, handler))
