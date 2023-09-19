@@ -86,9 +86,11 @@ async def send_request(
             chunk_message = (
                 chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
             )
+            if not chunk_message:
+                continue
             full_content += chunk_message
 
-            if index and index % 7 == 0:
+            if index and index % 13 == 0:
                 await message.edit_text(
                     text=escape_markdown(text=full_content, version=2),
                     parse_mode=ParseMode.MARKDOWN_V2,

@@ -80,20 +80,10 @@ async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     ]:
         context.bot_data.update({"initial": True})
 
-    # if message_text in YES_OR_NO_KEYBOARD:
-    #     return
-
     await update.get_bot().send_chat_action(
         update.message.chat.id, "typing", write_timeout=15.0, pool_timeout=10.0  # type: ignore
     )
 
-    # if message_text in TARGET_LANGUAGE_KEYBOARD:
-    #     request = {
-    #         "role": "user",
-    #         "content": translator_prompt.format(target_lang=message_text),
-    #     }
-    #     context.bot_data.update({"initial": True})
-    # else:
     request = {
         "role": "user",
         "content": message_text

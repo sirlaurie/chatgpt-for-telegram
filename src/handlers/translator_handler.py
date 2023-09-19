@@ -79,8 +79,6 @@ async def typing_tgt_lang(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "stream": True,
     }
 
-    context.chat_data.update({"last_message_date": update.message.date.timestamp()})
-
     await send_request(update=update, context=context, data=data)
 
     return TRANSLATE
