@@ -28,7 +28,7 @@ header = {
 async def send_request(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-    data: Dict[str, Union[str, List[Dict[str, str]]]],
+    data: Dict[str, Union[str, int, List[Dict[str, str]]]],
 ) -> None:
     """
     Sends the request to the server and processes the response.
@@ -49,6 +49,7 @@ async def send_request(
     full_content = ""
     index = 0
     model = context.chat_data.get("model", "")
+    data.update({"temperature": 0})
     async with client.stream(
         method="POST",
         url=os.getenv("api_endpoint") or os.getenv("default_api_endpoint", ""),
