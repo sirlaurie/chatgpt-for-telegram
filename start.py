@@ -172,19 +172,19 @@ def main() -> None:
         states={
             TYPING_SRC_LANG: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, typing_src_lang),
-                MessageHandler(filters.Regex("^Done$"), stop),
+                MessageHandler(filters.Regex("^/Done$"), stop),
             ],
             TYPING_TGT_LANG: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, typing_tgt_lang),
-                MessageHandler(filters.Regex("^Done$"), stop),
+                MessageHandler(filters.Regex("^/Done$"), stop),
             ],
             TRANSLATE: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, translate),
-                MessageHandler(filters.Regex("^Done$"), stop),
+                MessageHandler(filters.Regex("^/Done$"), stop),
             ],
         },
         fallbacks=[
-            MessageHandler(filters.Regex("^Done$"), stop),
+            MessageHandler(filters.Regex("^/Done$"), stop),
         ],
     )
     application.add_handler(admin_conv_handler)
