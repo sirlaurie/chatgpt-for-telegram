@@ -38,11 +38,6 @@ from typing import cast
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from src.constants import (
-    YES_OR_NO_KEYBOARD,
-    TARGET_LANGUAGE_KEYBOARD,
-    translator_prompt,
-)
 from src.helpers import check_permission, send_request
 from src.utils import pick
 
@@ -85,26 +80,26 @@ async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     ]:
         context.bot_data.update({"initial": True})
 
-    if message_text in YES_OR_NO_KEYBOARD:
-        return
+    # if message_text in YES_OR_NO_KEYBOARD:
+    #     return
 
     await update.get_bot().send_chat_action(
         update.message.chat.id, "typing", write_timeout=15.0, pool_timeout=10.0  # type: ignore
     )
 
-    if message_text in TARGET_LANGUAGE_KEYBOARD:
-        request = {
-            "role": "user",
-            "content": translator_prompt.format(target_lang=message_text),
-        }
-        context.bot_data.update({"initial": True})
-    else:
-        request = {
-            "role": "user",
-            "content": message_text
-            if not context.bot_data.get("initial", True)
-            else pick(message_text),
-        }
+    # if message_text in TARGET_LANGUAGE_KEYBOARD:
+    #     request = {
+    #         "role": "user",
+    #         "content": translator_prompt.format(target_lang=message_text),
+    #     }
+    #     context.bot_data.update({"initial": True})
+    # else:
+    request = {
+        "role": "user",
+        "content": message_text
+        if not context.bot_data.get("initial", True)
+        else pick(message_text),
+    }
 
     if context.bot_data.get("initial", True):
         messages = []

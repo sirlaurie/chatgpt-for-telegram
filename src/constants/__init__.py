@@ -17,8 +17,6 @@ __all__ = (
     "admin_command",
     # constant
     "SUPPPORTED_FILE",
-    "YES_OR_NO_KEYBOARD",
-    "TARGET_LANGUAGE_KEYBOARD",
     "WAITING",
     "PERMITTED",
     "PREMIUM",
@@ -76,8 +74,6 @@ from .commands import (
 
 from .constant import (
     SUPPPORTED_FILE,
-    YES_OR_NO_KEYBOARD,
-    TARGET_LANGUAGE_KEYBOARD,
     WAITING,
     PERMITTED,
     PREMIUM,

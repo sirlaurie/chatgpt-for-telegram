@@ -1,8 +1,8 @@
 SUPPPORTED_FILE = ["pdf", "xps", "epub", "mobi", "svg"]
 
-YES_OR_NO_KEYBOARD = ["Approved", "Decline"]
+# YES_OR_NO_KEYBOARD = ["Approved", "Decline"]
 
-TARGET_LANGUAGE_KEYBOARD = ["English", "Deutsch", "Française", "中文", "日本語"]
+# TARGET_LANGUAGE_KEYBOARD = ["English", "Deutsch", "Française", "中文", "日本語"]
 
 WAITING = '等待名单'
 PERMITTED = '允许名单'
