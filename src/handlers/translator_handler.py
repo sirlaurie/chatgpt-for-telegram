@@ -2,17 +2,23 @@
 # -*- coding: utf-8 -*-
 # @author: loricheung
 
+import html
+import json
 import os
+import httpx
 from telegram import Update
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
+from telegram.helpers import escape_markdown
+from src.constants import INIT_REPLY_MESSAGE
 # from telegram._replykeyboardmarkup import ReplyKeyboardMarkup
 
 # from telegram import MessageEntity
 
 # from src.constants import TARGET_LANGUAGE_KEYBOARD
 
-from src.helpers import check_permission, send_request
-from src.constants import translator_prompt
+from src.helpers import check_permission, headers
+from src.utils import usage_from_messages
 
 
 TYPING_SRC_LANG, TYPING_TGT_LANG, TRANSLATE = range(3)
@@ -58,28 +64,12 @@ async def typing_tgt_lang(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     tgt_lang = update.message.text
     context.chat_data.update({"target": tgt_lang})
+
     await update.message.reply_text(
-        text=f"OK, 您想要翻译成的文字语言是{tgt_lang}. \n\n请让我准备一下",
+        text=f"OK, 您想要翻译成的文字语言是{tgt_lang}. \n\n请发送你要翻译的内容",
         write_timeout=3600.0,
         pool_timeout=3600.0,
         )
-
-    init_content = translator_prompt.format(src_lang=context.chat_data.get('source'), tgt_lang=context.chat_data.get("target"))
-    req = {
-        "role": "user",
-        "content": init_content
-    }
-
-    context.chat_data["messages"] = [req]
-
-    data = {
-        "model": context.chat_data.get("model", None)
-        or os.getenv("model", "gpt-3.5-turbo-16k"),
-        "messages": [req],
-        "stream": True,
-    }
-
-    await send_request(update=update, context=context, data=data)
 
     return TRANSLATE
 
@@ -90,30 +80,81 @@ async def translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     assert context.chat_data is not None
 
-    text = update.message.text
-
-    req = {
-        "role": "user",
-        "content": text
-    }
-
-    old_messages = context.chat_data.get("messages", [])
-    if len(old_messages) > 2:
-        messages = old_messages[:2]
-    else:
-        messages = old_messages
-
-    messages.append(req)
+    text = str(update.message.text) + "."
 
     data = {
-        "model": context.chat_data.get("model", None)
-        or os.getenv("model", "gpt-3.5-turbo-16k"),
-        "messages": messages,
-        "stream": True,
+        "temperature": 0.7,
+        "model": "gpt-3.5-turbo-instruct",
+        "max_tokens": 3072,
+        "prompt": f"""你是一个经验丰富的{context.chat_data.get("source")}和{context.chat_data.get("target")}翻译官. 请将以下句子进行语言转换：[{text}]""",
+        "stream": True
     }
 
-    await send_request(update=update, context=context, data=data)
+    message = await update.message.reply_text(
+        text=INIT_REPLY_MESSAGE, pool_timeout=15.0
+    )
 
+    full_content = ""
+    index = 0
+    model = data.get("model", "")
+    client = httpx.AsyncClient(timeout=None)
+    async with client.stream(
+        method="POST",
+        url="https://api.openai.com/v1/completions",
+        headers=headers,
+        json=data,
+    ) as response:
+        if not response.is_success:
+            resp = await response.aread()
+            content = resp.decode()
+            content = json.loads(content)
+            await message.edit_text(
+                text=escape_markdown(
+                    text="ERROR: " + content.get("error", {}).get("message", {}),
+                    version=2,
+                ),
+                parse_mode=ParseMode.MARKDOWN_V2,
+            )
+            await response.aclose()
+            return
+        async for chunk in response.aiter_lines():
+            index += 1
+            string = chunk.strip("data: ")
+            if not string:
+                continue
+            if "[DONE]" in chunk:
+                await response.aclose()
+                continue
+            chunk = json.loads(string)
+            is_stop = chunk.get("choices", [{}])[0].get("finish_reason", None)
+            if is_stop:
+                break
+
+            chunk_message = (
+                chunk.get("choices", [{}])[0].get("text", "")
+            )
+            if not chunk_message:
+                continue
+            full_content += chunk_message
+
+            if index and index % 7 == 0:
+                await message.edit_text(
+                    text=escape_markdown(text=full_content, version=2),
+                    parse_mode=ParseMode.MARKDOWN_V2,
+                )
+        num_token, price = usage_from_messages(full_content, model=model)
+        to_sent_message = (
+            f"{html.escape(full_content)}\n\n"
+            f"----------------------------------------\n"
+            f"<i>🎨 Generate by model: {model}.</i>\n"
+            f"<i>💸 Usage: {num_token} tokens, cost: ${price}</i>"
+        )
+        await message.edit_text(
+            text=to_sent_message,
+            parse_mode=ParseMode.HTML,
+        )
+    await update.message.reply_dice()
+    await client.aclose()
     return TRANSLATE
 
 

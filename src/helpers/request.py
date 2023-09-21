@@ -19,7 +19,7 @@ from src.constants import INIT_REPLY_MESSAGE, SUPPPORTED_FILE
 from src.utils import usage_from_messages
 
 
-header = {
+headers = {
     "Content-Type": "application/json",
     "Authorization": f'Bearer {os.getenv("openai_apikey") or ""}',
 }
@@ -53,7 +53,7 @@ async def send_request(
     async with client.stream(
         method="POST",
         url=os.getenv("api_endpoint") or os.getenv("default_api_endpoint", ""),
-        headers=header,
+        headers=headers,
         json=data,
     ) as response:
         if not response.is_success:

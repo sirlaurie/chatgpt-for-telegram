@@ -4,7 +4,7 @@
 
 
 import httpx
-from src.helpers import header
+from src.helpers import headers
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
@@ -73,7 +73,7 @@ async def gen_image(prompt) -> str:
         "size": "1024x1024"
     }
     async with httpx.AsyncClient(timeout=None) as client:
-        response = await client.post("https://api.openai.com/v1/images/generations", headers=header, json=payload)
+        response = await client.post("https://api.openai.com/v1/images/generations", headers=headers, json=payload)
         if not response.is_success:
             return f"Error: a error happened when requesting, status code: {response.status_code}"
         data = response.json()

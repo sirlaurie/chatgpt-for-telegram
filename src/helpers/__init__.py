@@ -3,7 +3,7 @@
 # @author: loricheung
 
 __all__ = (
-  "header",
+  "headers",
   "warning",
   "check_permission",
   "apply_to_approve",
@@ -14,4 +14,4 @@ __all__ = (
 
 from .permission import check_permission
 from .unauthorize import warning, apply_to_approve, approval_callback
-from .request import send_request, read_document, header
+from .request import send_request, read_document, headers
