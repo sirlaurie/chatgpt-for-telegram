@@ -4,19 +4,14 @@
 
 import html
 import json
-import os
 import httpx
+
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram.helpers import escape_markdown
+
 from src.constants import INIT_REPLY_MESSAGE
-# from telegram._replykeyboardmarkup import ReplyKeyboardMarkup
-
-# from telegram import MessageEntity
-
-# from src.constants import TARGET_LANGUAGE_KEYBOARD
-
 from src.helpers import check_permission, headers
 from src.utils import usage_from_messages
 
@@ -31,7 +26,7 @@ async def translator_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
 
     await update.message.reply_text(
-        text='欢迎使用翻译机功能, 你只需要告诉我你要翻译的文字是什么语言, 和想要翻译成什么语言, 剩下的只管发送就好\n\n首先, 请输入你要准备翻译的语言, 形式为"中文", "English", "英语", "Deutsch"等普通人都能理解的即可.',
+        text='欢迎使用翻译机功能, 你只需要告诉我你要在哪两种语言之间翻译, 剩下的只管发送就好\n\n首先, 请输入第一个语言类型, 形式为"中文", "English", "英语", "Deutsch"等普通人都能理解的即可.',
         write_timeout=3600.0,
         pool_timeout=3600.0,
     )
@@ -48,7 +43,7 @@ async def typing_src_lang(update: Update, context: ContextTypes.DEFAULT_TYPE):
     src_lang = update.message.text
     context.chat_data.update({"source": src_lang})
     await update.message.reply_text(
-        text=f"OK, 您要翻译的文字语言是{src_lang}. \n\n接下来请输入您要翻译成语言类型, 形式如上即可.",
+        text=f"Good!\n\n接下来请输入第二种语言类型, 形式如上即可.",
         write_timeout=3600.0,
         pool_timeout=3600.0,
         )
@@ -66,7 +61,7 @@ async def typing_tgt_lang(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.chat_data.update({"target": tgt_lang})
 
     await update.message.reply_text(
-        text=f"OK, 您想要翻译成的文字语言是{tgt_lang}. \n\n请发送你要翻译的内容",
+        text=f"""OK, 我会在{context.chat_data.get("source")}和{context.chat_data.get("target")}之间进行翻译. \n\n下面请发送你要翻译的内容""",
         write_timeout=3600.0,
         pool_timeout=3600.0,
         )
@@ -153,7 +148,7 @@ async def translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text=to_sent_message,
             parse_mode=ParseMode.HTML,
         )
-    await update.message.reply_dice()
+
     await client.aclose()
     return TRANSLATE
 
