@@ -78,10 +78,10 @@ async def translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = str(update.message.text) + "."
 
     data = {
-        "temperature": 0.7,
+        "temperature": 0.3,
         "model": "gpt-3.5-turbo-instruct",
         "max_tokens": 3072,
-        "prompt": f"""你是一个经验丰富的{context.chat_data.get("source")}和{context.chat_data.get("target")}翻译官. 请将以下句子进行语言转换：[{text}]""",
+        "prompt": f"""你是一个经验丰富的翻译官. 请将以下句子在{context.chat_data.get("source")}和{context.chat_data.get("target")}之间翻译：[{text}].""",
         "stream": True
     }
 
