@@ -107,7 +107,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         parse_mode=ParseMode.HTML,
     )
 
-    if update.effective_user is not None:
+    if hasattr(update, "effective_user") and update.effective_user:
         user_id = update.effective_user.id
         await context.bot.send_message(
             chat_id=user_id,
