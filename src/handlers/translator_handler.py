@@ -81,7 +81,7 @@ async def translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "temperature": 0.3,
         "model": "gpt-3.5-turbo-instruct",
         "max_tokens": 3072,
-        "prompt": f"""你是一个经验丰富的翻译官. 请将以下句子在{context.chat_data.get("source")}和{context.chat_data.get("target")}之间翻译：[{text}].""",
+        "prompt": f"""你是一个经验丰富的翻译官, 请严格按照我下面的要求进行翻译. 如果我发送给你的文字是{context.chat_data.get("source")}, 那么请将它翻译为{context.chat_data.get("target")}, 如果我发送给你的文字是{context.chat_data.get("target")}, 那么请将它翻译为{context.chat_data.get("source")}. 下面是要翻译的内容:\n{text}.""",
         "stream": True
     }
 
