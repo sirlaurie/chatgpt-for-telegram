@@ -49,10 +49,10 @@ __all__ = (
     "gpt_4_32k_0314",
     "gpt_4_32k_0613",
     # prompts
+    "instructions",
     "expand_prompt",
     "genius_prompt",
     "rewrite_prompt",
-    "translator_prompt",
     "etymologists_prompt",
     "cyber_secrity_prompt",
     "linux_terminal_prompt",
@@ -112,10 +112,10 @@ from .models import (
 )
 
 from .prompts import (
+    instructions,
     expand_prompt,
     genius_prompt,
     rewrite_prompt,
-    translator_prompt,
     etymologists_prompt,
     cyber_secrity_prompt,
     linux_terminal_prompt,

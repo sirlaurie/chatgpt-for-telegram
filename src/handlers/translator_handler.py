@@ -13,7 +13,6 @@ from telegram.helpers import escape_markdown
 
 from src.constants import INIT_REPLY_MESSAGE
 from src.helpers import check_permission, headers
-from src.utils import usage_from_messages
 
 
 TYPING_SRC_LANG, TYPING_TGT_LANG, TRANSLATE = range(3)
@@ -81,7 +80,7 @@ async def translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "temperature": 0.3,
         "model": "gpt-3.5-turbo-instruct",
         "max_tokens": 3072,
-        "prompt": f"""你是一个经验丰富的翻译官, 请严格按照我下面的要求进行翻译. 如果我发送给你的文字是{context.chat_data.get("source")}, 那么请将它翻译为{context.chat_data.get("target")}, 如果我发送给你的文字是{context.chat_data.get("target")}, 那么请将它翻译为{context.chat_data.get("source")}. 下面是要翻译的内容:\n{text}.""",
+        "prompt": f"""你是一个经验丰富的翻译官, 请严格按照我下面的要求进行翻译. 如果我发送给你的文字是{context.chat_data.get("source")}, 那么请将它翻译为{context.chat_data.get("target")}, 如果我发送给你的文字是{context.chat_data.get("target")}, 那么请将它翻译为{context.chat_data.get("source")}, 在遵守原意的前提下让翻译后的内容更自然顺畅, 符合母语者的说话习惯. 下面是要翻译的内容:\n{text}.""",
         "stream": True
     }
 
@@ -91,7 +90,6 @@ async def translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     full_content = ""
     index = 0
-    model = data.get("model", "")
     client = httpx.AsyncClient(timeout=None)
     async with client.stream(
         method="POST",
@@ -137,12 +135,8 @@ async def translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     text=escape_markdown(text=full_content, version=2),
                     parse_mode=ParseMode.MARKDOWN_V2,
                 )
-        num_token, price = usage_from_messages(full_content, model=model)
         to_sent_message = (
-            f"{html.escape(full_content)}\n\n"
-            f"----------------------------------------\n"
-            f"<i>🎨 Generate by model: {model}.</i>\n"
-            f"<i>💸 Usage: {num_token} tokens, cost: ${price}</i>"
+            f"{html.escape(full_content) + 'ㅤ'}ㅤ\n\n"
         )
         await message.edit_text(
             text=to_sent_message,
