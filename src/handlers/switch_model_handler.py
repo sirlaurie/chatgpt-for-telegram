@@ -12,10 +12,8 @@ from src.constants import (
     gpt_3p5_turbo_16k,
     gpt_3p5_turbo_0613,
     gpt_3p5_turbo_16k_0613,
-    gpt_4_0314,
-    gpt_4_0613,
-    gpt_4_32k_0314,
-    gpt_4_32k_0613,
+    gpt_4_v,
+    gpt_4_1106,
 )
 from src.utils import is_allowed
 from src.helpers import check_permission
@@ -38,10 +36,8 @@ async def switch_model_callback(
         gpt_3p5_turbo_0613,
         gpt_3p5_turbo_16k,
         gpt_3p5_turbo_16k_0613,
-        gpt_4_0314,
-        gpt_4_0613,
-        gpt_4_32k_0314,
-        gpt_4_32k_0613,
+        gpt_4_v,
+        gpt_4_1106,
     ]:
         return
     context.chat_data.update({"model": model})
@@ -77,16 +73,8 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
                 ),
             ],
             [
-                InlineKeyboardButton("gpt-4-0314", callback_data=str(gpt_4_0314)),
-                InlineKeyboardButton(
-                    "gpt-4-32k-0314", callback_data=str(gpt_4_32k_0314)
-                ),
-            ],
-            [
-                InlineKeyboardButton("gpt-4-0613", callback_data=str(gpt_4_0613)),
-                InlineKeyboardButton(
-                    "gpt-4-32k-0613", callback_data=str(gpt_4_32k_0613)
-                ),
+                InlineKeyboardButton("gpt-4-v", callback_data=str(gpt_4_v)),
+                InlineKeyboardButton("gpt-4-1106", callback_data=str(gpt_4_1106)),
             ],
         ]
         reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)

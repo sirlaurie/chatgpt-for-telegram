@@ -42,7 +42,7 @@ async def send_request(
     assert update.message is not None
     assert context.chat_data is not None
 
-    client = httpx.AsyncClient(timeout=None)
+    client = httpx.AsyncClient(timeout=300)
     message = await update.message.reply_text(
         text=INIT_REPLY_MESSAGE, pool_timeout=15.0
     )
@@ -143,7 +143,8 @@ async def read_document(update: Update, file_path: str) -> str:
     except Exception as e:
         print(e)
         await update.message.reply_text(
-            text="未能获取到文件扩展名, 请上传一个具有确定扩展名的文件", pool_timeout=3600.0
+            text="未能获取到文件扩展名, 请上传一个具有确定扩展名的文件",
+            pool_timeout=3600.0,
         )
         return ""
     if file_type not in SUPPPORTED_FILE:

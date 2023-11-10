@@ -67,6 +67,7 @@ from src.handlers import (
     TRANSLATE,
     document_start,
     document_handler,
+    vision_handler,
 )
 from src.helpers import approval_callback
 
@@ -194,8 +195,11 @@ def main() -> None:
     application.add_handler(CommandHandler(model_switch_command, switch_model_handler))
     application.add_handler(CommandHandler(document_command, document_start))
     application.add_handler(MessageHandler(filters.Document.ALL, document_handler))
+    application.add_handler(MessageHandler(filters.PHOTO, vision_handler))
     application.add_handler(CallbackQueryHandler(switch_model_callback, pattern="^gpt"))
-    application.add_handler(CallbackQueryHandler(approval_callback, pattern="^允许|拒绝$"))
+    application.add_handler(
+        CallbackQueryHandler(approval_callback, pattern="^允许|拒绝$")
+    )
     application.add_handler(CommandHandler(linux_terminal_command, handler))
     application.add_handler(CommandHandler(rewrite_command, handler))
     application.add_handler(CommandHandler(cyber_secrity_command, handler))

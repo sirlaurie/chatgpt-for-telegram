@@ -44,10 +44,8 @@ __all__ = (
     "gpt_3p5_turbo_16k",
     "gpt_3p5_turbo_0613",
     "gpt_3p5_turbo_16k_0613",
-    "gpt_4_0314",
-    "gpt_4_0613",
-    "gpt_4_32k_0314",
-    "gpt_4_32k_0613",
+    "gpt_4_v",
+    "gpt_4_1106",
     # prompts
     "instructions",
     "expand_prompt",
@@ -105,10 +103,8 @@ from .models import (
     gpt_3p5_turbo_16k,
     gpt_3p5_turbo_0613,
     gpt_3p5_turbo_16k_0613,
-    gpt_4_0314,
-    gpt_4_0613,
-    gpt_4_32k_0314,
-    gpt_4_32k_0613,
+    gpt_4_v,
+    gpt_4_1106,
 )
 
 from .prompts import (

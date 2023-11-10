@@ -4,7 +4,6 @@
 
 import os
 from telegram import Update
-from telegram import Update
 import telegram
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
@@ -15,7 +14,7 @@ from src.helpers import send_request, read_document
 
 async def document_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
-        _ = context # no meaning. just for LSP
+        _ = context  # no meaning. just for LSP
         return
 
     await update.message.reply_text(
@@ -30,7 +29,6 @@ async def document_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 
 async def document_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-
     assert context.chat_data is not None
     if not update.message:
         return
@@ -46,42 +44,43 @@ async def document_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         file_path = file.file_path
     except telegram.error.TelegramError as error:
         await msg.edit_text(
-            text=f"Error: {error}. telegram bot目前仅支持50M以下的文本文件", pool_timeout=3600.0
+            text=f"Error: {error}. telegram bot目前仅支持50M以下的文本文件",
+            pool_timeout=3600.0,
         )
         return
 
     try:
         text = await file.download_as_bytearray()
         content = text.decode()
-    except UnicodeDecodeError as error:
+    except UnicodeDecodeError:
         assert file_path is not None
         await msg.edit_text(
-            text="检测到此文件不是文本文件, 尝试切换为专有格式读取模式....", pool_timeout=3600.0
+            text="检测到此文件不是文本文件, 尝试切换为专有格式读取模式....",
+            pool_timeout=3600.0,
         )
         content = await read_document(update, file_path=file_path)
-    except:
+    except Exception:
         await msg.edit_text(
             text="抱歉, 未能读取文件内容, 请确认文件是否属于支持的类型.",
-            pool_timeout=3600.0
-            )
+            pool_timeout=3600.0,
+        )
         return
     finally:
         await msg.edit_text(
-            text="已成功解析文件, 正在理解你的文件中...",
-            pool_timeout=3600.0
-            )
+            text="已成功解析文件, 正在理解你的文件中...", pool_timeout=3600.0
+        )
 
     if not content.strip():
         await msg.edit_text(
             text="虽然文件解析成功了, 但是没有识别到任何文字内容. 如有疑问请联系管理员查看.",
-            pool_timeout=3600.0
-            )
+            pool_timeout=3600.0,
+        )
         return
 
     req = {
-            "role": "user",
-            "content": f"我会给你一个文件路径和文件的内容, 请你根据文件路径推测这个文件是什么类型文件, 然后阅读内容, 当你执行完成时, 按照下面的格式进行回答:```这是一个[文件类型], 这个文件是[内容概述]```. 以下是路径和内容 ```路径: {file_path}, 内容: {content}```"
-        }
+        "role": "user",
+        "content": f"我会给你一个文件路径和文件的内容, 请你根据文件路径推测这个文件是什么类型文件, 然后阅读内容, 当你执行完成时, 按照下面的格式进行回答:```这是一个[文件类型], 这个文件是[内容概述]```. 以下是路径和内容 ```路径: {file_path}, 内容: {content}```",
+    }
 
     if isinstance(context.chat_data, dict):
         context.chat_data["messages"] = [req]

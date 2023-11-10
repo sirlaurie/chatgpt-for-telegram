@@ -24,10 +24,8 @@ from src.constants import (
     etymologists_prompt,
     genius_prompt,
     expand_prompt,
-    gpt_4_0314,
-    gpt_4_32k_0314,
-    gpt_4_0613,
-    gpt_4_32k_0613,
+    gpt_4_v,
+    gpt_4_1106,
     gpt_3p5_turbo,
     gpt_3p5_turbo_0613,
     gpt_3p5_turbo_16k,
@@ -65,10 +63,8 @@ def pick(act: str) -> str:
 
 
 token_price = {
-    gpt_4_0314: 0.06,
-    gpt_4_32k_0314: 0.12,
-    gpt_4_0613: 0.06,
-    gpt_4_32k_0613: 0.12,
+    gpt_4_v: 0.03,
+    gpt_4_1106: 0.03,
     gpt_3p5_turbo: 0.002,
     gpt_3p5_turbo_0613: 0.002,
     gpt_3p5_turbo_16k: 0.004,
