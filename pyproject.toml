@@ -1,17 +1,17 @@
 [tool.poetry]
-name = "telegram bot for chatgpt"
+name = "bot"
 version = "0.1.0"
-description = "telegram bot for using chatgpt"
-authors = ["sirlaurie"]
-license = "MIT"
+description = "a telegram bot for openai chatgpt"
+authors = ["sirlaurie <liusuzhang@gmail.com>"]
+license = "GPLv3"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-python-telegram-bot = "^20.0"
-tiktoken = "^0.4.0"
-pymupdf = "^1.22.5"
-httpx = {extras = ["http2"], version = "^0.24.1"}
+openai = "^1.2.3"
+python-telegram-bot = "^20.6"
+pymupdf = "^1.23.7"
+
 
 [build-system]
 requires = ["poetry-core"]

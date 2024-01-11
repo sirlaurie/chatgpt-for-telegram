@@ -21,65 +21,79 @@ from telegram.ext import (
     CallbackQueryHandler,
 )
 
-from src.constants import WELCOME_MESSAGE
-from src.constants import (
-    model_switch_command,
-    linux_terminal_command,
-    translator_command,
-    rewrite_command,
-    cyber_secrity_command,
-    etymologists_command,
-    genius_command,
-    reset_command,
+from src.helpers.permission import check_permission
+from src.helpers.unauthorize import approval_callback
+from src.constants.messages import WELCOME_MESSAGE
+from src.constants.commands import (
     admin_command,
+    my_prompts_command,
+    create_new_prompt_command,
     document_command,
+    translator_command,
     gen_image_command,
+)
+from src.constants.constant import (
     APPROVE,
     DECLINE,
     UPGRADE,
     DOWNGRADE,
+    WAITING,
+    PERMITTED,
+    PREMIUM,
 )
-from src.helpers import check_permission
 from src.handlers import (
     handler,
-    reset_handler,
     admin_handler,
-    query_list,
-    manage_user,
-    action,
-    back,
-    finish,
-    CHOOSING,
-    MANAGER,
-    image_start,
-    generate,
-    cancel_gen_image,
-    GENERATE,
-    switch_model_handler,
-    switch_model_callback,
-    translator_handler,
-    typing_src_lang,
-    typing_tgt_lang,
-    translate,
-    stop,
+    my_prompts_handler,
+    create_new_prompt_handler,
+)
+from src.handlers.document_handler import document_handler, document_start
+from src.handlers.translator_handler import (
     TYPING_SRC_LANG,
     TYPING_TGT_LANG,
     TRANSLATE,
-    document_start,
-    document_handler,
-    vision_handler,
+    typing_src_lang,
+    typing_tgt_lang,
+    translator_handler,
+    translate,
+    stop,
 )
-from src.helpers import approval_callback
-
+from src.handlers.image_gen_handler import (
+    GENERATE,
+    generate,
+    image_start,
+    cancel_gen_image,
+)
+from src.handlers.admin_handler import (
+    CHOOSING,
+    MANAGER,
+    back,
+    finish,
+    query_list,
+    manage_user,
+    action,
+)
+from src.handlers.my_prompts_handle import (
+    prompt_callback_handler,
+    view_prompts,
+)
+from src.handlers.new_prompt_handler import (
+    prompt_name_handler,
+    prompt_content_handler,
+    share_handler,
+    prompt_name,
+    prompt_content,
+    share,
+)
 
 # Enable logging
-logging.basicConfig(
-    filename="error.log",
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.WARNING,
-)
+# logging.basicConfig(
+#     filename="error.log",
+#     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+#     level=logging.DEBUG,
+# )
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 
 @check_permission
@@ -91,22 +105,22 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    logger.warning(f"Update {update} caused error {context.error}")
-    update_str = update.to_dict() if isinstance(update, Update) else str(update)
+    # logger.warning(f"Update {update} caused error {context.error}")
+    # update_str = update.to_dict() if isinstance(update, Update) else str(update)
 
-    message = (
-        f"An exception was raised while handling an update\n"
-        f"<pre>update = {html.escape(json.dumps(update_str, indent=2, ensure_ascii=False))}"
-        "</pre>\n\n"
-        f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
-        f"<pre>ERROR: {context.error}</pre>\n\n"
-    )
+    # message = (
+    #     f"An exception was raised while handling an update\n"
+    #     f"<pre>update = {html.escape(json.dumps(update_str, indent=2, ensure_ascii=False))}"
+    #     "</pre>\n\n"
+    #     f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
+    #     f"<pre>ERROR: {context.error}</pre>\n\n"
+    # )
 
-    await context.bot.send_message(
-        chat_id=os.getenv("DEVELOPER_CHAT_ID", 0),
-        text=message,
-        parse_mode=ParseMode.HTML,
-    )
+    # await context.bot.send_message(
+    #     chat_id=os.getenv("DEVELOPER_CHAT_ID", 0),
+    #     text=message,
+    #     parse_mode=ParseMode.HTML,
+    # )
 
     if hasattr(update, "effective_user") and update.effective_user:
         user_id = update.effective_user.id
@@ -128,14 +142,39 @@ def main() -> None:
         .build()
     )
     application.add_handler(CommandHandler("start", start))
-
+    application.add_handler(CommandHandler(my_prompts_command, my_prompts_handler))
+    application.add_handler(
+        CallbackQueryHandler(prompt_callback_handler, pattern=f"{view_prompts}|\\d+")
+    )
+    application.add_handler(
+        CallbackQueryHandler(approval_callback, pattern=f"{APPROVE}|{DECLINE}")
+    )
+    new_prompt_conv_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler(create_new_prompt_command, create_new_prompt_handler),
+        ],
+        states={
+            prompt_name: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, prompt_name_handler),
+            ],
+            prompt_content: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, prompt_content_handler),
+            ],
+            share: [
+                CallbackQueryHandler(share_handler, pattern="yes|no"),
+            ],
+        },
+        fallbacks=[],
+    )
     admin_conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler(admin_command, admin_handler),
         ],
         states={
             CHOOSING: [
-                CallbackQueryHandler(query_list, pattern="^(允许|等待|高级)名单$"),
+                CallbackQueryHandler(
+                    query_list, pattern=f"{WAITING}|{PERMITTED}|{PREMIUM}"
+                ),
             ],
             MANAGER: [
                 CallbackQueryHandler(manage_user, pattern=r"\d+"),
@@ -148,21 +187,6 @@ def main() -> None:
         },
         fallbacks=[
             CallbackQueryHandler(finish, pattern="^finish$"),
-        ],
-    )
-
-    image_gen_conv_handler = ConversationHandler(
-        entry_points=[
-            CommandHandler(gen_image_command, image_start),
-        ],
-        states={
-            GENERATE: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, generate),
-                CallbackQueryHandler(cancel_gen_image, pattern="^cancel_gen_image$"),
-            ],
-        },
-        fallbacks=[
-            CallbackQueryHandler(cancel_gen_image, pattern="^cancel_gen_image$"),
         ],
     )
 
@@ -188,28 +212,32 @@ def main() -> None:
             MessageHandler(filters.Regex("^/Done$"), stop),
         ],
     )
+
+    image_gen_conv_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler(gen_image_command, image_start),
+        ],
+        states={
+            GENERATE: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, generate),
+                CallbackQueryHandler(cancel_gen_image, pattern="^cancel_gen_image$"),
+            ],
+        },
+        fallbacks=[
+            CallbackQueryHandler(cancel_gen_image, pattern="^cancel_gen_image$"),
+        ],
+    )
     application.add_handler(admin_conv_handler)
-    application.add_handler(image_gen_conv_handler)
+    application.add_handler(new_prompt_conv_handler)
     application.add_handler(translator_conv_handler)
-    application.add_handler(CommandHandler(reset_command, reset_handler))
-    application.add_handler(CommandHandler(model_switch_command, switch_model_handler))
+    application.add_handler(image_gen_conv_handler)
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handler))
     application.add_handler(CommandHandler(document_command, document_start))
     application.add_handler(MessageHandler(filters.Document.ALL, document_handler))
-    application.add_handler(MessageHandler(filters.PHOTO, vision_handler))
-    application.add_handler(CallbackQueryHandler(switch_model_callback, pattern="^gpt"))
-    application.add_handler(
-        CallbackQueryHandler(approval_callback, pattern="^允许|拒绝$")
-    )
-    application.add_handler(CommandHandler(linux_terminal_command, handler))
-    application.add_handler(CommandHandler(rewrite_command, handler))
-    application.add_handler(CommandHandler(cyber_secrity_command, handler))
-    application.add_handler(CommandHandler(etymologists_command, handler))
-    application.add_handler(CommandHandler(genius_command, handler))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handler))
     # error handler
-    application.add_error_handler(error_handler)  # type: ignore
+    # application.add_error_handler(error_handler)  # type: ignore
     # Run the bot until the user presses Ctrl-C
-    application.run_polling()
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == "__main__":

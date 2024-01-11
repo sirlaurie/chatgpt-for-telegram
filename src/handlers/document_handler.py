@@ -2,14 +2,15 @@
 # -*- coding: utf-8 -*-
 # @author: loricheung
 
-import os
+from openai.types.chat import ChatCompletionUserMessageParam
 from telegram import Update
 import telegram
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 from telegram.helpers import escape_markdown
 
-from src.helpers import send_request, read_document
+from src.utils.document import read_document
+from src.handlers.message_handler import send_request
 
 
 async def document_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -77,7 +78,7 @@ async def document_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         )
         return
 
-    req = {
+    req: ChatCompletionUserMessageParam = {
         "role": "user",
         "content": f"我会给你一个文件路径和文件的内容, 请你根据文件路径推测这个文件是什么类型文件, 然后阅读内容, 当你执行完成时, 按照下面的格式进行回答:```这是一个[文件类型], 这个文件是[内容概述]```. 以下是路径和内容 ```路径: {file_path}, 内容: {content}```",
     }
@@ -87,15 +88,5 @@ async def document_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     context.chat_data.update({"last_message_date": update.message.date.timestamp()})
 
-    data = {
-        "model": context.chat_data.get("model", None)
-        or os.getenv("model", "gpt-3.5-turbo-16k"),
-        "messages": [req],
-        "stream": True,
-    }
-
-    first_name = getattr(update.message.from_user, "first_name", None)
-    print(f"************ from {first_name}: ************\n{data}")
-
-    await send_request(update=update, context=context, data=data)
+    await send_request(update=update, context=context, messages=[req])
     return

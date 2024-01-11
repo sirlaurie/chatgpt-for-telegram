@@ -2,16 +2,25 @@
 # -*- coding: utf-8 -*-
 # @author: loricheung
 
+
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from src.constants import NEW_CONVERSATION_MESSAGE
+from src.constants.messages import NEW_CONVERSATION_MESSAGE
 
-from src.helpers import check_permission
+# from src.constants.commands import (
+#     reset_command,
+#     admin_command,
+#     my_prompts_command,
+#     my_assistants_command,
+#     create_new_prompt_command,
+#     create_new_assistant_command,
+# )
+from src.helpers.permission import check_permission
 
 
 @check_permission
-async def reset_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def reset_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
         return
 

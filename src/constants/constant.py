@@ -8,7 +8,7 @@ WAITING = "等待名单"
 PERMITTED = "允许名单"
 PREMIUM = "高级名单"
 
-APPROVE = "允许"
+APPROVE = "放行"
 DECLINE = "拒绝"
 
 UPGRADE = "升级"

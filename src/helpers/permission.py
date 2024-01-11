@@ -9,7 +9,7 @@ from typing import Callable
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from src.constants import NOT_ALLOWD, NOT_PERMITED
+from src.constants.messages import NOT_ALLOWD, NOT_PERMITED
 from src.utils import is_allowed
 from .unauthorize import warning
 

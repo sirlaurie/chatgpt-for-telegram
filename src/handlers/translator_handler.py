@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # @author: loricheung
 
+import os
 import html
 import json
 import httpx
@@ -11,8 +12,13 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram.helpers import escape_markdown
 
-from src.constants import INIT_REPLY_MESSAGE
-from src.helpers import check_permission, headers
+from src.constants.messages import INIT_REPLY_MESSAGE
+from src.helpers.permission import check_permission
+
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f'Bearer {os.getenv("OPENAI_API_KEY") or ""}',
+}
 
 
 TYPING_SRC_LANG, TYPING_TGT_LANG, TRANSLATE = range(3)
@@ -42,7 +48,7 @@ async def typing_src_lang(update: Update, context: ContextTypes.DEFAULT_TYPE):
     src_lang = update.message.text
     context.chat_data.update({"source": src_lang})
     await update.message.reply_text(
-        text=f"Good!\n\n接下来请输入第二种语言类型, 形式如上即可.",
+        text="""Good!\n\n接下来请输入第二种语言类型, 形式如上即可.""",
         write_timeout=3600.0,
         pool_timeout=3600.0,
     )
@@ -60,7 +66,7 @@ async def typing_tgt_lang(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.chat_data.update({"target": tgt_lang})
 
     await update.message.reply_text(
-        text=f"""OK, 我会在{context.chat_data.get("source")}和{context.chat_data.get("target")}之间进行翻译. \n\n下面请发送你要翻译的内容""",
+        text=f"""OK, 我会在{context.chat_data.get("source")}和{context.chat_data.get("target")}之间进行翻译. \n\n下面请发送你要翻译的内容. 退出翻译模式请回复```/Done```""",
         write_timeout=3600.0,
         pool_timeout=3600.0,
     )
@@ -78,20 +84,11 @@ async def translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     source_lang = context.chat_data.get("source", "英文")
     target_lang = context.chat_data.get("target", "中文")
     prompt = f"""
-    翻译任务:
+    ###任务###:
     如果我发送给你的文字是{source_lang}, 请将它翻译为{target_lang}; 如果我发送给你的文字是{target_lang}, 请将它翻译为{source_lang}.
 
-    待翻译内容:
+    ###待翻译内容###:
     {text}
-
-    翻译要求:
-    先将待翻译内容直译, 再按照目标语言的使用习惯优化语句保证内容自然流畅.
-
-    注意事项:
-    只需将翻译后的内容回复给我
-    以纯文本格式回复
-    请不要修改翻译任务部分的文本
-    请注意源语言和目标语言，确保翻译方向正确
 """
 
     data = {

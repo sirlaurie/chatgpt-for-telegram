@@ -5,71 +5,23 @@
 
 __all__ = (
     "handler",
-    "reset_handler",
     "admin_handler",
-    "query_list",
-    "manage_user",
-    "action",
-    "back",
-    "finish",
-    "CHOOSING",
-    "MANAGER",
-    "image_start",
-    "generate",
-    "cancel_gen_image",
-    "GENERATE",
-    "switch_model_handler",
-    "switch_model_callback",
-    "translator_handler",
-    "typing_src_lang",
-    "typing_tgt_lang",
-    "translate",
-    "stop",
-    "TYPING_SRC_LANG",
-    "TYPING_TGT_LANG",
-    "TRANSLATE",
-    "document_start",
-    "document_handler",
-    "vision_handler",
+    "my_prompts_handler",
+    "create_new_prompt_handler",
 )
 
-import os
+
 import datetime
 from typing import cast
+
 from telegram import Update
 from telegram.ext import ContextTypes
-
-from src.helpers import check_permission, send_request
-from src.utils import pick
-
-# from src.constants import instructions
-from .reset_handler import reset_handler
-from .switch_model_handler import switch_model_handler, switch_model_callback
-from .translator_handler import (
-    translator_handler,
-    typing_src_lang,
-    typing_tgt_lang,
-    translate,
-    stop,
-    TYPING_SRC_LANG,
-    TYPING_TGT_LANG,
-    TRANSLATE,
-)
-from .admin_handler import (
-    admin_handler,
-    query_list,
-    manage_user,
-    action,
-    back,
-    finish,
-    CHOOSING,
-    MANAGER,
-)
-from .document_handler import document_start, document_handler
-from .image_gen_handler import image_start, generate, cancel_gen_image, GENERATE
-from .vision_handler import vision_handler
-
-# custom_instrucions = {"role": "system", "content": instructions}
+from openai.types.chat import ChatCompletionUserMessageParam
+from src.helpers.permission import check_permission
+from .message_handler import send_request
+from .admin_handler import admin_handler
+from .my_prompts_handle import my_prompts_handler
+from .new_prompt_handler import create_new_prompt_handler
 
 
 @check_permission
@@ -83,30 +35,7 @@ async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     message_text = cast(str, update.message.text)
 
-    if message_text in [
-        "/linux_terminal",
-        "/rewrite",
-        "/cyber_secrity",
-        "/etymologists",
-        "/genius",
-        "/expand",
-        "/advanced_frontend",
-    ]:
-        context.bot_data.update({"initial": True})
-
-    # await update.get_bot().send_chat_action(
-    #     update.message.chat.id,
-    #     "typing",
-    #     write_timeout=15.0,
-    #     pool_timeout=10.0,  # type: ignore
-    # )
-
-    request = {
-        "role": "user",
-        "content": message_text
-        if not context.bot_data.get("initial", True)
-        else pick(message_text),
-    }
+    message: ChatCompletionUserMessageParam = {"role": "user", "content": message_text}
 
     if context.bot_data.get("initial", True):
         messages = []
@@ -126,21 +55,10 @@ async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         else:
             messages = []
 
-    # if len(messages) == 0:
-    #     messages.append(custom_instrucions)
-    messages.append(request)
+    messages.append(message)
     context.chat_data.update({"last_message_date": update.message.date.timestamp()})
     context.chat_data["messages"] = messages
 
-    data = {
-        "model": context.chat_data.get("model", None)
-        or os.getenv("model", "gpt-3.5-turbo-16k"),
-        "messages": messages,
-        # "max_tokens": 2048,
-        "stream": True,
-    }
+    await send_request(update=update, context=context, messages=messages)
 
-    first_name = getattr(update.message.from_user, "first_name", None)
-    print(f"************ from {first_name}: ************\n{data}")
-
-    await send_request(update=update, context=context, data=data)
+    # first_name = getattr(update.message.from_user, "first_name", None)

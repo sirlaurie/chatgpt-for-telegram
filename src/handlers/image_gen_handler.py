@@ -2,12 +2,16 @@
 # -*- coding: utf-8 -*-
 # @author: loricheung
 
-
+import os
 import httpx
-from src.helpers import headers
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
+
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f'Bearer {os.getenv("OPENAI_API_KEY") or ""}',
+}
 
 
 GENERATE, EXIT = range(2)

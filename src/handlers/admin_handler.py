@@ -8,7 +8,8 @@ from typing import Callable, cast
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from telegram.ext import ContextTypes, ConversationHandler, ExtBot
-from src.constants import (
+
+from src.constants.constant import (
     WAITING,
     PERMITTED,
     PREMIUM,
@@ -16,15 +17,17 @@ from src.constants import (
     DECLINE,
     UPGRADE,
     DOWNGRADE,
-    APPROVED_MESSAGE,
-    DECLINE_MESSAGE,
-    UPGRADE_MESSAGE,
-    DOWNGRANDE_MESSAGE,
     WAITING_COLUMN,
     ALLOW_COLUMN,
     PREMIUM_COLUMN,
 )
-from src.utils import update, query, query_one
+from src.constants.messages import (
+    APPROVED_MESSAGE,
+    DECLINE_MESSAGE,
+    UPGRADE_MESSAGE,
+    DOWNGRANDE_MESSAGE,
+)
+from src.utils import update_user, query_user, query
 
 
 CHOOSING, MANAGER = range(2)
@@ -43,14 +46,20 @@ def check_callback(func: Callable) -> Callable:
         if not query_data:
             return -1
         bot = context.bot
-        return await func(bot=bot, callback_query=callback_query, query_data=query_data, *args, **kwargs)
+        return await func(
+            bot=bot,
+            callback_query=callback_query,
+            query_data=query_data,
+            *args,
+            **kwargs,
+        )
 
     return wrapper
 
 
 async def admin_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if not update.message:
-        _ = context # no meaning. just for LSP to ignore unaccessed params
+        _ = context  # no meaning. just for LSP to ignore unaccessed params
         return -1
 
     if not update.effective_user:
@@ -82,8 +91,10 @@ async def admin_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
 
 @check_callback
-async def query_list(bot: ExtBot, callback_query: CallbackQuery, query_data: str) -> int:
-    _ = bot # no meaning. just for LSP
+async def query_list(
+    bot: ExtBot, callback_query: CallbackQuery, query_data: str
+) -> int:
+    _ = bot  # no meaning. just for LSP
     maps = {}
     if query_data == WAITING:
         maps.update({WAITING_COLUMN: 1})
@@ -92,7 +103,7 @@ async def query_list(bot: ExtBot, callback_query: CallbackQuery, query_data: str
     if query_data == PREMIUM:
         maps.update({PREMIUM_COLUMN: 1})
 
-    users = query(maps)
+    users = query(table="Users", maps=maps)
 
     extra_row = [
         InlineKeyboardButton("Back", callback_data="back"),
@@ -127,7 +138,7 @@ async def query_list(bot: ExtBot, callback_query: CallbackQuery, query_data: str
             [
                 InlineKeyboardButton(
                     f"👤 {users[user_index][1]} - {users[user_index][2]}",
-                    callback_data=str(users[user_index][2])
+                    callback_data=str(users[user_index][2]),
                 )
             ]
         )
@@ -144,9 +155,11 @@ async def query_list(bot: ExtBot, callback_query: CallbackQuery, query_data: str
 
 
 @check_callback
-async def manage_user(bot: ExtBot, callback_query: CallbackQuery, query_data: str) -> int:
-    _ = bot # no meaning. just for LSP
-    user = cast(tuple, query_one(int(query_data)))
+async def manage_user(
+    bot: ExtBot, callback_query: CallbackQuery, query_data: str
+) -> int:
+    _ = bot  # no meaning. just for LSP
+    user = cast(tuple, query_user(int(query_data)))
     inline_keyboard = [
         [
             InlineKeyboardButton(f"{APPROVE}", callback_data=f"{APPROVE} {user[2]}"),
@@ -181,16 +194,16 @@ async def action(bot: ExtBot, callback_query: CallbackQuery, query_data: str) ->
     ]
     try:
         if act == APPROVE:
-            update(int(telegram_id), 1, 0, 0)
+            update_user(int(telegram_id), 1, 0, 0)
             await bot.send_message(chat_id=int(telegram_id), text=APPROVED_MESSAGE)
         if act == DECLINE:
-            update(int(telegram_id), 0, 0, 1)
+            update_user(int(telegram_id), 0, 0, 1)
             await bot.send_message(chat_id=int(telegram_id), text=DECLINE_MESSAGE)
         if act == UPGRADE:
-            update(int(telegram_id), 1, 1, 0)
+            update_user(int(telegram_id), 1, 1, 0)
             await bot.send_message(chat_id=int(telegram_id), text=UPGRADE_MESSAGE)
         if act == DOWNGRADE:
-            update(int(telegram_id), 1, 0, 0)
+            update_user(int(telegram_id), 1, 0, 0)
             await bot.send_message(chat_id=int(telegram_id), text=DOWNGRANDE_MESSAGE)
         await callback_query.edit_message_text(
             text="As you wish, Sir",
@@ -204,13 +217,13 @@ async def action(bot: ExtBot, callback_query: CallbackQuery, query_data: str) ->
             reply_markup=InlineKeyboardMarkup(inline_keyboard),
             write_timeout=3600.0,
             pool_timeout=3600.0,
-            )
+        )
     return MANAGER
 
 
 @check_callback
 async def back(bot: ExtBot, callback_query: CallbackQuery, query_data: str) -> int:
-    _ = bot, query_data # no meaning. just for LSP
+    _ = bot, query_data  # no meaning. just for LSP
     inline_keyboard = [
         [
             InlineKeyboardButton(WAITING, callback_data=WAITING),
@@ -236,7 +249,7 @@ async def finish(bot: ExtBot, callback_query: CallbackQuery, query_data: str) ->
     """Returns `ConversationHandler.END`, which tells the
     ConversationHandler that the conversation is over.
     """
-    _ = bot, query_data # no meaning. just for LSP
+    _ = bot, query_data  # no meaning. just for LSP
     # await callback_query.answer()
     await callback_query.edit_message_text(text="Good bye, Sir!")
     return ConversationHandler.END
