@@ -103,7 +103,7 @@ async def query_list(
     if query_data == PREMIUM:
         maps.update({PREMIUM_COLUMN: 1})
 
-    users = query(table="Users", maps=maps)
+    users = query(table="User", maps=maps)
 
     extra_row = [
         InlineKeyboardButton("Back", callback_data="back"),

@@ -49,10 +49,12 @@ async def my_prompts_handler(
         inline_prompts_keyboard = [
             [
                 InlineKeyboardButton(
-                    user_prompts[i][1], callback_data=str(user_prompts[i][3])
+                    user_prompts[i][1],
+                    callback_data=f"prompt {str(user_prompts[i][3])}",
                 ),
                 InlineKeyboardButton(
-                    user_prompts[i + 1][1], callback_data=str(user_prompts[i + 1][3])
+                    user_prompts[i + 1][1],
+                    callback_data=f"prompt {str(user_prompts[i + 1][3])}",
                 ),
             ]
             for i in range(0, len(user_prompts) - 1, 2)
@@ -66,7 +68,7 @@ async def my_prompts_handler(
             [
                 InlineKeyboardButton(
                     f"{user_prompts[user_prompt_index][1]}",
-                    callback_data=str(user_prompts[user_prompt_index][3]),
+                    callback_data=f"prompt {str(user_prompts[user_prompt_index][3])}",
                 )
             ]
         )
@@ -127,8 +129,9 @@ async def prompt_callback_handler(
             reply_markup=InlineKeyboardMarkup(inline_keyboard=inline_prompts_keyboard),
         )
         return
-    if query_data != view_prompts and query_data is not None:
-        prompt = query(table="Prompt", maps={"createAt": int(query_data)})
+    if query_data is not None and query_data.startswith("prompt"):
+        prompt_id = query_data.split(" ")[1]
+        prompt = query(table="Prompt", maps={"createAt": int(prompt_id)})
 
         prompt_content = prompt[0][2]
         msg: ChatCompletionUserMessageParam = {

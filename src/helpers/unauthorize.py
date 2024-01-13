@@ -64,10 +64,10 @@ async def apply_to_approve(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     inline_markup = [
         [
             InlineKeyboardButton(
-                text="Approved", callback_data=f"{APPROVE} {telegram_id}"
+                text="Approved", callback_data=f"F {APPROVE} {telegram_id}"
             ),
             InlineKeyboardButton(
-                text="Decline", callback_data=f"{DECLINE} {telegram_id}"
+                text="Decline", callback_data=f"F {DECLINE} {telegram_id}"
             ),
         ]
     ]
@@ -111,7 +111,7 @@ async def approval_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     if not query_data:
         return
-    act, telegram_id = query_data.split()
+    _, act, telegram_id = query_data.split()
 
     if act == APPROVE:
         update_user(int(telegram_id), 1, 0, 0)

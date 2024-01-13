@@ -4,8 +4,6 @@
 
 # import re
 import os
-import json
-import html
 import logging
 
 from telegram.constants import ParseMode
@@ -87,13 +85,13 @@ from src.handlers.new_prompt_handler import (
 )
 
 # Enable logging
-# logging.basicConfig(
-#     filename="error.log",
-#     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-#     level=logging.DEBUG,
-# )
+logging.basicConfig(
+    filename="error.log",
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.DEBUG,
+)
 
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @check_permission
@@ -144,10 +142,12 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler(my_prompts_command, my_prompts_handler))
     application.add_handler(
-        CallbackQueryHandler(prompt_callback_handler, pattern=f"{view_prompts}|\\d+")
+        CallbackQueryHandler(
+            prompt_callback_handler, pattern=f"{view_prompts}|^prompt (17)\\d{8}$"
+        )
     )
     application.add_handler(
-        CallbackQueryHandler(approval_callback, pattern=f"{APPROVE}|{DECLINE}")
+        CallbackQueryHandler(approval_callback, pattern=f"^F ({APPROVE}|{DECLINE}) \\d+$")
     )
     new_prompt_conv_handler = ConversationHandler(
         entry_points=[
@@ -179,7 +179,7 @@ def main() -> None:
             MANAGER: [
                 CallbackQueryHandler(manage_user, pattern=r"\d+"),
                 CallbackQueryHandler(
-                    action, pattern=f"{APPROVE}|{DECLINE}|{UPGRADE}|{DOWNGRADE}"
+                    action, pattern=f"{APPROVE}|{DECLINE}|{UPGRADE}|{DOWNGRADE} \\d+$"
                 ),
                 CallbackQueryHandler(back, pattern="^back$"),
                 CallbackQueryHandler(finish, pattern="^finish$"),
@@ -233,6 +233,7 @@ def main() -> None:
     application.add_handler(image_gen_conv_handler)
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handler))
     application.add_handler(CommandHandler(document_command, document_start))
+    # application.add_handler(MessageHandler(filters.PHOTO, vision_handler))
     application.add_handler(MessageHandler(filters.Document.ALL, document_handler))
     # error handler
     # application.add_error_handler(error_handler)  # type: ignore

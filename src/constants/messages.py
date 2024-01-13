@@ -15,7 +15,7 @@ DECLINE_MESSAGE = "抱歉, 管理员拒绝了你的请求. 可能他并不认识
 
 UPGRADE_MESSAGE = "管理员已经将你设为高级用户, 现在你可以使用切换模型功能了.😘\n\nAdmin has upgraded your permission, now you can switch model.😘"
 
-DOWNGRANDE_MESSAGE = "管理员已经将你降级为普通用户, 你无法继续使用切换模型功能了.😔\\Admin has downgraded your permission, you are no longer to switch model.😔"
+DOWNGRANDE_MESSAGE = "管理员已经将你降级为普通用户, 你无法继续使用切换模型功能了.😔\n\nAdmin has downgraded your permission, you are no longer to switch model.😔"
 
 WELCOME_MESSAGE = "Hi, 你想和我说点什么吗"
 
