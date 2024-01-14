@@ -44,7 +44,9 @@ async def send_request(
     #     return
     if update.message is not None:
         message = update.message
-    elif update.callback_query is not None:
+    elif (
+        update.callback_query is not None and update.callback_query.message is not None
+    ):
         message = update.callback_query.message
     else:
         return
@@ -52,7 +54,7 @@ async def send_request(
     full_content = ""
     index = 0
     model = context.chat_data.get("model", os.getenv("model"))
-    print(f"messages: {messages}")
+
     stream = await async_client.chat.completions.create(
         messages=messages, model=model, stream=True
     )
