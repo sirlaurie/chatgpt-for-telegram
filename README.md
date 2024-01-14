@@ -2,17 +2,18 @@
 
 ### Features
 
-- ChatGPT like
-- Stream output
-- User managerment
-- Document support
-- DALLE support
+-  ChatGPT like
+-  Stream output
+-  User managerment
+-  Document support
+-  DALLE support
+-  Custom Prompt and share
 
 ### Requirements
 
-- Python3
-- OpenAI API Key
-- Telegram bot token
+-  Python3
+-  OpenAI API Key
+-  Telegram bot token
 
 ### Usage
 
@@ -28,6 +29,19 @@
 
    edit `.env` with your own API key and bot token
 
-3. Run
+3. Config bot commands
+
+   Here is commands list I used:
+
+   ```
+   my_prompts - user's private prompts
+   create_new_prompt - Create a new prompt
+   gen_image - Use Dall.E 3 to generate image
+   document - Upload document
+   translator - Use GPT as a translator
+   admin - only for the bot admin
+   ```
+
+4. Run
 
    `source .env && python3 start.py`
