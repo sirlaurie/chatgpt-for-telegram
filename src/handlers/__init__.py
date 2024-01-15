@@ -5,9 +5,6 @@
 
 __all__ = (
     "handler",
-    "admin_handler",
-    "my_prompts_handler",
-    "create_new_prompt_handler",
 )
 
 
@@ -19,9 +16,6 @@ from telegram.ext import ContextTypes
 from openai.types.chat import ChatCompletionUserMessageParam
 from src.helpers.permission import check_permission
 from .message_handler import send_request
-from .admin_handler import admin_handler
-from .my_prompts_handle import my_prompts_handler
-from .new_prompt_handler import create_new_prompt_handler
 
 
 @check_permission

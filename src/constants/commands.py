@@ -1,5 +1,6 @@
 # handler
 reset_command = "reset"
+switch_model_command = "switch_model"
 my_prompts_command = "my_prompts"
 create_new_prompt_command = "create_new_prompt"
 gen_image_command = "gen_image"
