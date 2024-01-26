@@ -10,10 +10,10 @@ from telegram.ext import ContextTypes
 from src.constants.models import (
     gpt_3p5_turbo,
     gpt_3p5_turbo_16k,
-    gpt_3p5_turbo_0613,
+    gpt_3p5_turbo_1106,
     gpt_3p5_turbo_16k_0613,
     gpt_4_v,
-    gpt_4_1106,
+    gpt_4_0125,
 )
 from src.utils import is_allowed
 from src.helpers.permission import check_permission
@@ -33,11 +33,11 @@ async def switch_model_callback(
     model = query.data
     if model not in [
         gpt_3p5_turbo,
-        gpt_3p5_turbo_0613,
+        gpt_3p5_turbo_1106,
         gpt_3p5_turbo_16k,
         gpt_3p5_turbo_16k_0613,
         gpt_4_v,
-        gpt_4_1106,
+        gpt_4_0125,
     ]:
         return
     context.chat_data.update({"model": model})
@@ -60,7 +60,7 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             [
                 InlineKeyboardButton("gpt-3.5-turbo", callback_data=str(gpt_3p5_turbo)),
                 InlineKeyboardButton(
-                    "gpt-3.5-turbo-0613", callback_data=str(gpt_3p5_turbo_0613)
+                    "gpt-3.5-turbo-0613", callback_data=str(gpt_3p5_turbo_1106)
                 ),
             ],
             [
@@ -74,7 +74,7 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             ],
             [
                 InlineKeyboardButton("gpt-4-v", callback_data=str(gpt_4_v)),
-                InlineKeyboardButton("gpt-4-1106", callback_data=str(gpt_4_1106)),
+                InlineKeyboardButton("gpt-4-1106", callback_data=str(gpt_4_0125)),
             ],
         ]
         reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)
