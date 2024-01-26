@@ -60,7 +60,7 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             [
                 InlineKeyboardButton("gpt-3.5-turbo", callback_data=str(gpt_3p5_turbo)),
                 InlineKeyboardButton(
-                    "gpt-3.5-turbo-0613", callback_data=str(gpt_3p5_turbo_1106)
+                    "gpt-3.5-turbo-1106", callback_data=str(gpt_3p5_turbo_1106)
                 ),
             ],
             [
@@ -74,7 +74,7 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             ],
             [
                 InlineKeyboardButton("gpt-4-v", callback_data=str(gpt_4_v)),
-                InlineKeyboardButton("gpt-4-1106", callback_data=str(gpt_4_0125)),
+                InlineKeyboardButton("gpt-4-1205", callback_data=str(gpt_4_0125)),
             ],
         ]
         reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)
