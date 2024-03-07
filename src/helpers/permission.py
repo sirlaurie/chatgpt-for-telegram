@@ -33,7 +33,7 @@ def check_permission(func: Callable) -> Callable:
         if not permitted and msg == NOT_ALLOWD:
             await context.bot.send_message(
                 chat_id=os.getenv("DEVELOPER_CHAT_ID", 0),
-                text=f"from {update.effective_user.username}: {message}",
+                text=f"from {update.effective_user.first_name}: {message}",
                 parse_mode=ParseMode.HTML,
             )
             await update.message.reply_text(text=NOT_ALLOWD)
