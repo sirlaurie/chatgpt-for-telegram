@@ -1,20 +1,20 @@
-## telegram bot base on OpenAI
+## telegram bot base on OpenAI and Gemini
 
 ### Features
 
--  ChatGPT like
--  Stream output
--  User managerment
--  Document support
--  DALLE support
--  Custom Prompt and share
+- ChatGPT like
+- Stream output
+- User managerment
+- Document support
+- DALLE support
+- Custom Prompt and share
 
 ### Requirements
 
--  Python3
--  OpenAI API Key
--  Telegram bot token
--  [Poetry](https://python-poetry.org/) (Optional)
+- Python3
+- OpenAI API Key or Google Gemini API Key
+- Telegram bot token
+- [Poetry](https://python-poetry.org/) (Optional)
 
 ### Usage
 
