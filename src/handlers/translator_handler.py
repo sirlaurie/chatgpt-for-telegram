@@ -17,7 +17,7 @@ from src.helpers.permission import check_permission
 
 headers = {
     "Content-Type": "application/json",
-    "Authorization": f'Bearer {os.getenv("OPENAI_API_KEY") or ""}',
+    "Authorization": f'Bearer {os.environ.get("OPENAI_API_KEY") or ""}',
 }
 
 

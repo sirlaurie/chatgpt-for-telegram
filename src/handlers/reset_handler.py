@@ -31,5 +31,6 @@ async def reset_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     if isinstance(context.chat_data, dict):
         context.chat_data["messages"] = []
+        context.chat_data["history"] = []
     await update.message.reply_text(text=NEW_CONVERSATION_MESSAGE)
     return

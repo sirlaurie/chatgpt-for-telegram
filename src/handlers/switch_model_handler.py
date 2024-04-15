@@ -9,11 +9,11 @@ from telegram.ext import ContextTypes
 
 from src.constants.models import (
     gpt_3p5_turbo,
-    gpt_3p5_turbo_16k,
     gpt_3p5_turbo_1106,
-    gpt_3p5_turbo_16k_0613,
-    gpt_4_v,
-    gpt_4_0125,
+    gpt_4,
+    gpt_4_turbo,
+    gemini_pro,
+    gemini_1p5_pro,
 )
 from src.utils import is_allowed
 from src.helpers.permission import check_permission
@@ -34,10 +34,10 @@ async def switch_model_callback(
     if model not in [
         gpt_3p5_turbo,
         gpt_3p5_turbo_1106,
-        gpt_3p5_turbo_16k,
-        gpt_3p5_turbo_16k_0613,
-        gpt_4_v,
-        gpt_4_0125,
+        gpt_4,
+        gpt_4_turbo,
+        gemini_pro,
+        gemini_1p5_pro,
     ]:
         return
     context.chat_data.update({"model": model})
@@ -55,28 +55,27 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     if not update.message or not isinstance(context.chat_data, dict):
         return
 
+    inline_keybord = [
+        [
+            InlineKeyboardButton("gpt-3.5-turbo", callback_data=str(gpt_3p5_turbo)),
+            InlineKeyboardButton(
+                "gpt-3.5-turbo-1106", callback_data=str(gpt_3p5_turbo_1106)
+            ),
+        ],
+        [
+            InlineKeyboardButton("gemini pro", callback_data=str(gemini_pro)),
+            InlineKeyboardButton("gemini 1.5 pro", callback_data=str(gemini_1p5_pro)),
+        ],
+    ]
+
     if premium:
-        inline_keybord = [
+        premium_inline_keybord = [
             [
-                InlineKeyboardButton("gpt-3.5-turbo", callback_data=str(gpt_3p5_turbo)),
-                InlineKeyboardButton(
-                    "gpt-3.5-turbo-1106", callback_data=str(gpt_3p5_turbo_1106)
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    "gpt-3.5-turbo-16k", callback_data=str(gpt_3p5_turbo_16k)
-                ),
-                InlineKeyboardButton(
-                    "gpt-3.5-turbo-16k-0613",
-                    callback_data=str(gpt_3p5_turbo_16k_0613),
-                ),
-            ],
-            [
-                InlineKeyboardButton("gpt-4-v", callback_data=str(gpt_4_v)),
-                InlineKeyboardButton("gpt-4-1205", callback_data=str(gpt_4_0125)),
+                InlineKeyboardButton("gpt-4", callback_data=str(gpt_4)),
+                InlineKeyboardButton("gpt-4-turbo", callback_data=str(gpt_4_turbo)),
             ],
         ]
+        inline_keybord.extend(premium_inline_keybord)
         reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)
 
         await update.message.reply_text(
@@ -85,7 +84,10 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
         )
         return
 
+    reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)
+
     await update.message.reply_text(
-        "Sorry, 由于GPT-4等高级模型的费用较高(GPT-3.5的20倍), 默认用户当前只能使用GPT-3.5-turbo-16k模型"
+        text="Sorry, 由于GPT-4系列模型的费用较高(约是GPT-3.5的20倍), 默认用户当前只能使用GPT-3.5系列模型. 如果你愿意资助, 可以开放GPT-4模型.",
+        reply_markup=reply_markup
     )
     return

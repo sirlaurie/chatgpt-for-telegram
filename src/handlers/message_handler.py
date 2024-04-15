@@ -11,6 +11,7 @@ import httpx
 
 from openai import AsyncOpenAI
 from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
+import google.generativeai as genai
 from fitz import fitz
 from telegram import Update
 from telegram.constants import ParseMode
@@ -53,25 +54,39 @@ async def send_request(
     msg = await message.reply_text(text=INIT_REPLY_MESSAGE, pool_timeout=15.0)
     full_content = ""
     index = 0
-    model = context.chat_data.get("model", os.getenv("model"))
+    model_name: str = context.chat_data.get("model", os.environ.get("model"))
 
-    stream = await async_client.chat.completions.create(
-        messages=messages, model=model, stream=True
-    )
-    async for chunk in stream:
-        if chunk.choices[0].delta.content is not None:
-            full_content += chunk.choices[0].delta.content
-        if index and index % 9 == 0:
+    if model_name.startswith("gpt"):
+        stream = await async_client.chat.completions.create(
+            messages=messages, model=model_name, stream=True
+        )
+        async for chunk in stream:
+            if chunk.choices[0].delta.content is not None:
+                full_content += chunk.choices[0].delta.content
+            if index and index % 9 == 0:
+                await msg.edit_text(
+                    text=escape_markdown(text=full_content, version=2),
+                    parse_mode=ParseMode.MARKDOWN_V2,
+                )
+            index += 1
+
+    if model_name.startswith("gemini"):
+        model = genai.GenerativeModel(model_name=model_name)
+        chat = model.start_chat(history=context.chat_data.get("history", []))
+        reponse = chat.send_message(content=messages[-1].get("content"), stream=True)
+        for chunk in reponse:
+            full_content += chunk.text
             await msg.edit_text(
                 text=escape_markdown(text=full_content, version=2),
-                parse_mode=ParseMode.MARKDOWN_V2,
+                parse_mode=ParseMode.MARKDOWN_V2
             )
-        index += 1
+
+        context.chat_data["history"] = chat.history
 
     to_sent_message = (
         f"{html.escape(full_content)}\n\n"
         f"----------------------------------------\n"
-        f"<i>🎨 Generate by model: {model}.</i>\n"
+        f"<i>🎨 Generate by model: {model_name}.</i>\n"
     )
     await msg.edit_text(
         text=to_sent_message,

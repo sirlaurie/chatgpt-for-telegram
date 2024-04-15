@@ -144,7 +144,7 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler(reset_command, reset_handler))
     application.add_handler(CommandHandler(switch_model_command, switch_model_handler))
-    application.add_handler(CallbackQueryHandler(switch_model_callback, pattern="^gpt"))
+    application.add_handler(CallbackQueryHandler(switch_model_callback, pattern="^gpt|^gemini"))
     application.add_handler(CommandHandler(my_prompts_command, my_prompts_handler))
     application.add_handler(
         CallbackQueryHandler(
