@@ -9,7 +9,7 @@ from typing import Callable, cast
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from telegram.ext import ContextTypes, ConversationHandler, ExtBot
 
-from src.constants.constant import (
+from ..constants.constant import (
     WAITING,
     PERMITTED,
     PREMIUM,
@@ -21,13 +21,13 @@ from src.constants.constant import (
     ALLOW_COLUMN,
     PREMIUM_COLUMN,
 )
-from src.constants.messages import (
+from ..constants.messages import (
     APPROVED_MESSAGE,
     DECLINE_MESSAGE,
     UPGRADE_MESSAGE,
     DOWNGRANDE_MESSAGE,
 )
-from src.utils import update_user, query_user, query
+from ..utils import update_user, query_user, query
 
 
 CHOOSING, MANAGER = range(2)

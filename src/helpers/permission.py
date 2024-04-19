@@ -10,8 +10,8 @@ from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import CallbackContext
 
-from src.constants.messages import NOT_ALLOWD, NOT_PERMITED
-from src.utils import is_allowed
+from ..constants.messages import NOT_ALLOWD, NOT_PERMITED
+from ..utils import is_allowed
 from .unauthorize import warning
 
 

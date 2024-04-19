@@ -7,7 +7,7 @@ from fitz import fitz
 from telegram import Update
 from io import BytesIO
 
-from src.constants.constant import SUPPPORTED_FILE
+from ..constants.constant import SUPPPORTED_FILE
 
 
 async def read_document(update: Update, file_path: str) -> str:

@@ -7,7 +7,7 @@ import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
-from src.constants.models import (
+from ..constants.models import (
     gpt_3p5_turbo,
     gpt_3p5_turbo_1106,
     gpt_4,
@@ -15,8 +15,8 @@ from src.constants.models import (
     gemini_pro,
     gemini_1p5_pro,
 )
-from src.utils import is_allowed
-from src.helpers.permission import check_permission
+from ..utils import is_allowed
+from ..helpers.permission import check_permission
 
 
 async def switch_model_callback(

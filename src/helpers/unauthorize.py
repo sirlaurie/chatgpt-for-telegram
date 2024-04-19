@@ -7,15 +7,15 @@ import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
-from src.constants.constant import APPROVE, DECLINE
-from src.constants.messages import (
+from ..constants.constant import APPROVE, DECLINE
+from ..constants.messages import (
     NOT_PERMITED,
     ASK_FOR_PERMITED,
     APPROVED_MESSAGE,
     DECLINE_MESSAGE,
     PROCESS_TIMEOUT,
 )
-from src.utils.operations import is_allowed, add_user, update_user
+from ..utils.operations import is_allowed, add_user, update_user
 
 
 apply_timeout = read_timeout = write_timeout = pool_timeout = 3600.0

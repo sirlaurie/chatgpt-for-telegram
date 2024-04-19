@@ -12,8 +12,8 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram.helpers import escape_markdown
 
-from src.constants.messages import INIT_REPLY_MESSAGE
-from src.helpers.permission import check_permission
+from ..constants.messages import INIT_REPLY_MESSAGE
+from ..helpers.permission import check_permission
 
 headers = {
     "Content-Type": "application/json",

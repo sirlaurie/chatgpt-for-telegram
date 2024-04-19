@@ -7,7 +7,7 @@ from telegram import Update
 import telegram
 from telegram.ext import ContextTypes
 
-from src.helpers import headers
+from ..helpers import headers
 
 
 async def vision_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

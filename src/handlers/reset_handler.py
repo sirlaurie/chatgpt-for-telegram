@@ -6,7 +6,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from src.constants.messages import NEW_CONVERSATION_MESSAGE
+from ..constants.messages import NEW_CONVERSATION_MESSAGE
 
 # from src.constants.commands import (
 #     reset_command,
@@ -16,7 +16,7 @@ from src.constants.messages import NEW_CONVERSATION_MESSAGE
 #     create_new_prompt_command,
 #     create_new_assistant_command,
 # )
-from src.helpers.permission import check_permission
+from ..helpers.permission import check_permission
 
 
 @check_permission

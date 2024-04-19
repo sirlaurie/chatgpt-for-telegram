@@ -13,13 +13,14 @@ from openai import AsyncOpenAI
 from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
 import google.generativeai as genai
 from fitz import fitz
-from telegram import Update
+from telegram import Update, Message
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 from telegram.helpers import escape_markdown
 
-from src.constants.messages import INIT_REPLY_MESSAGE
-from src.constants.constant import SUPPPORTED_FILE
+from ..constants import safety_settings
+from ..constants.messages import INIT_REPLY_MESSAGE
+from ..constants.constant import SUPPPORTED_FILE
 
 
 async_client = AsyncOpenAI()
@@ -39,10 +40,8 @@ async def send_request(
     Returns:
         None
     """
-    # print(f"update message: {update.message}")
+
     assert context.chat_data is not None
-    # if update.message is None and update.callback_query is None:
-    #     return
     if update.message is not None:
         message = update.message
     elif (
@@ -50,6 +49,8 @@ async def send_request(
     ):
         message = update.callback_query.message
     else:
+        return
+    if not isinstance(message, Message):
         return
     msg = await message.reply_text(text=INIT_REPLY_MESSAGE, pool_timeout=15.0)
     full_content = ""
@@ -71,14 +72,16 @@ async def send_request(
             index += 1
 
     if model_name.startswith("gemini"):
-        model = genai.GenerativeModel(model_name=model_name)
+        model = genai.GenerativeModel(
+            model_name=model_name, safety_settings=safety_settings
+        )
         chat = model.start_chat(history=context.chat_data.get("history", []))
         reponse = chat.send_message(content=messages[-1].get("content"), stream=True)
         for chunk in reponse:
             full_content += chunk.text
             await msg.edit_text(
                 text=escape_markdown(text=full_content, version=2),
-                parse_mode=ParseMode.MARKDOWN_V2
+                parse_mode=ParseMode.MARKDOWN_V2,
             )
 
         context.chat_data["history"] = chat.history

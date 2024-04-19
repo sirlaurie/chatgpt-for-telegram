@@ -6,8 +6,8 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
 
-from src.helpers.permission import check_permission
-from src.utils.operations import add_prompt
+from ..helpers.permission import check_permission
+from ..utils.operations import add_prompt
 
 
 prompt_name, prompt_content, share = range(3)

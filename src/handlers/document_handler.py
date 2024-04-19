@@ -9,8 +9,8 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 from telegram.helpers import escape_markdown
 
-from src.utils.document import read_document
-from src.handlers.message_handler import send_request
+from ..utils.document import read_document
+from .message_handler import send_request
 
 
 async def document_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

@@ -8,9 +8,9 @@ from openai.types.chat import ChatCompletionUserMessageParam
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
-from src.handlers.message_handler import send_request
-from src.helpers.permission import check_permission
-from src.utils.operations import query
+from .message_handler import send_request
+from ..helpers.permission import check_permission
+from ..utils.operations import query
 
 view_prompts = "view_prompts"
 

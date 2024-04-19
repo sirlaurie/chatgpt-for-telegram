@@ -5,7 +5,7 @@
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 import time
 from ._db import DBClient
-from src.constants.messages import NOT_ALLOWD, NOT_PERMITED
+from ..constants.messages import NOT_ALLOWD, NOT_PERMITED
 
 
 client = DBClient()

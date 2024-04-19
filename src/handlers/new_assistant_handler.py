@@ -6,8 +6,8 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from src.constants.commands import create_new_assistant_command
-from src.helpers.permission import check_permission
+from ..constants.commands import create_new_assistant_command
+from ..helpers.permission import check_permission
 
 
 @check_permission
