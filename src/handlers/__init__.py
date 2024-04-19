@@ -3,9 +3,7 @@
 # @author: loricheung
 
 
-__all__ = (
-    "handler",
-)
+__all__ = ("handler",)
 
 
 import datetime
@@ -13,9 +11,9 @@ from typing import cast
 
 from telegram import Update
 from telegram.ext import ContextTypes
-from openai.types.chat import ChatCompletionUserMessageParam
-from src.helpers.permission import check_permission
+from ..helpers.permission import check_permission
 from .message_handler import send_request
+# from ..constants.messages import SYSTEM_PROMPT
 
 
 @check_permission
@@ -28,8 +26,8 @@ async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     context.bot_data.update({"initial": False})
 
     message_text = cast(str, update.message.text)
-
-    message: ChatCompletionUserMessageParam = {"role": "user", "content": message_text}
+    # system_prompt = {"role": "system", "content": SYSTEM_PROMPT}
+    message = {"role": "user", "content": message_text}
 
     if context.bot_data.get("initial", True):
         messages = []
@@ -54,5 +52,3 @@ async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     context.chat_data["messages"] = messages
 
     await send_request(update=update, context=context, messages=messages)
-
-    # first_name = getattr(update.message.from_user, "first_name", None)

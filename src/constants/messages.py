@@ -22,3 +22,5 @@ WELCOME_MESSAGE = "Hi, 你想和我说点什么吗"
 NEW_CONVERSATION_MESSAGE = "好的, 已为你开启新会话! 请继续输入你的问题."
 
 INIT_REPLY_MESSAGE = "hold my beer ... "
+
+SYSTEM_PROMPT = "1. you are a helpful assistant. please reply user with user input language. 2. 你是一个智能助手, 请以用户的语言类型回复用户的需求"

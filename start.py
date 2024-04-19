@@ -44,7 +44,10 @@ from src.constants.constant import (
 from src.handlers import handler
 from src.handlers.admin_handler import admin_handler
 from src.handlers.reset_handler import reset_handler
-from src.handlers.switch_model_handler import switch_model_handler, switch_model_callback
+from src.handlers.switch_model_handler import (
+    switch_model_handler,
+    switch_model_callback,
+)
 from src.handlers.my_prompts_handler import my_prompts_handler
 from src.handlers.new_prompt_handler import create_new_prompt_handler
 from src.handlers.document_handler import document_handler, document_start
@@ -144,7 +147,11 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler(reset_command, reset_handler))
     application.add_handler(CommandHandler(switch_model_command, switch_model_handler))
-    application.add_handler(CallbackQueryHandler(switch_model_callback, pattern="^gpt|^gemini"))
+    application.add_handler(
+        CallbackQueryHandler(
+            switch_model_callback, pattern="^gpt|^gemini|^llama|^mixtral"
+        )
+    )
     application.add_handler(CommandHandler(my_prompts_command, my_prompts_handler))
     application.add_handler(
         CallbackQueryHandler(
@@ -152,7 +159,9 @@ def main() -> None:
         )
     )
     application.add_handler(
-        CallbackQueryHandler(approval_callback, pattern=f"^F ({APPROVE}|{DECLINE}) \\d+$")
+        CallbackQueryHandler(
+            approval_callback, pattern=f"^F ({APPROVE}|{DECLINE}) \\d+$"
+        )
     )
     new_prompt_conv_handler = ConversationHandler(
         entry_points=[

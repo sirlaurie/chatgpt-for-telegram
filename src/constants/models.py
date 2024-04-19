@@ -8,3 +8,6 @@ gpt_4 = "gpt-4"
 
 gemini_pro = "gemini-1.0-pro"
 gemini_1p5_pro = "gemini-1.5-pro-latest"
+
+llama3 = "llama3-8b-8192"
+mixtral_8x7b = "mixtral-8x7b-32768"

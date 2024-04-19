@@ -14,6 +14,8 @@ from ..constants.models import (
     gpt_4_turbo,
     gemini_pro,
     gemini_1p5_pro,
+    llama3,
+    mixtral_8x7b,
 )
 from ..utils import is_allowed
 from ..helpers.permission import check_permission
@@ -38,6 +40,8 @@ async def switch_model_callback(
         gpt_4_turbo,
         gemini_pro,
         gemini_1p5_pro,
+        llama3,
+        mixtral_8x7b,
     ]:
         return
     context.chat_data.update({"model": model})
@@ -66,6 +70,10 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             InlineKeyboardButton("gemini pro", callback_data=str(gemini_pro)),
             InlineKeyboardButton("gemini 1.5 pro", callback_data=str(gemini_1p5_pro)),
         ],
+        [
+            InlineKeyboardButton("llama3", callback_data=str(llama3)),
+            InlineKeyboardButton("mixtral 8x7b", callback_data=str(mixtral_8x7b)),
+        ],
     ]
 
     if premium:
@@ -88,6 +96,6 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
 
     await update.message.reply_text(
         text="Sorry, 由于GPT-4系列模型的费用较高(约是GPT-3.5的20倍), 默认用户当前只能使用GPT-3.5系列模型. 如果你愿意资助, 可以开放GPT-4模型.",
-        reply_markup=reply_markup
+        reply_markup=reply_markup,
     )
     return

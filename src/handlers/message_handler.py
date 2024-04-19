@@ -9,9 +9,6 @@ from io import BytesIO
 from typing import Dict, List
 import httpx
 
-from openai import AsyncOpenAI
-from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
-import google.generativeai as genai
 from fitz import fitz
 from telegram import Update, Message
 from telegram.constants import ParseMode
@@ -21,15 +18,13 @@ from telegram.helpers import escape_markdown
 from ..constants import safety_settings
 from ..constants.messages import INIT_REPLY_MESSAGE
 from ..constants.constant import SUPPPORTED_FILE
-
-
-async_client = AsyncOpenAI()
+from ..helpers.msp import llm_services, genai
 
 
 async def send_request(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-    messages: List[ChatCompletionMessageParam],
+    messages: List[dict],
 ) -> None:
     """
     Sends the request to the server and processes the response.
@@ -57,8 +52,11 @@ async def send_request(
     index = 0
     model_name: str = context.chat_data.get("model", os.environ.get("model"))
 
-    if model_name.startswith("gpt"):
-        stream = await async_client.chat.completions.create(
+    client = llm_services.get(model_name)
+    assert client is not None
+
+    if client is not genai:
+        stream = await client.chat.completions.create(
             messages=messages, model=model_name, stream=True
         )
         async for chunk in stream:
@@ -70,8 +68,7 @@ async def send_request(
                     parse_mode=ParseMode.MARKDOWN_V2,
                 )
             index += 1
-
-    if model_name.startswith("gemini"):
+    else:
         model = genai.GenerativeModel(
             model_name=model_name, safety_settings=safety_settings
         )
