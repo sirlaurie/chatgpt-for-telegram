@@ -10,6 +10,7 @@ from ..constants.models import (
     gemini_pro,
     gemini_1p5_pro,
     llama3,
+    llama3_70b,
     mixtral_8x7b,
 )
 
@@ -26,5 +27,6 @@ llm_services = {
     gemini_pro: genai,
     gemini_1p5_pro: genai,
     llama3: groq_client,
+    llama3_70b: groq_client,
     mixtral_8x7b: groq_client,
 }

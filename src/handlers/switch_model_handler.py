@@ -15,6 +15,7 @@ from ..constants.models import (
     gemini_pro,
     gemini_1p5_pro,
     llama3,
+    llama3_70b,
     mixtral_8x7b,
 )
 from ..utils import is_allowed
@@ -41,6 +42,7 @@ async def switch_model_callback(
         gemini_pro,
         gemini_1p5_pro,
         llama3,
+        llama3_70b,
         mixtral_8x7b,
     ]:
         return
@@ -71,7 +73,8 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             InlineKeyboardButton("gemini 1.5 pro", callback_data=str(gemini_1p5_pro)),
         ],
         [
-            InlineKeyboardButton("llama3", callback_data=str(llama3)),
+            InlineKeyboardButton("llama3-8b", callback_data=str(llama3)),
+            InlineKeyboardButton("llama3-70b", callback_data=str(llama3_70b)),
             InlineKeyboardButton("mixtral 8x7b", callback_data=str(mixtral_8x7b)),
         ],
     ]
