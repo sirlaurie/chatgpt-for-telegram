@@ -30,7 +30,7 @@ async def switch_model_callback(
     if not query:
         return
 
-    await query.answer()
+    _ = await query.answer()
     if not isinstance(context.chat_data, dict):
         return
     model = query.data
@@ -48,7 +48,7 @@ async def switch_model_callback(
         return
     context.chat_data.update({"model": model})
 
-    await query.edit_message_text(text=f"OK! 已为您切换到 {model} 模型")
+    _ = await query.edit_message_text(text=f"OK! 已为您切换到 {model} 模型")
 
 
 @check_permission
@@ -69,7 +69,7 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             ),
         ],
         [
-            InlineKeyboardButton("gemini pro", callback_data=str(gemini_2_flash)),
+            InlineKeyboardButton("gemini 2.0 flash", callback_data=str(gemini_2_flash)),
             InlineKeyboardButton("gemini 1.5 pro", callback_data=str(gemini_1p5_pro)),
         ],
         [
@@ -82,14 +82,14 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     if premium:
         premium_inline_keybord = [
             [
-                InlineKeyboardButton("gpt-4", callback_data=str(gpt_4o)),
+                InlineKeyboardButton("gpt-4o", callback_data=str(gpt_4o)),
                 InlineKeyboardButton("gpt-4-turbo", callback_data=str(gpt_4_turbo)),
             ],
         ]
         inline_keybord.extend(premium_inline_keybord)
         reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)
 
-        await update.message.reply_text(
+        _ = await update.message.reply_text(
             f"当前使用的模型是: {context.chat_data.get('model', None) or os.getenv('model')}. 切换你要使用的模型:",
             reply_markup=reply_markup,
         )
@@ -97,7 +97,7 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
 
     reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)
 
-    await update.message.reply_text(
+    _ = await update.message.reply_text(
         text="Sorry, 由于GPT-4系列模型的费用较高(约是GPT-3.5的20倍), 默认用户当前只能使用GPT-3.5系列模型. 如果你愿意资助, 可以开放GPT-4模型.",
         reply_markup=reply_markup,
     )

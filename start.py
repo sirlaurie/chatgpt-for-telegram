@@ -104,7 +104,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
         _ = context
         return
-    await update.message.reply_text(text=WELCOME_MESSAGE)
+    _ = await update.message.reply_text(text=WELCOME_MESSAGE)
 
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -127,7 +127,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     if hasattr(update, "effective_user") and update.effective_user:
         user_id = update.effective_user.id
-        await context.bot.send_message(
+        _ = await context.bot.send_message(
             chat_id=user_id,
             text=f"<pre>ERROR: {context.error}</pre>\n\n",
             parse_mode=ParseMode.HTML,

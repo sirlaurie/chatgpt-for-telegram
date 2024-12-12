@@ -82,7 +82,7 @@ async def admin_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             InlineKeyboardButton("Finish", callback_data="finish"),
         ],
     ]
-    await update.message.reply_text(
+    _ = await update.message.reply_text(
         text="选择需要管理的名单: ",
         reply_markup=InlineKeyboardMarkup(inline_keyboard),
     )
@@ -111,7 +111,7 @@ async def query_list(
     ]
 
     if not users:
-        await callback_query.edit_message_text(
+        _ = await callback_query.edit_message_text(
             text=f"目前{query_data}没有用户",
             reply_markup=InlineKeyboardMarkup([extra_row]),
             write_timeout=3600.0,
@@ -145,7 +145,7 @@ async def query_list(
 
     inline_keyboard.append(extra_row)
 
-    await callback_query.edit_message_text(
+    _ = await callback_query.edit_message_text(
         text=f"这是{query_data}: ",
         reply_markup=InlineKeyboardMarkup(inline_keyboard),
         write_timeout=3600.0,
@@ -174,7 +174,7 @@ async def manage_user(
             InlineKeyboardButton("Finish", callback_data="finish"),
         ],
     ]
-    await callback_query.edit_message_text(
+    _ = await callback_query.edit_message_text(
         text=f"选择对用户 {user[1]} 的操作: ",
         reply_markup=InlineKeyboardMarkup(inline_keyboard),
         write_timeout=3600.0,
@@ -195,24 +195,24 @@ async def action(bot: ExtBot, callback_query: CallbackQuery, query_data: str) ->
     try:
         if act == APPROVE:
             update_user(int(telegram_id), 1, 0, 0)
-            await bot.send_message(chat_id=int(telegram_id), text=APPROVED_MESSAGE)
+            _ = await bot.send_message(chat_id=int(telegram_id), text=APPROVED_MESSAGE)
         if act == DECLINE:
             update_user(int(telegram_id), 0, 0, 1)
-            await bot.send_message(chat_id=int(telegram_id), text=DECLINE_MESSAGE)
+            _ = await bot.send_message(chat_id=int(telegram_id), text=DECLINE_MESSAGE)
         if act == UPGRADE:
             update_user(int(telegram_id), 1, 1, 0)
-            await bot.send_message(chat_id=int(telegram_id), text=UPGRADE_MESSAGE)
+            _ = await bot.send_message(chat_id=int(telegram_id), text=UPGRADE_MESSAGE)
         if act == DOWNGRADE:
             update_user(int(telegram_id), 1, 0, 0)
-            await bot.send_message(chat_id=int(telegram_id), text=DOWNGRANDE_MESSAGE)
-        await callback_query.edit_message_text(
+            _ = await bot.send_message(chat_id=int(telegram_id), text=DOWNGRANDE_MESSAGE)
+        _ = await callback_query.edit_message_text(
             text="As you wish, Sir",
             reply_markup=InlineKeyboardMarkup(inline_keyboard),
             write_timeout=3600.0,
             pool_timeout=3600.0,
         )
     except Exception as e:
-        await callback_query.edit_message_text(
+        _ = await callback_query.edit_message_text(
             text=f"the action was successfully done, but a error was happen, here is the reson\n{e}",
             reply_markup=InlineKeyboardMarkup(inline_keyboard),
             write_timeout=3600.0,
@@ -235,7 +235,7 @@ async def back(bot: ExtBot, callback_query: CallbackQuery, query_data: str) -> i
             InlineKeyboardButton("Finish", callback_data="finish"),
         ],
     ]
-    await callback_query.edit_message_text(
+    _ = await callback_query.edit_message_text(
         text="选择需要管理的名单: ",
         reply_markup=InlineKeyboardMarkup(inline_keyboard),
         write_timeout=3600.0,
@@ -251,5 +251,5 @@ async def finish(bot: ExtBot, callback_query: CallbackQuery, query_data: str) ->
     """
     _ = bot, query_data  # no meaning. just for LSP
     # await callback_query.answer()
-    await callback_query.edit_message_text(text="Good bye, Sir!")
+    _ = await callback_query.edit_message_text(text="Good bye, Sir!")
     return ConversationHandler.END
