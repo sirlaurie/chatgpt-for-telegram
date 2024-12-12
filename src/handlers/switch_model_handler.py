@@ -10,9 +10,9 @@ from telegram.ext import ContextTypes
 from ..constants.models import (
     gpt_3p5_turbo,
     gpt_3p5_turbo_1106,
-    gpt_4,
+    gpt_4o,
     gpt_4_turbo,
-    gemini_pro,
+    gemini_2_flash,
     gemini_1p5_pro,
     llama3,
     llama3_70b,
@@ -37,9 +37,9 @@ async def switch_model_callback(
     if model not in [
         gpt_3p5_turbo,
         gpt_3p5_turbo_1106,
-        gpt_4,
+        gpt_4o,
         gpt_4_turbo,
-        gemini_pro,
+        gemini_2_flash,
         gemini_1p5_pro,
         llama3,
         llama3_70b,
@@ -69,7 +69,7 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             ),
         ],
         [
-            InlineKeyboardButton("gemini pro", callback_data=str(gemini_pro)),
+            InlineKeyboardButton("gemini pro", callback_data=str(gemini_2_flash)),
             InlineKeyboardButton("gemini 1.5 pro", callback_data=str(gemini_1p5_pro)),
         ],
         [
@@ -82,7 +82,7 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     if premium:
         premium_inline_keybord = [
             [
-                InlineKeyboardButton("gpt-4", callback_data=str(gpt_4)),
+                InlineKeyboardButton("gpt-4", callback_data=str(gpt_4o)),
                 InlineKeyboardButton("gpt-4-turbo", callback_data=str(gpt_4_turbo)),
             ],
         ]
