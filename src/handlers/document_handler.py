@@ -18,7 +18,7 @@ async def document_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         _ = context  # no meaning. just for LSP
         return
 
-    await update.message.reply_text(
+    _ = await update.message.reply_text(
         text=escape_markdown(
             text="文件功能尚在测试中, 可能不稳定, 如有问题请反馈给我的主人.\n支持各种纯文本文件, 如`.md`, `.txt`, `.py`, 或者专有格式文档, 如PDF, EPUB.\n\n请发送你要分析的文件",
             version=2,

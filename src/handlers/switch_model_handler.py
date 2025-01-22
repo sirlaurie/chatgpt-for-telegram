@@ -65,9 +65,9 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             ),
         ],
         [
-            InlineKeyboardButton("Eemini 2.0 Flash", callback_data=str(gemini_2_flash)),
+            InlineKeyboardButton("Gemini 2.0 Flash", callback_data=str(gemini_2_flash)),
             InlineKeyboardButton(
-                "Gemini Experimental", callback_data=str(gemini_experimental)
+                "Gemini Exp 1206", callback_data=str(gemini_experimental)
             ),
         ],
         [

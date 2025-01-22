@@ -1,6 +1,5 @@
 from openai import AsyncOpenAI
 import google.generativeai as genai
-# from groq import AsyncGroq
 
 from ..constants.models import (
     gpt_3p5_turbo,
@@ -13,7 +12,6 @@ from ..constants.models import (
 )
 
 openai_client = AsyncOpenAI()
-# groq_client = AsyncGroq()
 genai.configure()
 
 
