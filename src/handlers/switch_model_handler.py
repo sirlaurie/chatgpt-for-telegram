@@ -13,10 +13,8 @@ from ..constants.models import (
     gpt_4o,
     gpt_4_turbo,
     gemini_2_flash,
-    gemini_1p5_pro,
-    llama3,
-    llama3_70b,
-    mixtral_8x7b,
+    gemini_experimental,
+    gemini_2_flash_thinking,
 )
 from ..utils import is_allowed
 from ..helpers.permission import check_permission
@@ -40,10 +38,8 @@ async def switch_model_callback(
         gpt_4o,
         gpt_4_turbo,
         gemini_2_flash,
-        gemini_1p5_pro,
-        llama3,
-        llama3_70b,
-        mixtral_8x7b,
+        gemini_experimental,
+        gemini_2_flash_thinking,
     ]:
         return
     context.chat_data.update({"model": model})
@@ -69,13 +65,16 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             ),
         ],
         [
-            InlineKeyboardButton("gemini 2.0 flash", callback_data=str(gemini_2_flash)),
-            InlineKeyboardButton("gemini 1.5 pro", callback_data=str(gemini_1p5_pro)),
+            InlineKeyboardButton("Eemini 2.0 Flash", callback_data=str(gemini_2_flash)),
+            InlineKeyboardButton(
+                "Gemini Experimental", callback_data=str(gemini_experimental)
+            ),
         ],
         [
-            InlineKeyboardButton("llama3-8b", callback_data=str(llama3)),
-            InlineKeyboardButton("llama3-70b", callback_data=str(llama3_70b)),
-            InlineKeyboardButton("mixtral 8x7b", callback_data=str(mixtral_8x7b)),
+            InlineKeyboardButton(
+                "Gemini 2.0 Flash Thinking EXP 0121 ",
+                callback_data=str(gemini_2_flash_thinking),
+            ),
         ],
     ]
 

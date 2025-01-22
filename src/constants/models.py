@@ -7,8 +7,5 @@ gpt_4_turbo = "gpt-4-turbo"
 gpt_4o = "gpt-4"
 
 gemini_2_flash = "gemini-2.0-flash-exp"
-gemini_1p5_pro = "gemini-1.5-pro-latest"
-
-llama3 = "llama3-8b-8192"
-llama3_70b = "llama3-70b-8192"
-mixtral_8x7b = "mixtral-8x7b-32768"
+gemini_experimental = "gemini-exp-1206"
+gemini_2_flash_thinking = "gemini-2.0-flash-thinking-exp-01-21"
