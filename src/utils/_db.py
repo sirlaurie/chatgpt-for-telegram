@@ -28,8 +28,19 @@ class DBClient:
                     "allow": "INTEGER",
                     "premium": "INTEGER",
                     "waiting": "INTEGER",
+                    "free_messages_used": "INTEGER DEFAULT 0",
+                    "subscription_status": "TEXT DEFAULT 'free'",
+                    "subscription_type": "TEXT",
+                    "subscription_start_date": "INTEGER",
+                    "subscription_end_date": "INTEGER",
+                    "stripe_customer_id": "TEXT",
+                    "last_message_date": "INTEGER",
                 },
             )
+        else:
+            # Migrate existing User table - add new columns if they don't exist
+            self._migrate_user_table()
+
         prompt_table_exist = self.check_table("Prompt")
         if not prompt_table_exist:
             self.create_table(
@@ -54,6 +65,73 @@ class DBClient:
                     "share": "INTEGER",
                 },
             )
+
+        # Create Payment table
+        payment_table_exist = self.check_table("Payment")
+        if not payment_table_exist:
+            self.create_table(
+                "Payment",
+                {
+                    "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+                    "telegramId": "INTEGER",
+                    "stripe_payment_id": "TEXT",
+                    "stripe_subscription_id": "TEXT",
+                    "amount": "REAL",
+                    "currency": "TEXT DEFAULT 'USD'",
+                    "status": "TEXT",
+                    "payment_type": "TEXT",
+                    "created_at": "INTEGER",
+                    "updated_at": "INTEGER",
+                },
+            )
+
+        # Create Subscription table
+        subscription_table_exist = self.check_table("Subscription")
+        if not subscription_table_exist:
+            self.create_table(
+                "Subscription",
+                {
+                    "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+                    "telegramId": "INTEGER",
+                    "stripe_subscription_id": "TEXT UNIQUE",
+                    "stripe_customer_id": "TEXT",
+                    "status": "TEXT",
+                    "plan_type": "TEXT",
+                    "current_period_start": "INTEGER",
+                    "current_period_end": "INTEGER",
+                    "cancel_at_period_end": "INTEGER DEFAULT 0",
+                    "created_at": "INTEGER",
+                    "updated_at": "INTEGER",
+                },
+            )
+
+    def _migrate_user_table(self) -> None:
+        """Migrate existing User table to add new subscription-related columns"""
+        # Get existing columns
+        self.cursor.execute("PRAGMA table_info(User)")
+        existing_columns = {row[1] for row in self.cursor.fetchall()}
+
+        # Define new columns to add
+        new_columns = {
+            "free_messages_used": "INTEGER DEFAULT 0",
+            "subscription_status": "TEXT DEFAULT 'free'",
+            "subscription_type": "TEXT",
+            "subscription_start_date": "INTEGER",
+            "subscription_end_date": "INTEGER",
+            "stripe_customer_id": "TEXT",
+            "last_message_date": "INTEGER",
+        }
+
+        # Add missing columns
+        for column_name, column_type in new_columns.items():
+            if column_name not in existing_columns:
+                try:
+                    sql = f"ALTER TABLE User ADD COLUMN {validate_identifier(column_name)} {column_type}"
+                    self.cursor.execute(sql)
+                    self.connection.commit()
+                except sqlite3.OperationalError as e:
+                    # Column might already exist, ignore
+                    pass
 
     def __del__(self) -> None:
         self.connection.commit()
@@ -129,10 +207,34 @@ class DBClient:
         res = self.cursor.execute(sql)
         return res.fetchall()
 
-    def query(self, table: str, column: str, value: int) -> List[Tuple]:
+    def query(self, table: str, column: str, value: Union[int, str]) -> List[Tuple]:
         sql = f"SELECT * FROM {table} WHERE {column} = ?"
         res = self.cursor.execute(sql, (value,))
         return res.fetchall()
+
+    def execute_query(self, sql: str, params: Tuple = ()) -> List[Tuple]:
+        """Execute a custom SQL query with parameters"""
+        res = self.cursor.execute(sql, params)
+        self.connection.commit()
+        return res.fetchall()
+
+    def execute_one(self, sql: str, params: Tuple = ()) -> Optional[Tuple]:
+        """Execute a custom SQL query and return one result"""
+        res = self.cursor.execute(sql, params)
+        return res.fetchone()
+
+    def get_column_value(self, table: str, telegram_id: int, column: str) -> Optional[Union[str, int]]:
+        """Get a specific column value for a user"""
+        sql = f"SELECT {validate_identifier(column)} FROM {validate_identifier(table)} WHERE telegramId = ?"
+        result = self.cursor.execute(sql, (telegram_id,))
+        row = result.fetchone()
+        return row[0] if row else None
+
+    def update_column(self, table: str, telegram_id: int, column: str, value: Union[str, int]) -> None:
+        """Update a specific column for a user"""
+        sql = f"UPDATE {validate_identifier(table)} SET {validate_identifier(column)} = ? WHERE telegramId = ?"
+        self.cursor.execute(sql, (value, telegram_id))
+        self.connection.commit()
 
     # def read_one(self, telegram_id: int, table: str = "User") -> Optional[Tuple]:
     #     sql = f"SELECT * FROM {table} WHERE telegramId = ?"

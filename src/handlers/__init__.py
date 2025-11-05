@@ -12,11 +12,13 @@ from typing import cast
 from telegram import Update
 from telegram.ext import ContextTypes
 from ..helpers.permission import check_permission
+from ..helpers.subscription_check import check_subscription
 from .message_handler import send_request
 # from ..constants.messages import SYSTEM_PROMPT
 
 
 @check_permission
+@check_subscription
 async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
         return

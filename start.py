@@ -88,6 +88,20 @@ from src.handlers.new_prompt_handler import (
     prompt_content,
     share,
 )
+from src.handlers.subscription_handler import (
+    subscribe_command,
+    my_subscription_command,
+    cancel_subscription_command,
+    usage_command,
+    handle_cancel_auto_renew,
+    handle_reactivate_subscription,
+    handle_confirm_cancel_subscription,
+    handle_keep_subscription,
+)
+from src.helpers.subscription_check import (
+    handle_subscribe_callback,
+    handle_cancel_payment,
+)
 
 # Enable logging
 logging.basicConfig(
@@ -147,6 +161,51 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler(reset_command, reset_handler))
     application.add_handler(CommandHandler(switch_model_command, switch_model_handler))
+
+    # Subscription commands
+    application.add_handler(CommandHandler("subscribe", subscribe_command))
+    application.add_handler(CommandHandler("my_subscription", my_subscription_command))
+    application.add_handler(CommandHandler("cancel_subscription", cancel_subscription_command))
+    application.add_handler(CommandHandler("usage", usage_command))
+
+    # Subscription callback handlers
+    application.add_handler(
+        CallbackQueryHandler(
+            handle_subscribe_callback,
+            pattern="^subscribe_|^subscription_info$"
+        )
+    )
+    application.add_handler(
+        CallbackQueryHandler(
+            handle_cancel_payment,
+            pattern="^cancel_payment$"
+        )
+    )
+    application.add_handler(
+        CallbackQueryHandler(
+            handle_cancel_auto_renew,
+            pattern="^cancel_auto_renew$"
+        )
+    )
+    application.add_handler(
+        CallbackQueryHandler(
+            handle_reactivate_subscription,
+            pattern="^reactivate_subscription$"
+        )
+    )
+    application.add_handler(
+        CallbackQueryHandler(
+            handle_confirm_cancel_subscription,
+            pattern="^confirm_cancel_subscription$"
+        )
+    )
+    application.add_handler(
+        CallbackQueryHandler(
+            handle_keep_subscription,
+            pattern="^keep_subscription$"
+        )
+    )
+
     application.add_handler(
         CallbackQueryHandler(
             switch_model_callback, pattern="^gpt|^gemini|^llama|^mixtral"
