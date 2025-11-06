@@ -20,7 +20,6 @@ from telegram.ext import (
 )
 
 from src.helpers.permission import check_permission
-from src.helpers.unauthorize import approval_callback
 from src.constants.messages import WELCOME_MESSAGE
 from src.constants.commands import (
     reset_command,
@@ -217,11 +216,7 @@ def main() -> None:
             prompt_callback_handler, pattern=f"{view_prompts}|^prompt (17)\\d{8}$"
         )
     )
-    application.add_handler(
-        CallbackQueryHandler(
-            approval_callback, pattern=f"^F ({APPROVE}|{DECLINE}) \\d+$"
-        )
-    )
+    # Approval callback removed - using public bot mode with auto-approval
     new_prompt_conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler(create_new_prompt_command, create_new_prompt_handler),
