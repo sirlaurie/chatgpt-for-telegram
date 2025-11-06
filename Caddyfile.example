@@ -2,9 +2,10 @@
 # 用于 Telegram Bot Webhook 服务器
 #
 # 使用方法：
-# 1. 将此文件复制到 /etc/caddy/Caddyfile
+# 1. 复制此文件: cp Caddyfile.example Caddyfile
 # 2. 替换 yourdomain.com 为你的实际域名
-# 3. 重启 Caddy: sudo systemctl restart caddy
+# 3. 将配置复制到 /etc/caddy/Caddyfile (或使用 --config 指定路径)
+# 4. 重启 Caddy: sudo systemctl restart caddy
 #
 # Caddy 会自动：
 # - 申请 Let's Encrypt SSL 证书
@@ -12,30 +13,25 @@
 # - HTTP 自动重定向到 HTTPS
 # - 自动续期证书
 
-# 替换为你的域名
+# 替换为你的域名（例如：stripe.yourdomain.com）
 yourdomain.com {
-    # Stripe Webhook endpoint
-    reverse_proxy /stripe/webhook localhost:8000
-
-    # Payment success/cancel pages
-    reverse_proxy /payment/* localhost:8000
-
-    # Health check endpoint
-    reverse_proxy /health localhost:8000
+    # 将所有请求反向代理到 FastAPI webhook server
+    # 这样可以避免重定向循环问题
+    reverse_proxy localhost:8000
 
     # 日志配置（可选）
     log {
-        output file /var/log/caddy/telegram-bot.log
+        output file /var/log/caddy/telegram-bot.log {
+            roll_size 10mb
+            roll_keep 5
+        }
         format json
     }
 
     # 添加安全头（可选）
     header {
         # 启用 HSTS
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-
-        # 防止点击劫持
-        X-Frame-Options "DENY"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
 
         # 防止 MIME 类型嗅探
         X-Content-Type-Options "nosniff"
@@ -44,6 +40,26 @@ yourdomain.com {
         X-XSS-Protection "1; mode=block"
     }
 }
+
+# 高级配置：如果只想代理特定路径（不推荐，可能导致重定向问题）
+# yourdomain.com {
+#     # 根路径必须配置，否则会导致重定向循环
+#     reverse_proxy / localhost:8000
+#
+#     # 或者只代理特定路径（但必须处理根路径）
+#     handle /stripe/webhook {
+#         reverse_proxy localhost:8000
+#     }
+#     handle /payment/* {
+#         reverse_proxy localhost:8000
+#     }
+#     handle /health {
+#         reverse_proxy localhost:8000
+#     }
+#     handle / {
+#         reverse_proxy localhost:8000
+#     }
+# }
 
 # 如果需要支持多个域名，可以添加更多配置块
 # www.yourdomain.com {
