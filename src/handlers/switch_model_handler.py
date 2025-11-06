@@ -11,11 +11,11 @@ from ..constants.models import (
     # OpenAI models
     gpt_4o,
     gpt_4o_mini,
-    gpt_4_turbo,
+    gpt_4p1,
     # Gemini models
     gemini_2p5_flash,
-    gemini_2p5_flash_thinking,
-    gemini_exp_1206,
+    gemini_2p5_pro,
+    gemini_flash_latest,
 )
 from ..helpers.permission import check_permission
 
@@ -36,11 +36,11 @@ async def switch_model_callback(
         # OpenAI models
         gpt_4o,
         gpt_4o_mini,
-        gpt_4_turbo,
+        gpt_4p1,
         # Gemini models
         gemini_2p5_flash,
-        gemini_2p5_flash_thinking,
-        gemini_exp_1206,
+        gemini_2p5_pro,
+        gemini_flash_latest,
     ]:
         return
     context.chat_data.update({"model": model})
@@ -63,14 +63,14 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             InlineKeyboardButton("GPT-4o Mini", callback_data=str(gpt_4o_mini)),
         ],
         [
-            InlineKeyboardButton("GPT-4 Turbo", callback_data=str(gpt_4_turbo)),
+            InlineKeyboardButton("GPT-4.1 ✨", callback_data=str(gpt_4p1)),
         ],
         [
             InlineKeyboardButton("Gemini 2.5 Flash ⚡", callback_data=str(gemini_2p5_flash)),
-            InlineKeyboardButton("Gemini 2.5 Thinking 🤔", callback_data=str(gemini_2p5_flash_thinking)),
+            InlineKeyboardButton("Gemini 2.5 Pro 💎", callback_data=str(gemini_2p5_pro)),
         ],
         [
-            InlineKeyboardButton("Gemini Exp 1206 🧪", callback_data=str(gemini_exp_1206)),
+            InlineKeyboardButton("Gemini Flash Latest 🔄", callback_data=str(gemini_flash_latest)),
         ],
     ]
 

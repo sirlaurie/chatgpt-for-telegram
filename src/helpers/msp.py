@@ -5,11 +5,11 @@ from ..constants.models import (
     # OpenAI models
     gpt_4o,
     gpt_4o_mini,
-    gpt_4_turbo,
+    gpt_4p1,
     # Gemini models
     gemini_2p5_flash,
-    gemini_2p5_flash_thinking,
-    gemini_exp_1206,
+    gemini_2p5_pro,
+    gemini_flash_latest,
 )
 
 openai_client = AsyncOpenAI()
@@ -20,9 +20,9 @@ llm_services = {
     # OpenAI models
     gpt_4o: openai_client,
     gpt_4o_mini: openai_client,
-    gpt_4_turbo: openai_client,
+    gpt_4p1: openai_client,
     # Gemini models
     gemini_2p5_flash: genai,
-    gemini_2p5_flash_thinking: genai,
-    gemini_exp_1206: genai,
+    gemini_2p5_pro: genai,
+    gemini_flash_latest: genai,
 }
