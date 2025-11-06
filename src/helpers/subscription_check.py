@@ -80,32 +80,32 @@ async def send_payment_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE
     yearly_price = format_price(PRICING["yearly"]["price"])
 
     message = f"""
-🚫 *免费额度已用完*
+🚫 *Free Messages Used Up*
 
-您已使用完 {FREE_MESSAGE_LIMIT} 次免费对话。
+You have used all {FREE_MESSAGE_LIMIT} free messages.
 
-订阅后可享受：
-✨ 无限对话次数
-🤖 所有 AI 模型访问
-📄 文档分析
-🎨 图像生成
-🌍 翻译服务
+Subscribe to enjoy:
+✨ Unlimited messages
+🤖 All AI model access
+📄 Document analysis
+🎨 Image generation
+🌍 Translation services
 
-选择订阅计划：
+Choose a subscription plan:
 """
 
     keyboard = [
         [
             InlineKeyboardButton(
-                f"💳 月付 {monthly_price}/月",
+                f"💳 Monthly {monthly_price}",
                 callback_data="subscribe_monthly"
             ),
             InlineKeyboardButton(
-                f"💎 年付 {yearly_price}/年 (省17%)",
+                f"💎 Yearly {yearly_price} (Save 17%)",
                 callback_data="subscribe_yearly"
             ),
         ],
-        [InlineKeyboardButton("❓ 查看订阅详情", callback_data="subscription_info")],
+        [InlineKeyboardButton("❓ View Details", callback_data="subscription_info")],
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -121,14 +121,14 @@ async def send_usage_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE
     """Send reminder when user is approaching free limit"""
 
     message = f"""
-💬 *使用提醒*
+💬 *Usage Reminder*
 
-您还剩 {remaining} 次免费对话机会。
+You have {remaining} free messages remaining.
 
-订阅后即可享受无限对话！
+Subscribe for unlimited messages!
 """
 
-    keyboard = [[InlineKeyboardButton("💳 查看订阅计划", callback_data="subscription_info")]]
+    keyboard = [[InlineKeyboardButton("💳 View Plans", callback_data="subscription_info")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(
@@ -142,14 +142,14 @@ async def send_limit_reached(update: Update, context: ContextTypes.DEFAULT_TYPE)
     """Send notification when user reaches free limit"""
 
     message = """
-✅ *这是您的最后一次免费对话*
+✅ *This is your last free message*
 
-下次对话将需要订阅。
+Next message will require subscription.
 
-点击下方按钮查看订阅计划：
+Click below to view subscription plans:
 """
 
-    keyboard = [[InlineKeyboardButton("💳 立即订阅", callback_data="subscription_info")]]
+    keyboard = [[InlineKeyboardButton("💳 Subscribe Now", callback_data="subscription_info")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(
@@ -185,35 +185,35 @@ async def show_subscription_plans(query, context: ContextTypes.DEFAULT_TYPE, tel
     yearly_monthly = format_price(PRICING["yearly"]["price"] / 12)
 
     message = f"""
-💎 *订阅计划*
+💎 *Subscription Plans*
 
-📅 *月度订阅*
-• 价格：{monthly_price}/月
-• 无限对话次数
-• 所有功能完整访问
+📅 *Monthly Subscription*
+• Price: {monthly_price}/month
+• Unlimited messages
+• Full access to all features
 
-🎁 *年度订阅* ⭐ 推荐
-• 价格：{yearly_price}/年
-• 相当于 {yearly_monthly}/月
-• 节省 17%
-• 无限对话次数
-• 所有功能完整访问
+🎁 *Yearly Subscription* ⭐ Recommended
+• Price: {yearly_price}/year
+• Equivalent to {yearly_monthly}/month
+• Save 17%
+• Unlimited messages
+• Full access to all features
 
-✨ *包含功能：*
-• 🤖 GPT-3.5, GPT-4, Gemini 模型
-• 📄 文档分析（PDF, EPUB等）
-• 🎨 DALL-E 3 图像生成
-• 🌍 多语言翻译
-• 💾 对话历史保存
-• 🎯 自定义提示词
+✨ *Included Features:*
+• 🤖 GPT-3.5, GPT-4, Gemini models
+• 📄 Document analysis (PDF, EPUB, etc.)
+• 🎨 DALL-E 3 image generation
+• 🌍 Multi-language translation
+• 💾 Conversation history
+• 🎯 Custom prompts
 
-选择您的计划：
+Choose your plan:
 """
 
     keyboard = [
         [
-            InlineKeyboardButton(f"💳 月付 {monthly_price}", callback_data="subscribe_monthly"),
-            InlineKeyboardButton(f"💎 年付 {yearly_price}", callback_data="subscribe_yearly"),
+            InlineKeyboardButton(f"💳 Monthly {monthly_price}", callback_data="subscribe_monthly"),
+            InlineKeyboardButton(f"💎 Yearly {yearly_price}", callback_data="subscribe_yearly"),
         ],
     ]
 
@@ -236,21 +236,21 @@ async def initiate_subscription(query, context: ContextTypes.DEFAULT_TYPE, teleg
             plan_type=plan_type,
         )
 
-        plan_name = "月度" if plan_type == "monthly" else "年度"
+        plan_name = "Monthly" if plan_type == "monthly" else "Yearly"
         price = format_price(PRICING[plan_type]["price"])
 
         message = f"""
-✅ *准备好订阅了！*
+✅ *Ready to Subscribe!*
 
-计划：{plan_name}订阅
-价格：{price}
+Plan: {plan_name} Subscription
+Price: {price}
 
-点击下方按钮前往安全支付页面：
+Click below to proceed to secure payment:
 """
 
         keyboard = [
-            [InlineKeyboardButton("💳 前往支付", url=session["url"])],
-            [InlineKeyboardButton("❌ 取消", callback_data="cancel_payment")],
+            [InlineKeyboardButton("💳 Proceed to Payment", url=session["url"])],
+            [InlineKeyboardButton("❌ Cancel", callback_data="cancel_payment")],
         ]
 
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -266,7 +266,7 @@ async def initiate_subscription(query, context: ContextTypes.DEFAULT_TYPE, teleg
     except Exception as e:
         logger.error(f"Error creating checkout session: {str(e)}")
         await query.edit_message_text(
-            "❌ 抱歉，创建支付会话时出错。请稍后重试或联系管理员。"
+            "❌ Sorry, an error occurred while creating payment session. Please try again later or contact administrator."
         )
 
 
@@ -275,4 +275,4 @@ async def handle_cancel_payment(update: Update, context: ContextTypes.DEFAULT_TY
     query = update.callback_query
     await query.answer()
 
-    await query.edit_message_text("❌ 已取消支付。如需订阅，请随时使用 /subscribe 命令。")
+    await query.edit_message_text("❌ Payment cancelled. To subscribe, use /subscribe command anytime.")

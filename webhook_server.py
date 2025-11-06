@@ -227,25 +227,25 @@ async def handle_checkout_completed(session_data):
     )
 
     # Send notification to user
-    plan_name = "月度" if plan_type == "monthly" else "年度"
+    plan_name = "Monthly" if plan_type == "monthly" else "Yearly"
     end_date = datetime.fromtimestamp(current_period_end).strftime("%Y-%m-%d")
 
     message = f"""
-🎉 *订阅成功！*
+🎉 *Subscription Successful!*
 
-感谢您的订阅！
+Thank you for subscribing!
 
-订阅类型: {plan_name}订阅
-到期时间: {end_date}
+Plan: {plan_name} Subscription
+Expires: {end_date}
 
-✅ 您现在可以无限使用所有功能了！
+✅ You now have unlimited access to all features!
 
-• 🤖 所有 AI 模型
-• 📄 文档分析
-• 🎨 图像生成
-• 🌍 翻译服务
+• 🤖 All AI Models
+• 📄 Document Analysis
+• 🎨 Image Generation
+• 🌍 Translation Services
 
-开始对话吧！
+Start chatting!
 """
 
     await send_telegram_notification(telegram_id, message)
@@ -306,14 +306,14 @@ async def handle_payment_succeeded(invoice_data):
     end_date = datetime.fromtimestamp(invoice_data["period_end"]).strftime("%Y-%m-%d")
 
     message = f"""
-✅ *订阅已自动续费*
+✅ *Subscription Renewed*
 
-您的订阅已成功续费！
+Your subscription has been successfully renewed!
 
-到期时间: {end_date}
-支付金额: ${amount:.2f} {currency}
+Expires: {end_date}
+Amount Paid: ${amount:.2f} {currency}
 
-感谢您的继续支持！
+Thank you for your continued support!
 """
 
     await send_telegram_notification(telegram_id, message)
@@ -339,14 +339,14 @@ async def handle_payment_failed(invoice_data):
 
     # Send notification
     message = """
-⚠️ *支付失败*
+⚠️ *Payment Failed*
 
-您的订阅续费失败。
+Your subscription renewal failed.
 
-请检查您的支付方式并更新付款信息。
-如果问题持续，请联系管理员。
+Please check your payment method and update your payment information.
+If the problem persists, please contact support.
 
-使用 /my_subscription 查看订阅状态。
+Use /my_subscription to view your subscription status.
 """
 
     await send_telegram_notification(telegram_id, message)
@@ -407,15 +407,15 @@ async def handle_subscription_deleted(subscription_data):
 
     # Send notification
     message = """
-ℹ️ *订阅已取消*
+ℹ️ *Subscription Cancelled*
 
-您的订阅已到期并被取消。
+Your subscription has expired and been cancelled.
 
-您现在恢复为免费用户，每天有 5 次对话机会。
+You are now a free user with 5 free messages.
 
-如需继续使用，请使用 /subscribe 重新订阅。
+To continue using all features, use /subscribe to resubscribe.
 
-感谢您的使用！
+Thank you for using our service!
 """
 
     await send_telegram_notification(telegram_id, message)
@@ -433,11 +433,11 @@ async def payment_success(session_id: str = None):
     session_display = f'<p style="font-size: 12px; color: #999; margin-top: 20px;">Session: {session_id}</p>' if session_id else ''
 
     html_content = f"""<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>支付成功</title>
+    <title>Payment Successful</title>
     <style>
         body {{
             margin: 0;
@@ -492,13 +492,13 @@ async def payment_success(session_id: str = None):
 <body>
     <div class="container">
         <div class="icon">🎉</div>
-        <h1>支付成功！</h1>
-        <p>感谢您的订阅！<br>您的支付已成功处理。</p>
+        <h1>Payment Successful!</h1>
+        <p>Thank you for subscribing!<br>Your payment has been successfully processed.</p>
         <div class="info">
-            ✅ 订阅已激活<br>
-            📱 请返回 Telegram 查看订阅状态
+            ✅ Subscription Activated<br>
+            📱 Please return to Telegram to view your subscription status
         </div>
-        <a href="tg://" class="button">返回 Telegram</a>
+        <a href="tg://" class="button">Return to Telegram</a>
         {session_display}
     </div>
 </body>
@@ -510,11 +510,11 @@ async def payment_success(session_id: str = None):
 async def payment_cancel():
     """Payment cancel page"""
     html_content = """<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>支付已取消</title>
+    <title>Payment Cancelled</title>
     <style>
         body {
             margin: 0;
@@ -569,12 +569,12 @@ async def payment_cancel():
 <body>
     <div class="container">
         <div class="icon">😔</div>
-        <h1>支付已取消</h1>
-        <p>您的支付已取消，没有产生任何费用。</p>
+        <h1>Payment Cancelled</h1>
+        <p>Your payment has been cancelled. No charges were made.</p>
         <div class="info">
-            💡 使用 /subscribe 命令<br>可以重新开始订阅流程
+            💡 Use /subscribe command<br>to start the subscription process again
         </div>
-        <a href="tg://" class="button">返回 Telegram</a>
+        <a href="tg://" class="button">Return to Telegram</a>
     </div>
 </body>
 </html>"""

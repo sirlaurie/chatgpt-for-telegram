@@ -31,12 +31,12 @@ async def subscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     status = check_subscription_status(telegram_id)
 
     if status["is_admin"]:
-        await update.message.reply_text("👨‍💼 您是管理员，无需订阅即可使用所有功能。")
+        await update.message.reply_text("👨‍💼 You are an administrator with access to all features without subscription.")
         return
 
     if status["is_subscribed"]:
         await update.message.reply_text(
-            "✅ 您已经是订阅用户了！使用 /my_subscription 查看订阅详情。"
+            "✅ You are already subscribed! Use /my_subscription to view subscription details."
         )
         return
 
@@ -48,36 +48,36 @@ async def subscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     remaining = status["free_messages_remaining"]
 
     message = f"""
-💎 *订阅 AI 助手*
+💎 *Subscribe to AI Assistant*
 
-您当前还有 {remaining}/{FREE_MESSAGE_LIMIT} 次免费对话机会。
+You have {remaining}/{FREE_MESSAGE_LIMIT} free messages remaining.
 
-📅 *月度订阅*
-• 价格：{monthly_price}/月
-• 无限对话次数
-• 所有功能完整访问
+📅 *Monthly Subscription*
+• Price: {monthly_price}/month
+• Unlimited messages
+• Full access to all features
 
-🎁 *年度订阅* ⭐ 推荐
-• 价格：{yearly_price}/年（{yearly_monthly}/月）
-• 节省 17%
-• 无限对话次数
-• 所有功能完整访问
+🎁 *Yearly Subscription* ⭐ Recommended
+• Price: {yearly_price}/year ({yearly_monthly}/month)
+• Save 17%
+• Unlimited messages
+• Full access to all features
 
-✨ *包含功能：*
-• 🤖 GPT-3.5, GPT-4, Gemini 模型
-• 📄 文档分析（PDF, EPUB等）
-• 🎨 DALL-E 3 图像生成
-• 🌍 多语言翻译
-• 💾 对话历史保存
-• 🎯 自定义提示词
+✨ *Included Features:*
+• 🤖 GPT-3.5, GPT-4, Gemini models
+• 📄 Document analysis (PDF, EPUB, etc.)
+• 🎨 DALL-E 3 image generation
+• 🌍 Multi-language translation
+• 💾 Conversation history
+• 🎯 Custom prompts
 
-选择您的计划：
+Choose your plan:
 """
 
     keyboard = [
         [
-            InlineKeyboardButton(f"💳 月付 {monthly_price}", callback_data="subscribe_monthly"),
-            InlineKeyboardButton(f"💎 年付 {yearly_price}", callback_data="subscribe_yearly"),
+            InlineKeyboardButton(f"💳 Monthly {monthly_price}", callback_data="subscribe_monthly"),
+            InlineKeyboardButton(f"💎 Yearly {yearly_price}", callback_data="subscribe_yearly"),
         ],
     ]
 
@@ -99,11 +99,11 @@ async def my_subscription_command(update: Update, context: ContextTypes.DEFAULT_
 
     if status["is_admin"]:
         message = """
-👨‍💼 *管理员账户*
+👨‍💼 *Administrator Account*
 
-您拥有完整的管理员权限。
-✅ 无限对话次数
-✅ 所有功能访问
+You have full administrator privileges.
+✅ Unlimited messages
+✅ Access to all features
 """
         await update.message.reply_text(message, parse_mode="Markdown")
         return
@@ -113,17 +113,17 @@ async def my_subscription_command(update: Update, context: ContextTypes.DEFAULT_
         used = status["free_messages_used"]
 
         message = f"""
-📊 *您的使用情况*
+📊 *Your Usage Status*
 
-状态: 🆓 免费用户
-已使用: {used}/{FREE_MESSAGE_LIMIT} 次对话
-剩余: {remaining} 次对话
+Status: 🆓 Free User
+Used: {used}/{FREE_MESSAGE_LIMIT} messages
+Remaining: {remaining} messages
 
-订阅后可享受无限对话！
-使用 /subscribe 查看订阅计划。
+Subscribe for unlimited messages!
+Use /subscribe to view subscription plans.
 """
 
-        keyboard = [[InlineKeyboardButton("💳 立即订阅", callback_data="subscription_info")]]
+        keyboard = [[InlineKeyboardButton("💳 Subscribe Now", callback_data="subscription_info")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await update.message.reply_text(
@@ -137,7 +137,7 @@ async def my_subscription_command(update: Update, context: ContextTypes.DEFAULT_
     subscription = get_user_subscription(telegram_id)
 
     if not subscription:
-        await update.message.reply_text("❌ 无法获取订阅信息，请联系管理员。")
+        await update.message.reply_text("❌ Unable to retrieve subscription information. Please contact administrator.")
         return
 
     # Parse subscription data
@@ -154,28 +154,28 @@ async def my_subscription_command(update: Update, context: ContextTypes.DEFAULT_
     # Calculate days remaining
     days_remaining = max(0, (period_end - int(datetime.now().timestamp())) // 86400)
 
-    plan_name = "月度订阅" if plan_type == "monthly" else "年度订阅"
-    auto_renew = "❌ 已关闭" if cancel_at_end else "✅ 已开启"
+    plan_name = "Monthly Subscription" if plan_type == "monthly" else "Yearly Subscription"
+    auto_renew = "❌ Disabled" if cancel_at_end else "✅ Enabled"
 
     message = f"""
-📊 *您的订阅信息*
+📊 *Your Subscription*
 
-状态: ✅ 活跃
-套餐: {plan_name}
-开始时间: {start_date}
-到期时间: {end_date}
-剩余天数: {days_remaining} 天
-自动续费: {auto_renew}
+Status: ✅ Active
+Plan: {plan_name}
+Start Date: {start_date}
+Expiration Date: {end_date}
+Days Remaining: {days_remaining} days
+Auto-Renewal: {auto_renew}
 
-✨ 享受无限对话和所有高级功能！
+✨ Enjoy unlimited messages and all premium features!
 """
 
     keyboard = []
 
     if not cancel_at_end:
-        keyboard.append([InlineKeyboardButton("❌ 取消自动续费", callback_data="cancel_auto_renew")])
+        keyboard.append([InlineKeyboardButton("❌ Cancel Auto-Renewal", callback_data="cancel_auto_renew")])
     else:
-        keyboard.append([InlineKeyboardButton("✅ 恢复自动续费", callback_data="reactivate_subscription")])
+        keyboard.append([InlineKeyboardButton("✅ Resume Auto-Renewal", callback_data="reactivate_subscription")])
 
     reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
 
@@ -194,39 +194,39 @@ async def cancel_subscription_command(update: Update, context: ContextTypes.DEFA
     status = check_subscription_status(telegram_id)
 
     if not status["is_subscribed"]:
-        await update.message.reply_text("❌ 您当前没有活跃的订阅。")
+        await update.message.reply_text("❌ You do not have an active subscription.")
         return
 
     # Get subscription
     subscription = get_user_subscription(telegram_id)
 
     if not subscription:
-        await update.message.reply_text("❌ 无法获取订阅信息，请联系管理员。")
+        await update.message.reply_text("❌ Unable to retrieve subscription information. Please contact administrator.")
         return
 
     stripe_sub_id = subscription[2]
     cancel_at_end = subscription[8]
 
     if cancel_at_end:
-        await update.message.reply_text("ℹ️ 您的订阅已设置为在当前周期结束时取消。")
+        await update.message.reply_text("ℹ️ Your subscription is already set to cancel at the end of the current period.")
         return
 
     # Show confirmation
     message = """
-⚠️ *确认取消订阅？*
+⚠️ *Confirm Cancellation?*
 
-取消后：
-• 您的订阅将在当前周期结束时终止
-• 在到期前仍可正常使用所有功能
-• 到期后将恢复为免费用户（5次对话限制）
+After cancellation:
+• Your subscription will end at the end of the current period
+• You can still use all features until expiration
+• After expiration, you will return to free tier (5 message limit)
 
-确定要取消吗？
+Are you sure you want to cancel?
 """
 
     keyboard = [
         [
-            InlineKeyboardButton("✅ 确认取消", callback_data="confirm_cancel_subscription"),
-            InlineKeyboardButton("❌ 保持订阅", callback_data="keep_subscription"),
+            InlineKeyboardButton("✅ Confirm Cancellation", callback_data="confirm_cancel_subscription"),
+            InlineKeyboardButton("❌ Keep Subscription", callback_data="keep_subscription"),
         ],
     ]
 
@@ -247,25 +247,25 @@ async def usage_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     status = check_subscription_status(telegram_id)
 
     if status["is_admin"]:
-        message = "👨‍💼 管理员账户 - 无限制访问"
+        message = "👨‍💼 Administrator Account - Unlimited Access"
     elif status["is_subscribed"]:
         subscription = get_user_subscription(telegram_id)
         if subscription:
             period_end = subscription[7]
             end_date = datetime.fromtimestamp(period_end).strftime("%Y-%m-%d")
-            message = f"✅ 订阅用户 - 无限对话\n到期时间: {end_date}"
+            message = f"✅ Subscribed User - Unlimited Messages\nExpires: {end_date}"
         else:
-            message = "✅ 订阅用户 - 无限对话"
+            message = "✅ Subscribed User - Unlimited Messages"
     else:
         used = status["free_messages_used"]
         remaining = status["free_messages_remaining"]
         message = f"""
-📊 *使用统计*
+📊 *Usage Statistics*
 
-免费额度: {used}/{FREE_MESSAGE_LIMIT} 次
-剩余次数: {remaining} 次
+Free Messages: {used}/{FREE_MESSAGE_LIMIT} used
+Remaining: {remaining} messages
 
-想要无限对话？使用 /subscribe 订阅！
+Want unlimited messages? Use /subscribe!
 """
 
     await update.message.reply_text(message, parse_mode="Markdown")
@@ -285,7 +285,7 @@ async def handle_cancel_auto_renew(update: Update, context: ContextTypes.DEFAULT
     subscription = get_user_subscription(telegram_id)
 
     if not subscription:
-        await query.edit_message_text("❌ 无法获取订阅信息，请联系管理员。")
+        await query.edit_message_text("❌ Unable to retrieve subscription information. Please contact administrator.")
         return
 
     stripe_sub_id = subscription[2]
@@ -300,17 +300,17 @@ async def handle_cancel_auto_renew(update: Update, context: ContextTypes.DEFAULT
         cancel_user_subscription(telegram_id, immediate=False)
 
         message = f"""
-✅ *已取消自动续费*
+✅ *Auto-Renewal Cancelled*
 
-您的订阅将在 {end_date} 到期。
-在此之前，您仍可正常使用所有功能。
+Your subscription will expire on {end_date}.
+You can continue using all features until then.
 
-如需恢复订阅，请使用 /my_subscription 命令。
+To reactivate, use /my_subscription command.
 """
         await query.edit_message_text(message, parse_mode="Markdown")
         logger.info(f"Cancelled auto-renew for telegram_id: {telegram_id}")
     else:
-        await query.edit_message_text("❌ 取消订阅失败，请稍后重试或联系管理员。")
+        await query.edit_message_text("❌ Failed to cancel subscription. Please try again later or contact administrator.")
 
 
 async def handle_reactivate_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -324,7 +324,7 @@ async def handle_reactivate_subscription(update: Update, context: ContextTypes.D
     subscription = get_user_subscription(telegram_id)
 
     if not subscription:
-        await query.edit_message_text("❌ 无法获取订阅信息，请联系管理员。")
+        await query.edit_message_text("❌ Unable to retrieve subscription information. Please contact administrator.")
         return
 
     stripe_sub_id = subscription[2]
@@ -338,16 +338,16 @@ async def handle_reactivate_subscription(update: Update, context: ContextTypes.D
         update_subscription(stripe_sub_id, cancel_at_period_end=0)
 
         message = """
-✅ *已恢复自动续费*
+✅ *Auto-Renewal Reactivated*
 
-您的订阅将自动续费，无需担心到期问题。
+Your subscription will renew automatically. No need to worry about expiration.
 
-使用 /my_subscription 查看订阅详情。
+Use /my_subscription to view subscription details.
 """
         await query.edit_message_text(message, parse_mode="Markdown")
         logger.info(f"Reactivated subscription for telegram_id: {telegram_id}")
     else:
-        await query.edit_message_text("❌ 恢复订阅失败，请稍后重试或联系管理员。")
+        await query.edit_message_text("❌ Failed to reactivate subscription. Please try again later or contact administrator.")
 
 
 async def handle_confirm_cancel_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -361,7 +361,7 @@ async def handle_confirm_cancel_subscription(update: Update, context: ContextTyp
     subscription = get_user_subscription(telegram_id)
 
     if not subscription:
-        await query.edit_message_text("❌ 无法获取订阅信息，请联系管理员。")
+        await query.edit_message_text("❌ Unable to retrieve subscription information. Please contact administrator.")
         return
 
     stripe_sub_id = subscription[2]
@@ -375,17 +375,17 @@ async def handle_confirm_cancel_subscription(update: Update, context: ContextTyp
         cancel_user_subscription(telegram_id, immediate=False)
 
         message = f"""
-✅ *订阅已取消*
+✅ *Subscription Cancelled*
 
-您的订阅将在 {end_date} 到期。
-感谢您的使用！
+Your subscription will expire on {end_date}.
+Thank you for using our service!
 
-如需重新订阅，请随时使用 /subscribe 命令。
+To resubscribe anytime, use /subscribe command.
 """
         await query.edit_message_text(message, parse_mode="Markdown")
         logger.info(f"Confirmed cancel subscription for telegram_id: {telegram_id}")
     else:
-        await query.edit_message_text("❌ 取消订阅失败，请稍后重试或联系管理员。")
+        await query.edit_message_text("❌ Failed to cancel subscription. Please try again later or contact administrator.")
 
 
 async def handle_keep_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -393,4 +393,4 @@ async def handle_keep_subscription(update: Update, context: ContextTypes.DEFAULT
     query = update.callback_query
     await query.answer()
 
-    await query.edit_message_text("✅ 太好了！您的订阅将继续保持活跃。")
+    await query.edit_message_text("✅ Great! Your subscription will remain active.")

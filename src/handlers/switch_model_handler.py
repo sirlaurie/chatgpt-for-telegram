@@ -45,7 +45,7 @@ async def switch_model_callback(
         return
     context.chat_data.update({"model": model})
 
-    _ = await query.edit_message_text(text=f"OK! 已为您切换到 {model} 模型")
+    _ = await query.edit_message_text(text=f"OK! Switched to {model} model")
 
 
 @check_permission
@@ -77,7 +77,7 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
 
     _ = await update.message.reply_text(
-        f"当前使用的模型是: {context.chat_data.get('model', None) or os.getenv('model')}. 切换你要使用的模型:",
+        f"Current model: {context.chat_data.get('model', None) or os.getenv('model')}. Choose a model to switch:",
         reply_markup=reply_markup,
     )
     return
