@@ -93,9 +93,9 @@ async def translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     data = {
         "temperature": 0.3,
-        "model": "gpt-3.5-turbo-instruct",
+        "model": "gpt-4o-mini",
         "max_tokens": 3072,
-        "prompt": prompt,
+        "messages": [{"role": "user", "content": prompt}],
         "stream": True,
     }
 
@@ -109,7 +109,7 @@ async def translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     client = httpx.AsyncClient(timeout=None)
     async with client.stream(
         method="POST",
-        url="https://api.openai.com/v1/completions",
+        url="https://api.openai.com/v1/chat/completions",
         headers=headers,
         json=data,
     ) as response:
@@ -139,7 +139,7 @@ async def translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if is_stop:
                 break
 
-            chunk_message = chunk.get("choices", [{}])[0].get("text", "")
+            chunk_message = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
             if not chunk_message:
                 continue
             full_content += chunk_message

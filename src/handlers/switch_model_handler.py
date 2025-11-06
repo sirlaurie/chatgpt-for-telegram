@@ -8,15 +8,15 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 from ..constants.models import (
-    gpt_3p5_turbo,
-    gpt_3p5_turbo_1106,
+    # OpenAI models
     gpt_4o,
+    gpt_4o_mini,
     gpt_4_turbo,
-    gemini_2_flash,
-    gemini_experimental,
-    gemini_2_flash_thinking,
+    # Gemini models
+    gemini_2p5_flash,
+    gemini_2p5_flash_thinking,
+    gemini_exp_1206,
 )
-from ..utils import is_allowed
 from ..helpers.permission import check_permission
 
 
@@ -33,13 +33,14 @@ async def switch_model_callback(
         return
     model = query.data
     if model not in [
-        gpt_3p5_turbo,
-        gpt_3p5_turbo_1106,
+        # OpenAI models
         gpt_4o,
+        gpt_4o_mini,
         gpt_4_turbo,
-        gemini_2_flash,
-        gemini_experimental,
-        gemini_2_flash_thinking,
+        # Gemini models
+        gemini_2p5_flash,
+        gemini_2p5_flash_thinking,
+        gemini_exp_1206,
     ]:
         return
     context.chat_data.update({"model": model})
@@ -52,52 +53,31 @@ async def switch_model_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     if not update.effective_user:
         return
 
-    _, premium, *_ = is_allowed(update.effective_user.id)
-
     if not update.message or not isinstance(context.chat_data, dict):
         return
 
-    inline_keybord = [
+    # All models available to subscribed users
+    inline_keyboard = [
         [
-            InlineKeyboardButton("gpt-3.5-turbo", callback_data=str(gpt_3p5_turbo)),
-            InlineKeyboardButton(
-                "gpt-3.5-turbo-1106", callback_data=str(gpt_3p5_turbo_1106)
-            ),
+            InlineKeyboardButton("GPT-4o 🚀", callback_data=str(gpt_4o)),
+            InlineKeyboardButton("GPT-4o Mini", callback_data=str(gpt_4o_mini)),
         ],
         [
-            InlineKeyboardButton("Gemini 2.0 Flash", callback_data=str(gemini_2_flash)),
-            InlineKeyboardButton(
-                "Gemini Exp 1206", callback_data=str(gemini_experimental)
-            ),
+            InlineKeyboardButton("GPT-4 Turbo", callback_data=str(gpt_4_turbo)),
         ],
         [
-            InlineKeyboardButton(
-                "Gemini 2.0 Flash Thinking EXP 0121 ",
-                callback_data=str(gemini_2_flash_thinking),
-            ),
+            InlineKeyboardButton("Gemini 2.5 Flash ⚡", callback_data=str(gemini_2p5_flash)),
+            InlineKeyboardButton("Gemini 2.5 Thinking 🤔", callback_data=str(gemini_2p5_flash_thinking)),
+        ],
+        [
+            InlineKeyboardButton("Gemini Exp 1206 🧪", callback_data=str(gemini_exp_1206)),
         ],
     ]
 
-    if premium:
-        premium_inline_keybord = [
-            [
-                InlineKeyboardButton("gpt-4o", callback_data=str(gpt_4o)),
-                InlineKeyboardButton("gpt-4-turbo", callback_data=str(gpt_4_turbo)),
-            ],
-        ]
-        inline_keybord.extend(premium_inline_keybord)
-        reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)
-
-        _ = await update.message.reply_text(
-            f"当前使用的模型是: {context.chat_data.get('model', None) or os.getenv('model')}. 切换你要使用的模型:",
-            reply_markup=reply_markup,
-        )
-        return
-
-    reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keybord)
+    reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
 
     _ = await update.message.reply_text(
-        text="Sorry, 由于GPT-4系列模型的费用较高(约是GPT-3.5的20倍), 默认用户当前只能使用GPT-3.5系列模型. 如果你愿意资助, 可以开放GPT-4模型.",
+        f"当前使用的模型是: {context.chat_data.get('model', None) or os.getenv('model')}. 切换你要使用的模型:",
         reply_markup=reply_markup,
     )
     return
