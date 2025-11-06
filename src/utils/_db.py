@@ -145,9 +145,12 @@ class DBClient:
 
     def create_table(self, table: str, fields: dict[str, str]) -> None:
         # 验证字段类型，确保它们是合法的数据类型
-        valid_field_types = ["INTEGER", "TEXT", "REAL", "BLOB", "NULL"]
+        valid_field_types = ["INTEGER", "TEXT", "REAL", "BLOB", "NULL", "PRIMARY", "AUTOINCREMENT", "UNIQUE"]
         for field_type in fields.values():
-            if field_type.upper() not in valid_field_types:
+            # Extract the base type (first word) from field definition
+            # e.g., "INTEGER DEFAULT 0" -> "INTEGER"
+            base_type = field_type.strip().split()[0].upper()
+            if base_type not in valid_field_types:
                 raise ValueError(f"Invalid field type: {field_type}")
 
         fields_sql = ", ".join(
