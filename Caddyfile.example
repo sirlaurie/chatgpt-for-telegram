@@ -1,0 +1,51 @@
+# Caddy 配置文件示例
+# 用于 Telegram Bot Webhook 服务器
+#
+# 使用方法：
+# 1. 将此文件复制到 /etc/caddy/Caddyfile
+# 2. 替换 yourdomain.com 为你的实际域名
+# 3. 重启 Caddy: sudo systemctl restart caddy
+#
+# Caddy 会自动：
+# - 申请 Let's Encrypt SSL 证书
+# - 配置 HTTPS
+# - HTTP 自动重定向到 HTTPS
+# - 自动续期证书
+
+# 替换为你的域名
+yourdomain.com {
+    # Stripe Webhook endpoint
+    reverse_proxy /stripe/webhook localhost:8000
+
+    # Payment success/cancel pages
+    reverse_proxy /payment/* localhost:8000
+
+    # Health check endpoint
+    reverse_proxy /health localhost:8000
+
+    # 日志配置（可选）
+    log {
+        output file /var/log/caddy/telegram-bot.log
+        format json
+    }
+
+    # 添加安全头（可选）
+    header {
+        # 启用 HSTS
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+        # 防止点击劫持
+        X-Frame-Options "DENY"
+
+        # 防止 MIME 类型嗅探
+        X-Content-Type-Options "nosniff"
+
+        # XSS 保护
+        X-XSS-Protection "1; mode=block"
+    }
+}
+
+# 如果需要支持多个域名，可以添加更多配置块
+# www.yourdomain.com {
+#     redir https://yourdomain.com{uri} permanent
+# }

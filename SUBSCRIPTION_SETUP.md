@@ -277,9 +277,82 @@ sudo journalctl -u telegram-bot -f
 sudo journalctl -u webhook-server -f
 ```
 
-#### 使用 Nginx 反向代理
+#### 使用 Caddy 反向代理（推荐）
 
-配置 Nginx 将 HTTPS 流量转发到 Webhook 服务器：
+Caddy 自动管理 HTTPS 证书，配置极其简单！
+
+**1. 安装 Caddy**
+
+```bash
+# Ubuntu/Debian
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update
+sudo apt install caddy
+
+# CentOS/RHEL
+dnf install 'dnf-command(copr)'
+dnf copr enable @caddy/caddy
+dnf install caddy
+```
+
+**2. 创建 Caddyfile**
+
+创建文件 `/etc/caddy/Caddyfile`：
+
+```caddy
+yourdomain.com {
+    # Webhook endpoint for Stripe
+    reverse_proxy /stripe/webhook localhost:8000
+
+    # Payment success/cancel pages
+    reverse_proxy /payment/* localhost:8000
+
+    # Optional: Health check endpoint
+    reverse_proxy /health localhost:8000
+}
+```
+
+就这么简单！Caddy 会自动：
+- ✅ 申请 Let's Encrypt SSL 证书
+- ✅ 自动续期证书
+- ✅ 配置 HTTPS
+- ✅ HTTP 自动重定向到 HTTPS
+
+**3. 启动 Caddy**
+
+```bash
+sudo systemctl enable caddy
+sudo systemctl start caddy
+sudo systemctl status caddy
+```
+
+**4. 查看日志**
+
+```bash
+sudo journalctl -u caddy -f
+```
+
+**5. 验证配置**
+
+访问 `https://yourdomain.com/health` 应该返回 `{"status":"healthy"}`
+
+---
+
+#### 使用 Nginx 反向代理（备选方案）
+
+如果你更熟悉 Nginx，配置如下：
+
+**1. 安装 Certbot（用于 Let's Encrypt）**
+
+```bash
+sudo apt install certbot python3-certbot-nginx
+```
+
+**2. 配置 Nginx**
+
+创建文件 `/etc/nginx/sites-available/telegram-bot`：
 
 ```nginx
 server {
@@ -292,8 +365,8 @@ server {
     listen 443 ssl;
     server_name yourdomain.com;
 
-    ssl_certificate /path/to/ssl/cert.pem;
-    ssl_certificate_key /path/to/ssl/key.pem;
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
 
     location /stripe/webhook {
         proxy_pass http://localhost:8000;
@@ -307,8 +380,28 @@ server {
         proxy_pass http://localhost:8000;
         proxy_set_header Host $host;
     }
+
+    location /health {
+        proxy_pass http://localhost:8000;
+    }
 }
 ```
+
+**3. 启用站点**
+
+```bash
+sudo ln -s /etc/nginx/sites-available/telegram-bot /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+**4. 获取 SSL 证书**
+
+```bash
+sudo certbot --nginx -d yourdomain.com
+```
+
+Certbot 会自动配置 SSL 并设置自动续期。
 
 ---
 
