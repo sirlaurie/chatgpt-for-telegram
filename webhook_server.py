@@ -8,6 +8,7 @@ import uvicorn
 import os
 import logging
 import asyncio
+import time
 from telegram import Bot
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -270,8 +271,16 @@ async def handle_payment_succeeded(invoice_data):
         return
 
     telegram_id = subscription[1]
+    created_at = subscription[9]  # created_at timestamp
+    now = int(time.time())
 
-    # Update subscription period
+    # Skip if this is the first payment (subscription created within last 60 seconds)
+    # checkout.session.completed already handled the initial setup with correct periods
+    if now - created_at < 60:
+        logger.info(f"Skipping period update for newly created subscription: {subscription_id}")
+        return
+
+    # Update subscription period (only for recurring payments, not first payment)
     update_subscription(
         stripe_subscription_id=subscription_id,
         current_period_start=invoice_data["period_start"],
