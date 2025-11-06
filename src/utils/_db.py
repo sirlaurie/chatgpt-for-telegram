@@ -2,6 +2,9 @@ from typing import List, Tuple, Dict, Union, Optional
 import os
 import re
 import sqlite3
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def validate_identifier(identifier: str) -> str:
@@ -15,11 +18,23 @@ class DBClient:
     uri = os.environ.get("database_uri", "bot.db")
 
     def __init__(self) -> None:
+        # Check if database file exists (first time initialization)
+        is_new_db = not os.path.exists(DBClient.uri)
+
         self.connection = sqlite3.connect(database=DBClient.uri, timeout=30.0)
         self.cursor = self.connection.cursor()
+
         # Enable WAL mode for better concurrent access
-        self.cursor.execute("PRAGMA journal_mode=WAL;")
+        # This should be done immediately after connection, before any table operations
+        result = self.cursor.execute("PRAGMA journal_mode=WAL;")
+        current_mode = result.fetchone()[0]
         self.connection.commit()
+
+        if is_new_db:
+            logger.info(f"Database initialized with WAL mode: {current_mode}")
+        elif current_mode.upper() != "WAL":
+            logger.warning(f"Database journal mode changed from {current_mode} to WAL")
+
         user_table_exist = self.check_table("User")
         if not user_table_exist:
             self.create_table(
