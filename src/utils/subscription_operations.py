@@ -18,21 +18,14 @@ SUBSCRIPTION_STATUS_CANCELED = "canceled"
 PLAN_TYPE_MONTHLY = "monthly"
 PLAN_TYPE_YEARLY = "yearly"
 
-# Free message limit
-FREE_MESSAGE_LIMIT = 5
-
-
 def check_subscription_status(telegram_id: int) -> Dict[str, Union[str, int, bool]]:
     """
-    Check user's subscription status and usage
+    Check user's subscription status
 
     Returns:
         dict with keys:
         - is_subscribed: bool
         - subscription_status: str (free/active/expired/canceled)
-        - free_messages_used: int
-        - free_messages_remaining: int
-        - can_send_message: bool
         - subscription_end_date: int or None
         - is_admin: bool
     """
@@ -42,9 +35,6 @@ def check_subscription_status(telegram_id: int) -> Dict[str, Union[str, int, boo
         return {
             "is_subscribed": False,
             "subscription_status": SUBSCRIPTION_STATUS_FREE,
-            "free_messages_used": 0,
-            "free_messages_remaining": FREE_MESSAGE_LIMIT,
-            "can_send_message": True,
             "subscription_end_date": None,
             "is_admin": False,
         }
@@ -64,15 +54,11 @@ def check_subscription_status(telegram_id: int) -> Dict[str, Union[str, int, boo
         return {
             "is_subscribed": True,
             "subscription_status": "admin",
-            "free_messages_used": 0,
-            "free_messages_remaining": 999999,
-            "can_send_message": True,
             "subscription_end_date": None,
             "is_admin": True,
         }
 
     # Default values if None
-    free_messages_used = free_messages_used or 0
     subscription_status = subscription_status or SUBSCRIPTION_STATUS_FREE
 
     # Check if subscription is active and not expired
@@ -85,36 +71,12 @@ def check_subscription_status(telegram_id: int) -> Dict[str, Union[str, int, boo
             subscription_status = SUBSCRIPTION_STATUS_EXPIRED
             client.update_column("User", telegram_id, "subscription_status", SUBSCRIPTION_STATUS_EXPIRED)
 
-    # Determine if user can send message
-    can_send_message = is_subscribed or (free_messages_used < FREE_MESSAGE_LIMIT)
-
-    free_messages_remaining = max(0, FREE_MESSAGE_LIMIT - free_messages_used)
-
     return {
         "is_subscribed": is_subscribed,
         "subscription_status": subscription_status,
-        "free_messages_used": free_messages_used,
-        "free_messages_remaining": free_messages_remaining,
-        "can_send_message": can_send_message,
         "subscription_end_date": subscription_end_date,
         "is_admin": is_admin,
     }
-
-
-def increment_free_usage(telegram_id: int) -> int:
-    """
-    Increment the free message usage counter
-
-    Returns:
-        Current free_messages_used count
-    """
-    current_count = client.get_column_value("User", telegram_id, "free_messages_used") or 0
-    new_count = current_count + 1
-
-    client.update_column("User", telegram_id, "free_messages_used", new_count)
-    client.update_column("User", telegram_id, "last_message_date", int(time.time()))
-
-    return new_count
 
 
 def create_subscription(

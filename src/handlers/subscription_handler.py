@@ -9,7 +9,6 @@ from ..utils.subscription_operations import (
     check_subscription_status,
     get_user_subscription,
     cancel_subscription as cancel_user_subscription,
-    FREE_MESSAGE_LIMIT,
 )
 from ..helpers.stripe_helper import (
     cancel_stripe_subscription,
@@ -45,12 +44,8 @@ async def subscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     yearly_price = format_price(PRICING["yearly"]["price"])
     yearly_monthly = format_price(PRICING["yearly"]["price"] / 12)
 
-    remaining = status["free_messages_remaining"]
-
     message = f"""
 💎 *Subscribe to AI Assistant*
-
-You have {remaining}/{FREE_MESSAGE_LIMIT} free messages remaining.
 
 📅 *Monthly Subscription*
 • Price: {monthly_price}/month
@@ -109,17 +104,12 @@ You have full administrator privileges.
         return
 
     if not status["is_subscribed"]:
-        remaining = status["free_messages_remaining"]
-        used = status["free_messages_used"]
-
-        message = f"""
+        message = """
 📊 *Your Usage Status*
 
 Status: 🆓 Free User
-Used: {used}/{FREE_MESSAGE_LIMIT} messages
-Remaining: {remaining} messages
 
-Subscribe for unlimited messages!
+Subscribe for unlimited messages and access to all features!
 Use /subscribe to view subscription plans.
 """
 
@@ -257,13 +247,10 @@ async def usage_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             message = "✅ Subscribed User - Unlimited Messages"
     else:
-        used = status["free_messages_used"]
-        remaining = status["free_messages_remaining"]
-        message = f"""
+        message = """
 📊 *Usage Statistics*
 
-Free Messages: {used}/{FREE_MESSAGE_LIMIT} used
-Remaining: {remaining} messages
+Status: 🆓 Free User
 
 Want unlimited messages? Use /subscribe!
 """

@@ -7,8 +7,6 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from ..utils.subscription_operations import (
     check_subscription_status,
-    increment_free_usage,
-    FREE_MESSAGE_LIMIT,
 )
 from .stripe_helper import create_checkout_session, PRICING
 import logging
@@ -31,10 +29,9 @@ def format_price(price: float, currency: str = "USD") -> str:
 
 def check_subscription(handler):
     """
-    Decorator to check if user has an active subscription or free messages remaining
-    before allowing them to use the bot.
+    Decorator to check if user has an active subscription before allowing them to use the bot.
 
-    If user has exceeded free limit and has no subscription, sends payment prompt.
+    If user has no subscription, sends payment prompt.
     """
 
     @wraps(handler)
@@ -49,40 +46,23 @@ def check_subscription(handler):
         if status["is_admin"] or status["is_subscribed"]:
             return await handler(update, context)
 
-        # Check if user can send message (has free messages remaining)
-        if not status["can_send_message"]:
-            # User has exceeded free limit - send payment prompt
-            await send_payment_prompt(update, context, telegram_id)
-            return
-
-        # User has free messages remaining - proceed and increment counter
-        result = await handler(update, context)
-
-        # After processing, increment free usage counter
-        new_count = increment_free_usage(telegram_id)
-
-        # Send reminder if approaching limit
-        remaining = FREE_MESSAGE_LIMIT - new_count
-        if remaining == 2:
-            await send_usage_reminder(update, context, remaining)
-        elif remaining == 0:
-            await send_limit_reached(update, context)
-
-        return result
+        # User has no subscription - send payment prompt
+        await send_payment_prompt(update, context, telegram_id)
+        return
 
     return wrapper
 
 
 async def send_payment_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE, telegram_id: int):
-    """Send payment prompt when user exceeds free limit"""
+    """Send payment prompt to non-subscribed users"""
 
     monthly_price = format_price(PRICING["monthly"]["price"])
     yearly_price = format_price(PRICING["yearly"]["price"])
 
     message = f"""
-🚫 *Free Messages Used Up*
+🔒 *Subscription Required*
 
-You have used all {FREE_MESSAGE_LIMIT} free messages.
+Please subscribe to use this bot.
 
 Subscribe to enjoy:
 ✨ Unlimited messages
@@ -108,48 +88,6 @@ Choose a subscription plan:
         [InlineKeyboardButton("❓ View Details", callback_data="subscription_info")],
     ]
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await update.message.reply_text(
-        message,
-        parse_mode="Markdown",
-        reply_markup=reply_markup,
-    )
-
-
-async def send_usage_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE, remaining: int):
-    """Send reminder when user is approaching free limit"""
-
-    message = f"""
-💬 *Usage Reminder*
-
-You have {remaining} free messages remaining.
-
-Subscribe for unlimited messages!
-"""
-
-    keyboard = [[InlineKeyboardButton("💳 View Plans", callback_data="subscription_info")]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await update.message.reply_text(
-        message,
-        parse_mode="Markdown",
-        reply_markup=reply_markup,
-    )
-
-
-async def send_limit_reached(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Send notification when user reaches free limit"""
-
-    message = """
-✅ *This is your last free message*
-
-Next message will require subscription.
-
-Click below to view subscription plans:
-"""
-
-    keyboard = [[InlineKeyboardButton("💳 Subscribe Now", callback_data="subscription_info")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(
