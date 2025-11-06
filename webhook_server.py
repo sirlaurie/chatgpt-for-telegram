@@ -164,13 +164,14 @@ async def handle_checkout_completed(session_data):
     subscription = stripe.Subscription.retrieve(subscription_id)
 
     # Create subscription in database
+    # Use dictionary access for compatibility
     create_subscription(
         telegram_id=telegram_id,
         stripe_subscription_id=subscription_id,
         stripe_customer_id=customer_id,
         plan_type=plan_type,
-        current_period_start=subscription.current_period_start,
-        current_period_end=subscription.current_period_end,
+        current_period_start=subscription['current_period_start'],
+        current_period_end=subscription['current_period_end'],
     )
 
     # Record payment
@@ -189,7 +190,7 @@ async def handle_checkout_completed(session_data):
 
     # Send notification to user
     plan_name = "月度" if plan_type == "monthly" else "年度"
-    end_date = datetime.fromtimestamp(subscription.current_period_end).strftime("%Y-%m-%d")
+    end_date = datetime.fromtimestamp(subscription['current_period_end']).strftime("%Y-%m-%d")
 
     message = f"""
 🎉 *订阅成功！*
