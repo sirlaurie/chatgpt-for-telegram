@@ -23,7 +23,7 @@ async def image_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     assert update.message is not None
     global callback_query
     callback_query = await update.message.reply_text(
-        text="欢迎使用图像生成功能, 此功能使用DALL.E 3作为功能接口, \n请发送你要生成图像的提示词, 或者点击下方Exit退出此功能.",
+        text="Welcome to the image generation feature. This uses DALL-E 3 as the backend.\nPlease send your image prompt, or click Exit below to exit this feature.",
         reply_markup=InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton("Exit", callback_data="cancel_gen_image")]
@@ -40,19 +40,19 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     assert update.message is not None
 
     prompt = update.message.text
-    msg = await update.message.reply_text(text="正在生成图片, 请稍后...")
+    msg = await update.message.reply_text(text="Generating image, please wait...")
 
     image = await gen_image(prompt)
     if not image.startswith("http"):
         await msg.edit_text(text=image)
         return -1
 
-    await msg.edit_text(text="图片已生成, 正在获取图片...")
+    await msg.edit_text(text="Image generated, retrieving...")
     await msg.delete()
     await update.message.reply_photo(photo=image)
     global callback_query
     callback_query = await update.message.reply_text(
-        text="你可以继续发送新的提示词, 或者点击下方Exit退出此功能.",
+        text="You can continue sending new prompts, or click Exit below to exit this feature.",
         reply_markup=InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton("Exit", callback_data="cancel_gen_image")]
