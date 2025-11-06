@@ -15,8 +15,11 @@ class DBClient:
     uri = os.environ.get("database_uri", "bot.db")
 
     def __init__(self) -> None:
-        self.connection = sqlite3.connect(database=DBClient.uri)
+        self.connection = sqlite3.connect(database=DBClient.uri, timeout=30.0)
         self.cursor = self.connection.cursor()
+        # Enable WAL mode for better concurrent access
+        self.cursor.execute("PRAGMA journal_mode=WAL;")
+        self.connection.commit()
         user_table_exist = self.check_table("User")
         if not user_table_exist:
             self.create_table(
