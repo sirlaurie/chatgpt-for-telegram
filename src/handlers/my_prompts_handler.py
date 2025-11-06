@@ -34,14 +34,14 @@ async def my_prompts_handler(
 
     inline_keyboard = [
         [
-            # InlineKeyboardButton("创建新的prompt", callback_data=new_prompt),
-            InlineKeyboardButton("查看共享的prompt", callback_data=view_prompts),
+            # InlineKeyboardButton("Create new prompt", callback_data=new_prompt),
+            InlineKeyboardButton("View Shared Prompts", callback_data=view_prompts),
         ],
     ]
 
     if not user_prompts:
         await update.message.reply_text(
-            text="抱歉, 未查询到你创建过任何Prompt.\n\n你可以选择创建新的prompt或者查看其他人共享的prompt.",
+            text="Sorry, no prompts found that you have created.\n\nYou can choose to create a new prompt or view prompts shared by others.",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=inline_keyboard),
         )
         return
@@ -74,7 +74,7 @@ async def my_prompts_handler(
         )
     inline_prompts_keyboard.extend(inline_keyboard)
     await update.message.reply_text(
-        text="请选择你的prompt",
+        text="Please select your prompt",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=inline_prompts_keyboard),
     )
 
@@ -125,7 +125,7 @@ async def prompt_callback_handler(
                 ]
             )
         await message.edit_text(
-            text="以下是共享的prompt",
+            text="Here are the shared prompts",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=inline_prompts_keyboard),
         )
         return

@@ -20,7 +20,7 @@ async def create_new_prompt_handler(update: Update, context: ContextTypes.DEFAUL
     if not update.effective_user or not update.message:
         return
     await update.message.reply_text(
-        text="创建一个自定义的prompt, 请输入你的prompt名称, 例如: 翻译助手",
+        text="Create a custom prompt. Please enter your prompt name, e.g.: Translation Assistant",
         pool_timeout=3600.0,
     )
     return prompt_name
@@ -34,7 +34,7 @@ async def prompt_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         return prompt_name
     prompt.update({"name": text})
     await update.message.reply_text(
-        text="接下来请输入你的prompt具体内容", pool_timeout=3600.0
+        text="Next, please enter your prompt content", pool_timeout=3600.0
     )
     return prompt_content
 
@@ -51,7 +51,7 @@ async def prompt_content_handler(update: Update, context: ContextTypes.DEFAULT_T
         InlineKeyboardButton("No", callback_data="no"),
     ]
     await update.message.reply_text(
-        text="你是否愿意将你的prompt共享?",
+        text="Would you like to share your prompt?",
         reply_markup=InlineKeyboardMarkup([inline_keyboard]),
         pool_timeout=3600.0,
     )
@@ -71,7 +71,7 @@ async def share_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     prompt.update({"share": 1 if query_data == "yes" else 0})
     add_prompt(user_id=update.effective_user.id, prompt=prompt)
     await callback_query.edit_message_text(
-        text="恭喜!你成功的创建了一个自定义prompt!",
+        text="Congratulations! You have successfully created a custom prompt!",
         reply_markup=None,
         pool_timeout=3600.0,
     )
