@@ -3,7 +3,7 @@
 # Stripe Webhook Server
 
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 import uvicorn
 import os
 import logging
@@ -358,26 +358,232 @@ async def handle_subscription_deleted(subscription_data):
     logger.info(f"Subscription deleted for telegram_id: {telegram_id}")
 
 
-# Simple success/cancel pages (optional)
+# Payment success/cancel pages
 
 
-@app.get("/payment/success")
+@app.get("/payment/success", response_class=HTMLResponse)
 async def payment_success(session_id: str = None):
     """Payment success page"""
-    return {
-        "status": "success",
-        "message": "Payment successful! Please return to Telegram to start using the bot.",
-        "session_id": session_id,
-    }
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>支付成功 - Payment Successful</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .container {
+                background: white;
+                border-radius: 20px;
+                padding: 40px 30px;
+                max-width: 500px;
+                width: 100%;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                text-align: center;
+            }
+            .icon {
+                font-size: 80px;
+                margin-bottom: 20px;
+                animation: scaleIn 0.5s ease-out;
+            }
+            @keyframes scaleIn {
+                0% { transform: scale(0); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+            h1 {
+                color: #2d3748;
+                font-size: 28px;
+                margin-bottom: 15px;
+            }
+            .message {
+                color: #4a5568;
+                font-size: 16px;
+                line-height: 1.6;
+                margin-bottom: 30px;
+            }
+            .info {
+                background: #f7fafc;
+                border-radius: 10px;
+                padding: 15px;
+                margin-bottom: 25px;
+                font-size: 14px;
+                color: #718096;
+            }
+            .button {
+                display: inline-block;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 40px;
+                border-radius: 30px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 16px;
+                transition: transform 0.2s, box-shadow 0.2s;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            }
+            .button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            }
+            .button:active {
+                transform: translateY(0);
+            }
+            .session-id {
+                font-family: monospace;
+                font-size: 12px;
+                color: #a0aec0;
+                margin-top: 20px;
+                word-break: break-all;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="icon">🎉</div>
+            <h1>支付成功！</h1>
+            <div class="message">
+                感谢您的订阅！您的支付已成功处理。<br>
+                请返回 Telegram 开始使用所有功能。
+            </div>
+            <div class="info">
+                ✅ 订阅已激活<br>
+                📱 请返回 Telegram 查看您的订阅状态
+            </div>
+            <a href="tg://" class="button">返回 Telegram</a>
+            """ + (f'<div class="session-id">Session: {session_id}</div>' if session_id else '') + """
+        </div>
+        <script>
+            // 尝试自动关闭页面（某些移动浏览器支持）
+            setTimeout(function() {
+                if (window.opener) {
+                    window.close();
+                }
+            }, 3000);
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 
-@app.get("/payment/cancel")
+@app.get("/payment/cancel", response_class=HTMLResponse)
 async def payment_cancel():
     """Payment cancel page"""
-    return {
-        "status": "cancelled",
-        "message": "Payment was cancelled. You can try again anytime using /subscribe command in Telegram.",
-    }
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>支付已取消 - Payment Cancelled</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .container {
+                background: white;
+                border-radius: 20px;
+                padding: 40px 30px;
+                max-width: 500px;
+                width: 100%;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                text-align: center;
+            }
+            .icon {
+                font-size: 80px;
+                margin-bottom: 20px;
+            }
+            h1 {
+                color: #2d3748;
+                font-size: 28px;
+                margin-bottom: 15px;
+            }
+            .message {
+                color: #4a5568;
+                font-size: 16px;
+                line-height: 1.6;
+                margin-bottom: 30px;
+            }
+            .info {
+                background: #f7fafc;
+                border-radius: 10px;
+                padding: 15px;
+                margin-bottom: 25px;
+                font-size: 14px;
+                color: #718096;
+            }
+            .button {
+                display: inline-block;
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+                padding: 15px 40px;
+                border-radius: 30px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 16px;
+                transition: transform 0.2s, box-shadow 0.2s;
+                box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+            }
+            .button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
+            }
+            .button:active {
+                transform: translateY(0);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="icon">😔</div>
+            <h1>支付已取消</h1>
+            <div class="message">
+                您的支付已取消，没有产生任何费用。<br>
+                如需订阅，请随时返回 Telegram 重试。
+            </div>
+            <div class="info">
+                💡 使用 /subscribe 命令可以重新开始订阅流程
+            </div>
+            <a href="tg://" class="button">返回 Telegram</a>
+        </div>
+        <script>
+            // 尝试自动关闭页面
+            setTimeout(function() {
+                if (window.opener) {
+                    window.close();
+                }
+            }, 3000);
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 
 if __name__ == "__main__":
