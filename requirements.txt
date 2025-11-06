@@ -17,6 +17,7 @@ pydantic>=2.7.0
 
 # Utilities
 cachetools>=5.3.3
+python-dateutil>=2.8.2
 
 # Google Auth
 google-auth>=2.29.0

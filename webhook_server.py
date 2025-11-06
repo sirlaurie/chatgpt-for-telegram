@@ -10,6 +10,7 @@ import logging
 import asyncio
 from telegram import Bot
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 # Import project modules
 from src.helpers.stripe_helper import verify_webhook_signature
@@ -168,20 +169,37 @@ async def handle_checkout_completed(session_data):
     subscription = stripe.Subscription.retrieve(subscription_id)
 
     # Extract subscription period safely
-    # Stripe objects can be accessed as dict or attributes
+    # Note: Subscription object may not have current_period_start/end directly
+    # We need to calculate from billing_cycle_anchor or use created + 1 month/year
     try:
-        current_period_start = subscription.get('current_period_start') or subscription.current_period_start
-        current_period_end = subscription.get('current_period_end') or subscription.current_period_end
-    except (AttributeError, KeyError, TypeError) as e:
+        # Try to get current_period_start and current_period_end directly
+        current_period_start = getattr(subscription, 'current_period_start', None)
+        current_period_end = getattr(subscription, 'current_period_end', None)
+
+        # If not available, use alternative fields
+        if not current_period_start:
+            # Use start_date or created as fallback
+            current_period_start = subscription.get('start_date') or subscription.get('created')
+            logger.info(f"Using start_date/created as current_period_start: {current_period_start}")
+
+        if not current_period_end:
+            # Calculate end date based on plan interval
+            start_dt = datetime.fromtimestamp(current_period_start)
+
+            if plan_type == "yearly":
+                end_dt = start_dt + relativedelta(years=1)
+            else:  # monthly
+                end_dt = start_dt + relativedelta(months=1)
+
+            current_period_end = int(end_dt.timestamp())
+            logger.info(f"Calculated current_period_end: {current_period_end}")
+
+    except Exception as e:
         logger.error(f"Error accessing subscription fields: {e}")
         logger.error(f"Subscription object type: {type(subscription)}")
         logger.error(f"Subscription keys: {list(subscription.keys()) if hasattr(subscription, 'keys') else 'N/A'}")
-        # Fallback: try direct attribute access
-        current_period_start = getattr(subscription, 'current_period_start', None)
-        current_period_end = getattr(subscription, 'current_period_end', None)
-        if not current_period_start or not current_period_end:
-            logger.error("Failed to extract subscription period, aborting")
-            return
+        logger.error("Failed to extract subscription period, aborting")
+        return
 
     # Create subscription in database
     create_subscription(
