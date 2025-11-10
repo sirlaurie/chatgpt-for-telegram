@@ -8,7 +8,7 @@ import logging
 
 from telegram.constants import ParseMode
 
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -21,6 +21,8 @@ from telegram.ext import (
 
 from src.helpers.permission import check_permission
 from src.constants.messages import WELCOME_MESSAGE
+from src.helpers.stripe_helper import PRICING
+from src.helpers.subscription_check import format_price
 from src.constants.commands import (
     reset_command,
     switch_model_command,
@@ -117,7 +119,340 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
         _ = context
         return
-    _ = await update.message.reply_text(text=WELCOME_MESSAGE)
+
+    monthly_price = format_price(PRICING["monthly"]["price"])
+    yearly_price = format_price(PRICING["yearly"]["price"])
+    yearly_monthly = format_price(PRICING["yearly"]["price"] / 12)
+
+    welcome_text = f"""
+🤖 *Welcome to AI Assistant Bot*
+
+Your personal AI assistant powered by the latest AI models.
+
+━━━━━━━━━━━━━━━━━━━━━━
+*📋 ABOUT OUR SERVICE*
+━━━━━━━━━━━━━━━━━━━━━━
+
+We provide unlimited access to multiple cutting-edge AI models through Telegram:
+• GPT-4o, GPT-4.1, GPT-4o Mini
+• Gemini 2.5 Flash, Gemini 2.5 Pro
+• DALL-E 3 for image generation
+
+━━━━━━━━━━━━━━━━━━━━━━
+*💎 SUBSCRIPTION PLANS*
+━━━━━━━━━━━━━━━━━━━━━━
+
+*Monthly:* {monthly_price}/month
+*Yearly:* {yearly_price}/year (Save 17% - {yearly_monthly}/month)
+
+━━━━━━━━━━━━━━━━━━━━━━
+*✨ FEATURES INCLUDED*
+━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Unlimited AI conversations
+✓ Access to all AI models
+✓ Document analysis (PDF, EPUB, etc.)
+✓ DALL-E 3 image generation
+✓ Multi-language translation
+✓ Conversation history
+✓ Custom prompts
+✓ Priority support
+
+━━━━━━━━━━━━━━━━━━━━━━
+*🔐 SECURE PAYMENT*
+━━━━━━━━━━━━━━━━━━━━━━
+
+All payments are processed securely through Stripe, one of the world's most trusted payment platforms. We never store your payment information.
+
+━━━━━━━━━━━━━━━━━━━━━━
+*📜 TERMS & POLICIES*
+━━━━━━━━━━━━━━━━━━━━━━
+
+• Subscriptions auto-renew monthly/yearly
+• Cancel anytime before next billing cycle
+• 7-day refund policy
+• No hidden fees
+• Full service details: Use /terms
+
+━━━━━━━━━━━━━━━━━━━━━━
+*📞 CONTACT & SUPPORT*
+━━━━━━━━━━━━━━━━━━━━━━
+
+Business: autheai.com
+Support: Use /help command
+Email: support@autheai.com
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+*Ready to start?* Use /subscribe to choose your plan!
+
+Type /help to see all available commands.
+"""
+
+    keyboard = [
+        [
+            InlineKeyboardButton("💳 Subscribe Now", callback_data="subscription_info"),
+            InlineKeyboardButton("📋 View Plans", callback_data="subscription_info"),
+        ],
+        [
+            InlineKeyboardButton("📜 Terms & Policies", callback_data="show_terms"),
+            InlineKeyboardButton("❓ Help", callback_data="show_help"),
+        ],
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text(
+        text=welcome_text,
+        parse_mode="Markdown",
+        reply_markup=reply_markup,
+    )
+
+
+async def terms_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Show terms and conditions"""
+    if not update.message:
+        return
+
+    terms_text = """
+📜 *TERMS OF SERVICE & POLICIES*
+
+━━━━━━━━━━━━━━━━━━━━━━
+*🔰 SERVICE DESCRIPTION*
+━━━━━━━━━━━━━━━━━━━━━━
+
+AI Assistant Bot provides access to multiple AI models (GPT-4, Gemini, etc.) through Telegram for text generation, document analysis, image creation, and translation services.
+
+━━━━━━━━━━━━━━━━━━━━━━
+*💳 SUBSCRIPTION & BILLING*
+━━━━━━━━━━━━━━━━━━━━━━
+
+• Monthly: $9.99/month
+• Yearly: $99.99/year
+• Subscriptions auto-renew unless cancelled
+• Billing occurs on the same day each period
+• All payments processed via Stripe
+• We do not store payment information
+
+━━━━━━━━━━━━━━━━━━━━━━
+*❌ CANCELLATION POLICY*
+━━━━━━━━━━━━━━━━━━━━━━
+
+• Cancel anytime through /my_subscription
+• Cancellation takes effect at end of billing period
+• No partial refunds for unused time
+• Access continues until subscription expires
+• Use /cancel_subscription to cancel
+
+━━━━━━━━━━━━━━━━━━━━━━
+*💰 REFUND POLICY*
+━━━━━━━━━━━━━━━━━━━━━━
+
+• 7-day money-back guarantee for first purchase
+• Contact support within 7 days for refund
+• Email: support@autheai.com
+• Refunds processed within 5-10 business days
+• No refunds after 7 days
+
+━━━━━━━━━━━━━━━━━━━━━━
+*🔒 PRIVACY & DATA*
+━━━━━━━━━━━━━━━━━━━━━━
+
+• We don't sell your data
+• Conversations stored for service functionality
+• Payment info secured by Stripe (PCI compliant)
+• We collect: Telegram ID, subscription status
+• You can request data deletion anytime
+
+━━━━━━━━━━━━━━━━━━━━━━
+*⚖️ ACCEPTABLE USE*
+━━━━━━━━━━━━━━━━━━━━━━
+
+Prohibited activities:
+• Illegal content generation
+• Harassment or hate speech
+• Automated/bot usage
+• Sharing account access
+• Violating third-party rights
+
+Violations may result in immediate termination without refund.
+
+━━━━━━━━━━━━━━━━━━━━━━
+*🛡️ SERVICE AVAILABILITY*
+━━━━━━━━━━━━━━━━━━━━━━
+
+• Service provided "as is"
+• 99% uptime target (no guarantee)
+• Maintenance windows announced when possible
+• No liability for service interruptions
+• Rate limits may apply during high usage
+
+━━━━━━━━━━━━━━━━━━━━━━
+*📧 CONTACT*
+━━━━━━━━━━━━━━━━━━━━━━
+
+Business: autheai.com
+Support: support@autheai.com
+Bot: Use /help for assistance
+
+By subscribing, you agree to these terms.
+Last updated: January 2025
+"""
+
+    await update.message.reply_text(
+        text=terms_text,
+        parse_mode="Markdown",
+    )
+
+
+async def about_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Show detailed information about the service"""
+    if not update.message:
+        return
+
+    monthly_price = format_price(PRICING["monthly"]["price"])
+    yearly_price = format_price(PRICING["yearly"]["price"])
+
+    about_text = f"""
+ℹ️ *ABOUT AI ASSISTANT BOT*
+
+━━━━━━━━━━━━━━━━━━━━━━
+*🎯 WHAT WE OFFER*
+━━━━━━━━━━━━━━━━━━━━━━
+
+A comprehensive AI assistant service accessible directly through Telegram, providing unlimited access to the world's leading AI models.
+
+━━━━━━━━━━━━━━━━━━━━━━
+*🤖 AVAILABLE AI MODELS*
+━━━━━━━━━━━━━━━━━━━━━━
+
+*OpenAI Models:*
+• GPT-4o - Latest flagship model
+• GPT-4.1 - Enhanced reasoning
+• GPT-4o Mini - Fast & efficient
+
+*Google Models:*
+• Gemini 2.5 Flash - Speed optimized
+• Gemini 2.5 Pro - Most capable
+• Gemini Flash Latest - Auto-updated
+
+*Image Generation:*
+• DALL-E 3 - High-quality images
+
+━━━━━━━━━━━━━━━━━━━━━━
+*💎 PRICING*
+━━━━━━━━━━━━━━━━━━━━━━
+
+*Monthly Plan:* {monthly_price}/month
+• Unlimited messages
+• All AI models
+• All features
+
+*Yearly Plan:* {yearly_price}/year
+• Save 17% compared to monthly
+• Equivalent to $8.33/month
+• All features included
+
+━━━━━━━━━━━━━━━━━━━━━━
+*✨ KEY FEATURES*
+━━━━━━━━━━━━━━━━━━━━━━
+
+• Switch between AI models instantly
+• Analyze documents (PDF, EPUB, TXT, etc.)
+• Generate images from text descriptions
+• Translate between languages
+• Create and save custom prompts
+• Persistent conversation history
+• Priority customer support
+
+━━━━━━━━━━━━━━━━━━━━━━
+*🔐 SECURITY & TRUST*
+━━━━━━━━━━━━━━━━━━━━━━
+
+• Payments via Stripe (PCI DSS compliant)
+• No payment data stored on our servers
+• Industry-standard encryption
+• Regular security audits
+• Transparent pricing - no hidden fees
+
+━━━━━━━━━━━━━━━━━━━━━━
+*📞 SUPPORT*
+━━━━━━━━━━━━━━━━━━━━━━
+
+Business Website: autheai.com
+Email: support@autheai.com
+Response time: Within 24 hours
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+Ready to get started?
+Use /subscribe to choose your plan!
+"""
+
+    keyboard = [
+        [
+            InlineKeyboardButton("💳 Subscribe", callback_data="subscription_info"),
+        ],
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text(
+        text=about_text,
+        parse_mode="Markdown",
+        reply_markup=reply_markup,
+    )
+
+
+async def handle_info_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle information button callbacks"""
+    query = update.callback_query
+    if not query:
+        return
+
+    await query.answer()
+
+    if query.data == "show_terms":
+        terms_text = """
+📜 *TERMS OF SERVICE*
+
+*Subscription:* Auto-renews monthly/yearly
+*Cancellation:* Anytime, effective at period end
+*Refund:* 7-day money-back guarantee
+*Privacy:* We don't sell your data
+*Payment:* Secured by Stripe
+
+Full terms: Use /terms command
+Contact: support@autheai.com
+"""
+        await query.edit_message_text(
+            text=terms_text,
+            parse_mode="Markdown",
+        )
+
+    elif query.data == "show_help":
+        help_text = """
+❓ *QUICK HELP*
+
+*Available Commands:*
+/start - Show welcome & info
+/subscribe - Choose a plan
+/my_subscription - View subscription
+/usage - Check usage status
+/terms - Full terms & policies
+/about - Detailed service info
+/help - Show this help
+
+*Need Support?*
+Email: support@autheai.com
+Response within 24 hours
+
+Ready to subscribe? Use /subscribe
+"""
+        await query.edit_message_text(
+            text=help_text,
+            parse_mode="Markdown",
+        )
 
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -161,6 +496,10 @@ def main() -> None:
     application.add_handler(CommandHandler(reset_command, reset_handler))
     application.add_handler(CommandHandler(switch_model_command, switch_model_handler))
 
+    # Information commands
+    application.add_handler(CommandHandler("terms", terms_command))
+    application.add_handler(CommandHandler("about", about_command))
+
     # Subscription commands
     application.add_handler(CommandHandler("subscribe", subscribe_command))
     application.add_handler(CommandHandler("my_subscription", my_subscription_command))
@@ -202,6 +541,14 @@ def main() -> None:
         CallbackQueryHandler(
             handle_keep_subscription,
             pattern="^keep_subscription$"
+        )
+    )
+
+    # Information callback handlers
+    application.add_handler(
+        CallbackQueryHandler(
+            handle_info_callbacks,
+            pattern="^show_terms$|^show_help$"
         )
     )
 
