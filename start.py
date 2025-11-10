@@ -129,25 +129,25 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 Your personal AI assistant powered by the latest AI models.
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *📋 ABOUT OUR SERVICE*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 We provide unlimited access to multiple cutting-edge AI models through Telegram:
 • GPT-4o, GPT-4.1, GPT-4o Mini
 • Gemini 2.5 Flash, Gemini 2.5 Pro
 • DALL-E 3 for image generation
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *💎 SUBSCRIPTION PLANS*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 *Monthly:* {monthly_price}/month
 *Yearly:* {yearly_price}/year (Save 17% - {yearly_monthly}/month)
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *✨ FEATURES INCLUDED*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 ✓ Unlimited AI conversations
 ✓ Access to all AI models
@@ -158,15 +158,15 @@ We provide unlimited access to multiple cutting-edge AI models through Telegram:
 ✓ Custom prompts
 ✓ Priority support
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *🔐 SECURE PAYMENT*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 All payments are processed securely through Stripe, one of the world's most trusted payment platforms. We never store your payment information.
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *📜 TERMS & POLICIES*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 • Subscriptions auto-renew monthly/yearly
 • Cancel anytime before next billing cycle
@@ -174,15 +174,14 @@ All payments are processed securely through Stripe, one of the world's most trus
 • No hidden fees
 • Full service details: Use /terms
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *📞 CONTACT & SUPPORT*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
-Business: autheai.com
 Support: Use /help command
 Email: support@autheai.com
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 *Ready to start?* Use /subscribe to choose your plan!
 
@@ -217,15 +216,15 @@ async def terms_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     terms_text = """
 📜 *TERMS OF SERVICE & POLICIES*
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *🔰 SERVICE DESCRIPTION*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 AI Assistant Bot provides access to multiple AI models (GPT-4, Gemini, etc.) through Telegram for text generation, document analysis, image creation, and translation services.
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *💳 SUBSCRIPTION & BILLING*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 • Monthly: $9.99/month
 • Yearly: $99.99/year
@@ -234,9 +233,9 @@ AI Assistant Bot provides access to multiple AI models (GPT-4, Gemini, etc.) thr
 • All payments processed via Stripe
 • We do not store payment information
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *❌ CANCELLATION POLICY*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 • Cancel anytime through /my_subscription
 • Cancellation takes effect at end of billing period
@@ -244,9 +243,9 @@ AI Assistant Bot provides access to multiple AI models (GPT-4, Gemini, etc.) thr
 • Access continues until subscription expires
 • Use /cancel_subscription to cancel
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *💰 REFUND POLICY*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 • 7-day money-back guarantee for first purchase
 • Contact support within 7 days for refund
@@ -254,9 +253,9 @@ AI Assistant Bot provides access to multiple AI models (GPT-4, Gemini, etc.) thr
 • Refunds processed within 5-10 business days
 • No refunds after 7 days
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *🔒 PRIVACY & DATA*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 • We don't sell your data
 • Conversations stored for service functionality
@@ -264,9 +263,9 @@ AI Assistant Bot provides access to multiple AI models (GPT-4, Gemini, etc.) thr
 • We collect: Telegram ID, subscription status
 • You can request data deletion anytime
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *⚖️ ACCEPTABLE USE*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 Prohibited activities:
 • Illegal content generation
@@ -277,9 +276,9 @@ Prohibited activities:
 
 Violations may result in immediate termination without refund.
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *🛡️ SERVICE AVAILABILITY*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 • Service provided "as is"
 • 99% uptime target (no guarantee)
@@ -287,11 +286,10 @@ Violations may result in immediate termination without refund.
 • No liability for service interruptions
 • Rate limits may apply during high usage
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *📧 CONTACT*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
-Business: autheai.com
 Support: support@autheai.com
 Bot: Use /help for assistance
 
@@ -316,15 +314,15 @@ async def about_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     about_text = f"""
 ℹ️ *ABOUT AI ASSISTANT BOT*
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *🎯 WHAT WE OFFER*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 A comprehensive AI assistant service accessible directly through Telegram, providing unlimited access to the world's leading AI models.
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *🤖 AVAILABLE AI MODELS*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 *OpenAI Models:*
 • GPT-4o - Latest flagship model
@@ -339,9 +337,9 @@ A comprehensive AI assistant service accessible directly through Telegram, provi
 *Image Generation:*
 • DALL-E 3 - High-quality images
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *💎 PRICING*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 *Monthly Plan:* {monthly_price}/month
 • Unlimited messages
@@ -353,9 +351,9 @@ A comprehensive AI assistant service accessible directly through Telegram, provi
 • Equivalent to $8.33/month
 • All features included
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *✨ KEY FEATURES*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 • Switch between AI models instantly
 • Analyze documents (PDF, EPUB, TXT, etc.)
@@ -365,9 +363,9 @@ A comprehensive AI assistant service accessible directly through Telegram, provi
 • Persistent conversation history
 • Priority customer support
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *🔐 SECURITY & TRUST*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 • Payments via Stripe (PCI DSS compliant)
 • No payment data stored on our servers
@@ -375,15 +373,14 @@ A comprehensive AI assistant service accessible directly through Telegram, provi
 • Regular security audits
 • Transparent pricing - no hidden fees
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 *📞 SUPPORT*
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
-Business Website: autheai.com
 Email: support@autheai.com
 Response time: Within 24 hours
 
-━━━━━━━━━━━━━━━━━━━━━━
+---
 
 Ready to get started?
 Use /subscribe to choose your plan!
@@ -401,6 +398,65 @@ Use /subscribe to choose your plan!
         text=about_text,
         parse_mode="Markdown",
         reply_markup=reply_markup,
+    )
+
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Show help and available commands"""
+    if not update.message:
+        return
+
+    help_text = """
+❓ *HELP & COMMANDS*
+
+---
+*💬 BASIC COMMANDS*
+---
+
+/start - Show welcome & service info
+/help - Show this help message
+/subscribe - Choose a subscription plan
+/my_subscription - View your subscription status
+/usage - Check your usage statistics
+
+---
+*⚙️ FEATURE COMMANDS*
+---
+
+/reset - Start a new conversation
+/switch_model - Change AI model
+/my_prompts - View your custom prompts
+/new_prompt - Create a custom prompt
+/document - Analyze documents
+/translate - Translate text
+/gen_image - Generate images with DALL-E 3
+
+---
+*📋 INFORMATION COMMANDS*
+---
+
+/terms - View terms of service
+/about - Learn more about the service
+
+---
+*🔧 SUBSCRIPTION MANAGEMENT*
+---
+
+/cancel_subscription - Cancel auto-renewal
+
+---
+*📞 NEED MORE HELP?*
+---
+
+Email: support@autheai.com
+Response time: Within 24 hours
+
+We're here to help! 🤖
+"""
+
+    await update.message.reply_text(
+        text=help_text,
+        parse_mode="Markdown",
     )
 
 
@@ -497,6 +553,7 @@ def main() -> None:
     application.add_handler(CommandHandler(switch_model_command, switch_model_handler))
 
     # Information commands
+    application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("terms", terms_command))
     application.add_handler(CommandHandler("about", about_command))
 
